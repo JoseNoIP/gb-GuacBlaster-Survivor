@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(godot*)",
+      "Bash(gdlint*)",
+      "Bash(gdformat*)",
+      "Bash(pip install gdtoolkit*)",
+      "Bash(find . *)",
+      "Bash(ls*)",
+      "Bash(ls -la*)",
+      "Bash(mkdir -p*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git status*)",
+      "Bash(git add*)",
+      "Bash(grep -r*)",
+      "Bash(grep -n*)"
+    ]
+  }
+}

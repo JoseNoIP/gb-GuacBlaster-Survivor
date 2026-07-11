@@ -1,0 +1,38 @@
+# Godot 4 cache
+.godot/
+
+# Translations (auto-generated)
+*.translation
+
+# Export templates
+data_*/
+
+# Mono / C# (not used but safe to ignore)
+mono/
+.mono/
+
+# Exported builds
+builds/
+
+# Python (gdtoolkit)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+.idea/
+.vscode/
+*.suo
+*.user
