@@ -6,6 +6,12 @@ const UpgradeScreenGd := preload("res://src/scenes/UpgradeScreen.gd")
 var _screen: UpgradeScreen
 
 func before_each() -> void:
+	SaveManager._data = {
+		"gold": 0,
+		"upgrades": {"damage": 0, "speed": 0, "health": 0, "luck": 0},
+		"best_score": 0,
+		"total_sessions": 0,
+	}
 	GameManager.start_game()
 	_screen = UpgradeScreenGd.new()
 	add_child_autofree(_screen)
@@ -13,7 +19,7 @@ func before_each() -> void:
 # --- Gold earning ---
 
 func test_gold_earned_emitted_when_score_positive() -> void:
-	EventBus.enemy_destroyed.emit(1, Vector2.ZERO, 1000)
+	EventBus.gem_collected.emit(1000)
 	watch_signals(EventBus)
 	EventBus.player_died.emit()
 	assert_signal_emitted(EventBus, "gold_earned")
@@ -24,7 +30,7 @@ func test_no_gold_earned_when_score_is_zero() -> void:
 	assert_signal_not_emitted(EventBus, "gold_earned")
 
 func test_gold_amount_proportional_to_score() -> void:
-	EventBus.enemy_destroyed.emit(1, Vector2.ZERO, 1000)
+	EventBus.gem_collected.emit(1000)
 	watch_signals(EventBus)
 	EventBus.player_died.emit()
 	var expected: int = int(1000.0 * Constants.GOLD_PER_SCORE_POINT)

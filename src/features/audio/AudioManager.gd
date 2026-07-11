@@ -8,8 +8,15 @@ var _sfx_players: Dictionary[StringName, AudioStreamPlayer] = {}
 var _missing_warned: Dictionary[StringName, bool] = {}
 
 func _ready() -> void:
+	_register_stubs([&"shoot", &"player_die"])
 	EventBus.player_died.connect(func(): play_sfx(&"player_die"))
 	EventBus.boss_defeated.connect(func(_id: int): trigger_haptic_heavy())
+
+func _register_stubs(ids: Array) -> void:
+	for id: StringName in ids:
+		var player: AudioStreamPlayer = AudioStreamPlayer.new()
+		add_child(player)
+		register_sfx(id, player)
 
 func register_sfx(sound_id: StringName, player: AudioStreamPlayer) -> void:
 	_sfx_players[sound_id] = player
@@ -21,7 +28,9 @@ func play_sfx(sound_id: StringName) -> void:
 			push_warning("AudioManager: SFX '%s' not registered — add an AudioStreamPlayer" % sound_id)
 			_missing_warned[sound_id] = true
 		return
-	_sfx_players[sound_id].play()
+	var player: AudioStreamPlayer = _sfx_players[sound_id]
+	if player.stream != null:
+		player.play()
 
 func trigger_haptic_light() -> void:
 	Input.vibrate_handheld(10)

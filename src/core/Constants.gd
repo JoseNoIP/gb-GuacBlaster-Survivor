@@ -70,6 +70,8 @@ const META_HEALTH_PER_LEVEL: int = 1
 const META_LUCK_PER_LEVEL: float = 0.05
 const META_UPGRADE_COST_BASE: int = 50
 const GOLD_PER_SCORE_POINT: float = 0.1
+const GEM_FALL_SPEED: float = 90.0
+const GEM_MAGNET_SPEED: float = 300.0
 
 # --- Sessions ---
 const SESSION_TARGET_MIN: float = 120.0

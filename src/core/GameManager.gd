@@ -15,7 +15,7 @@ func _ready() -> void:
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.powerup_selected.connect(_on_powerup_selected)
 	EventBus.xp_collected.connect(_on_xp_collected)
-	EventBus.enemy_destroyed.connect(_on_enemy_destroyed)
+	EventBus.gem_collected.connect(_on_gem_collected)
 
 func _process(delta: float) -> void:
 	if _state == GameState.PLAYING:
@@ -49,7 +49,7 @@ func _on_player_died() -> void:
 		EventBus.gold_earned.emit(gold)
 	EventBus.game_over.emit(_score, _session_time)
 
-func _on_enemy_destroyed(_enemy_id: int, _position: Vector2, xp_value: int) -> void:
+func _on_gem_collected(xp_value: int) -> void:
 	var luck_level: int = SaveManager.get_upgrade_level(&"luck")
 	var luck_mult: float = 1.0 + float(luck_level) * Constants.META_LUCK_PER_LEVEL
 	var effective_xp: int = int(float(xp_value) * luck_mult)

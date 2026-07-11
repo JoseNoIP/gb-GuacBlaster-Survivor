@@ -19,6 +19,7 @@ signal projectile_hit_enemy(enemy_id: int, damage: float)
 
 # --- Experience / Level ---
 signal xp_collected(amount: int, total: int, required: int)
+signal gem_collected(xp_value: int)
 
 # --- Power-ups ---
 signal powerup_selection_requested(options: Array)

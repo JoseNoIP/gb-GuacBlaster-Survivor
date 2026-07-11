@@ -13,8 +13,8 @@ func test_start_game_resets_score() -> void:
 func test_start_game_resets_level() -> void:
 	assert_eq(GameManager.get_current_level(), 0)
 
-func test_enemy_destroyed_increases_score() -> void:
-	GameManager._on_enemy_destroyed(0, Vector2.ZERO, 10)
+func test_gem_collected_increases_score() -> void:
+	GameManager._on_gem_collected(10)
 	assert_eq(GameManager.get_score(), 10)
 
 func test_player_died_transitions_to_game_over() -> void:
