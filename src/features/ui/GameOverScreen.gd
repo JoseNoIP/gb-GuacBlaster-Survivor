@@ -1,7 +1,7 @@
 class_name GameOverScreen
 extends CanvasLayer
 ## Overlay shown when game_over fires. Displays final score, best score,
-## and a restart button that emits EventBus.restart_requested.
+## and buttons: restart (EventBus.restart_requested) and menu (EventBus.menu_requested).
 
 const OVERLAY_COLOR: Color = Color(0.0, 0.0, 0.0, 0.72)
 const TITLE_COLOR: Color = Color(1.0, 0.25, 0.1)
@@ -15,6 +15,7 @@ var _panel: Control
 var _score_label: Label
 var _best_label: Label
 var _restart_btn: Button
+var _menu_btn: Button
 
 func _ready() -> void:
 	layer = 20
@@ -86,6 +87,27 @@ func _build_ui() -> void:
 	_restart_btn.pressed.connect(_on_restart_pressed)
 	_panel.add_child(_restart_btn)
 
+	var spacer3: Control = Control.new()
+	spacer3.custom_minimum_size = Vector2(0.0, 12.0)
+	_panel.add_child(spacer3)
+
+	_menu_btn = Button.new()
+	_menu_btn.text = "MENÚ PRINCIPAL"
+	_menu_btn.custom_minimum_size = Vector2(220.0, 44.0)
+	_menu_btn.add_theme_font_size_override(&"font_size", 16)
+	var menu_sb: StyleBoxFlat = StyleBoxFlat.new()
+	menu_sb.bg_color = Color(0.25, 0.25, 0.25)
+	menu_sb.corner_radius_top_left = 10
+	menu_sb.corner_radius_top_right = 10
+	menu_sb.corner_radius_bottom_left = 10
+	menu_sb.corner_radius_bottom_right = 10
+	_menu_btn.add_theme_stylebox_override(&"normal", menu_sb)
+	var menu_hover_sb: StyleBoxFlat = menu_sb.duplicate() as StyleBoxFlat
+	menu_hover_sb.bg_color = Color(0.35, 0.35, 0.35)
+	_menu_btn.add_theme_stylebox_override(&"hover", menu_hover_sb)
+	_menu_btn.pressed.connect(_on_menu_pressed)
+	_panel.add_child(_menu_btn)
+
 func _on_game_over(score: int, _duration: float) -> void:
 	_score_label.text = "Score: %d" % score
 	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
@@ -94,6 +116,9 @@ func _on_game_over(score: int, _duration: float) -> void:
 
 func _on_restart_pressed() -> void:
 	EventBus.restart_requested.emit()
+
+func _on_menu_pressed() -> void:
+	EventBus.menu_requested.emit()
 
 func get_panel() -> Control:
 	return _panel
@@ -106,3 +131,6 @@ func get_best_label() -> Label:
 
 func get_restart_button() -> Button:
 	return _restart_btn
+
+func get_menu_button() -> Button:
+	return _menu_btn

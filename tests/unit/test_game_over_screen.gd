@@ -29,3 +29,9 @@ func test_restart_button_emits_restart_requested() -> void:
 func test_best_label_shows_best_score() -> void:
 	EventBus.game_over.emit(0, 0.0)
 	assert_eq(_screen.get_best_label().text, "Mejor: %d" % SaveManager.get_best_score())
+
+func test_menu_button_emits_menu_requested() -> void:
+	EventBus.game_over.emit(0, 0.0)
+	watch_signals(EventBus)
+	_screen.get_menu_button().pressed.emit()
+	assert_signal_emitted(EventBus, "menu_requested")
