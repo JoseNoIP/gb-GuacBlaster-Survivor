@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://src/scenes/Game.gd" id="1"]
 [ext_resource type="PackedScene" path="res://src/features/player/Player.tscn" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://src/features/ui/HUD.tscn" id="9"]
 [ext_resource type="Script" path="res://src/features/powerups/PowerUpManager.gd" id="10"]
 [ext_resource type="PackedScene" path="res://src/features/ui/GameOverScreen.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://src/features/enemies/EnemyBoss.tscn" id="12"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1")
@@ -28,6 +29,7 @@ script = ExtResource("5")
 basic_scene = ExtResource("6")
 tank_scene = ExtResource("7")
 zigzag_scene = ExtResource("8")
+boss_scene = ExtResource("12")
 
 [node name="Player" parent="." instance=ExtResource("2")]
 position = Vector2(195, 760)

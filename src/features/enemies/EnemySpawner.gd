@@ -9,11 +9,15 @@ extends Node2D
 @export var basic_scene: PackedScene
 @export var tank_scene: PackedScene
 @export var zigzag_scene: PackedScene
+@export var boss_scene: PackedScene
 
 var _active: bool = false
 var _spawn_timer: float = 0.0
 var _spawn_interval: float = Constants.SPAWNER_INITIAL_INTERVAL
 var _elapsed: float = 0.0
+var _boss_timer: float = Constants.BOSS_SPAWN_INTERVAL
+var _boss_alive: bool = false
+var _boss_generation: int = 0
 
 func _ready() -> void:
 	EventBus.game_started.connect(func(): _active = true)
@@ -21,6 +25,7 @@ func _ready() -> void:
 	EventBus.player_level_up.connect(func(_lvl: int): _active = false)
 	EventBus.powerup_selected.connect(func(_id: StringName): _active = true)
 	EventBus.enemy_split_requested.connect(_on_enemy_split_requested)
+	EventBus.boss_defeated.connect(func(_id: int): _boss_alive = false)
 
 func _process(delta: float) -> void:
 	if not _active:
@@ -31,6 +36,10 @@ func _process(delta: float) -> void:
 		_spawn_timer = 0.0
 		_spawn_wave()
 		_update_difficulty()
+	_boss_timer -= delta
+	if _boss_timer <= 0.0 and not _boss_alive:
+		_boss_timer = Constants.BOSS_SPAWN_INTERVAL
+		_spawn_boss()
 
 func _spawn_wave() -> void:
 	_instantiate_at_random_x(_pick_scene())
@@ -57,6 +66,18 @@ func _update_difficulty() -> void:
 		Constants.SPAWNER_MIN_INTERVAL,
 		Constants.SPAWNER_INITIAL_INTERVAL - minutes * Constants.SPAWNER_INTERVAL_DECREASE_PER_MIN
 	)
+
+func _spawn_boss() -> void:
+	if boss_scene == null:
+		return
+	var boss: Node2D = boss_scene.instantiate()
+	boss.set(&"_generation", _boss_generation)
+	var vp_width: float = get_viewport_rect().size.x
+	boss.position = Vector2(vp_width * 0.5, 60.0)
+	get_parent().add_child(boss)
+	_boss_alive = true
+	_boss_generation += 1
+	EventBus.boss_spawned.emit(boss.get_instance_id())
 
 func _on_enemy_split_requested(spawn_position: Vector2, count: int) -> void:
 	for i: int in count:

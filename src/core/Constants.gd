@@ -26,6 +26,15 @@ const ENEMY_ZIGZAG_AMPLITUDE: float = 100.0
 const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
 
 const BOSS_SPAWN_INTERVAL: float = 180.0
+const BOSS_HP_BASE: int = 100
+const BOSS_HP_PER_GENERATION: int = 50
+const BOSS_SPEED: float = 60.0
+const BOSS_XP: int = 100
+const BOSS_FIRE_INTERVAL: float = 2.0
+const BOSS_FIRE_INTERVAL_DECREASE: float = 0.2
+const BOSS_FIRE_INTERVAL_MIN: float = 0.8
+const BOSS_PROJECTILE_SPEED: float = 120.0
+const BOSS_PROJECTILE_DAMAGE: int = 1
 
 # --- Spawner ---
 const SPAWNER_INITIAL_INTERVAL: float = 0.8
