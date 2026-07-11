@@ -1,11 +1,11 @@
 class_name Projectile
 extends Area2D
 ## Single projectile fired by the player.
-## Moves in _direction at _speed px/s. Handles pierce (Súper-Guac power-up).
+## Moves in _direction at _speed px/s. Handles pierce (super_guac) and bounce (spicy_bounce).
 ##
 ## Required child nodes:
 ##   CollisionShape2D (CollisionShape2D)
-##   VisibleOnScreenNotifier2D — call _on_screen_exited on screen_exited signal
+##   VisibleOnScreenNotifier2D — connected to _on_screen_exited
 ##
 ## Collision layer: 3 (player projectiles). Mask: 2 (enemies).
 
@@ -13,14 +13,18 @@ var _speed: float = 400.0
 var _direction: Vector2 = Vector2.UP
 var _damage: float = Constants.PLAYER_BASE_DAMAGE
 var _pierce_remaining: int = 0
+var _bouncy: bool = false
 
 func _physics_process(delta: float) -> void:
 	position += _direction.normalized() * _speed * delta
+	if _bouncy:
+		_check_bounce()
 
-func setup(damage: float, direction: Vector2, pierce_count: int = 0) -> void:
+func setup(damage: float, direction: Vector2, pierce_count: int = 0, bouncy: bool = false) -> void:
 	_damage = damage
 	_direction = direction
 	_pierce_remaining = pierce_count
+	_bouncy = bouncy
 
 func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group(&"enemies"):
@@ -38,6 +42,17 @@ func _consume_pierce() -> void:
 		queue_free()
 	else:
 		_pierce_remaining -= 1
+
+func _check_bounce() -> void:
+	_bounce_at_width(get_viewport_rect().size.x)
+
+func _bounce_at_width(vp_width: float) -> void:
+	if position.x <= 0.0:
+		_direction.x = absf(_direction.x)
+		position.x = 0.0
+	elif position.x >= vp_width:
+		_direction.x = -absf(_direction.x)
+		position.x = vp_width
 
 func get_damage() -> float:
 	return _damage

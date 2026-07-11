@@ -66,3 +66,10 @@ const SESSION_TARGET_MAX: float = 300.0
 # --- XP ---
 const XP_BASE_REQUIRED: int = 100
 const XP_SCALE_FACTOR: float = 1.5
+
+# --- Combat ---
+const PLAYER_CONTACT_INVINCIBILITY: float = 1.0
+const GRENADE_RADIUS: float = 80.0
+const GRENADE_DAMAGE: int = 30
+const LASER_DAMAGE_PER_TICK: int = 5
+const LASER_TICK_INTERVAL: float = 0.3

@@ -1,13 +1,15 @@
 class_name ProjectileSpawner
 extends Node2D
 ## Listens to EventBus.player_fired and instantiates Projectile scenes.
-## Power-ups that add shots (Triple Shot, Bounce) modify this node, not Player.
+## Power-ups that modify shots (Triple Shot, Super-Guac, Bounce) are tracked here.
 ##
 ## Required: assign projectile_scene in the inspector.
 
 @export var projectile_scene: PackedScene
 
 var _triple_shot: bool = false
+var _pierce_count: int = 0
+var _bouncy: bool = false
 
 func _ready() -> void:
 	EventBus.player_fired.connect(_on_player_fired)
@@ -30,9 +32,13 @@ func _spawn(spawn_position: Vector2, direction: Vector2, damage: float) -> void:
 	var proj: Node2D = projectile_scene.instantiate()
 	get_parent().add_child(proj)
 	proj.global_position = spawn_position
-	proj.call(&"setup", damage, direction)
+	proj.call(&"setup", damage, direction, _pierce_count, _bouncy)
 
 func _on_powerup_selected(powerup_id: StringName) -> void:
 	match powerup_id:
 		&"triple_shot":
 			_triple_shot = true
+		&"super_guac":
+			_pierce_count = Constants.SUPER_GUAC_PENETRATION
+		&"spicy_bounce":
+			_bouncy = true

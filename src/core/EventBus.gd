@@ -29,6 +29,7 @@ signal game_started()
 signal game_paused(is_paused: bool)
 signal game_over(score: int, duration: float)
 signal wave_started(wave_number: int)
+signal restart_requested()
 
 # --- Meta ---
 signal gold_earned(amount: int)

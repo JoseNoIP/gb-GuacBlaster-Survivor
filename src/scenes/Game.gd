@@ -3,3 +3,7 @@ extends Node2D
 
 func _ready() -> void:
 	GameManager.start_game()
+	EventBus.restart_requested.connect(_on_restart_requested)
+
+func _on_restart_requested() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://src/scenes/Game.tscn")
