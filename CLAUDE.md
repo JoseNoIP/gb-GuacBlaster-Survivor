@@ -34,7 +34,7 @@ gdformat src/
 
 # Tests (requiere Godot instalado y GUT en addons/)
 godot --headless -s addons/gut/gut_cmdln.gd \
-  -gdir=res://tests -gexit -glog=2
+  -gdir=res://tests/unit -gexit -glog=2
 
 # Export Debug — Android
 godot --headless --export-debug "Android" builds/debug/GuacBlaster.apk
