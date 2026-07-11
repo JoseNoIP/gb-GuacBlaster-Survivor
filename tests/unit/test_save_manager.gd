@@ -37,3 +37,25 @@ func test_game_over_does_not_lower_best_score() -> void:
 	SaveManager._on_game_over(500, 90.0)
 	SaveManager._on_game_over(200, 60.0)
 	assert_eq(SaveManager.get_best_score(), 500)
+
+func test_purchase_upgrade_increments_level() -> void:
+	SaveManager._data["gold"] = 1000
+	var before: int = SaveManager.get_upgrade_level(&"damage")
+	SaveManager.purchase_upgrade(&"damage")
+	assert_eq(SaveManager.get_upgrade_level(&"damage"), before + 1)
+
+func test_purchase_upgrade_deducts_gold() -> void:
+	SaveManager._data["gold"] = 1000
+	var cost: int = (SaveManager.get_upgrade_level(&"damage") + 1) * Constants.META_UPGRADE_COST_BASE
+	SaveManager.purchase_upgrade(&"damage")
+	assert_eq(SaveManager.get_gold(), 1000 - cost)
+
+func test_purchase_upgrade_returns_false_when_no_gold() -> void:
+	SaveManager._data["gold"] = 0
+	assert_false(SaveManager.purchase_upgrade(&"damage"))
+
+func test_purchase_upgrade_emits_upgrade_purchased() -> void:
+	SaveManager._data["gold"] = 1000
+	watch_signals(EventBus)
+	SaveManager.purchase_upgrade(&"damage")
+	assert_signal_emitted(EventBus, "upgrade_purchased")

@@ -67,6 +67,9 @@ const SUPER_GUAC_PENETRATION: int = 3
 const META_DAMAGE_PER_LEVEL: float = 0.05
 const META_SPEED_PER_LEVEL: float = 0.03
 const META_HEALTH_PER_LEVEL: int = 1
+const META_LUCK_PER_LEVEL: float = 0.05
+const META_UPGRADE_COST_BASE: int = 50
+const GOLD_PER_SCORE_POINT: float = 0.1
 
 # --- Sessions ---
 const SESSION_TARGET_MIN: float = 120.0

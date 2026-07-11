@@ -45,6 +45,17 @@ func get_upgrade_level(upgrade_id: StringName) -> int:
 func get_best_score() -> int:
 	return _data.get("best_score", 0)
 
+func purchase_upgrade(upgrade_id: StringName) -> bool:
+	var current_level: int = get_upgrade_level(upgrade_id)
+	var cost: int = (current_level + 1) * Constants.META_UPGRADE_COST_BASE
+	if get_gold() < cost:
+		return false
+	_data["gold"] = get_gold() - cost
+	_data["upgrades"][str(upgrade_id)] = current_level + 1
+	_save()
+	EventBus.upgrade_purchased.emit(upgrade_id, current_level + 1)
+	return true
+
 func _save() -> void:
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:

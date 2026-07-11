@@ -74,8 +74,19 @@ func _build_ui() -> void:
 	_play_btn.pressed.connect(_on_play_pressed)
 	root.add_child(_play_btn)
 
+	var upgrades_spacer: Control = Control.new()
+	upgrades_spacer.custom_minimum_size = Vector2(0.0, 12.0)
+	root.add_child(upgrades_spacer)
+
+	var upgrades_btn: Button = Button.new()
+	upgrades_btn.text = "MEJORAS"
+	upgrades_btn.custom_minimum_size = Vector2(160.0, 44.0)
+	upgrades_btn.add_theme_font_size_override(&"font_size", 18)
+	upgrades_btn.pressed.connect(_on_upgrades_pressed)
+	root.add_child(upgrades_btn)
+
 	var btn_spacer: Control = Control.new()
-	btn_spacer.custom_minimum_size = Vector2(0.0, 32.0)
+	btn_spacer.custom_minimum_size = Vector2(0.0, 24.0)
 	root.add_child(btn_spacer)
 
 	_best_label = Label.new()
@@ -91,6 +102,9 @@ func _build_ui() -> void:
 
 func _on_play_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(GAME_SCENE)
+
+func _on_upgrades_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://src/scenes/UpgradeScreen.tscn")
 
 func get_title_label() -> Label:
 	return _title_label

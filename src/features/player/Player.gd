@@ -38,6 +38,7 @@ func _ready() -> void:
 	_setup_contact_area()
 	EventBus.player_health_changed.emit(_health, _max_health)
 	EventBus.powerup_selected.connect(_on_powerup_selected)
+	EventBus.game_started.connect(_on_game_started)
 
 func _setup_contact_area() -> void:
 	var area := Area2D.new()
@@ -91,6 +92,20 @@ func _on_enemy_contact(body: Node2D) -> void:
 		return
 	take_damage(1)
 	_invincibility_timer = Constants.PLAYER_CONTACT_INVINCIBILITY
+
+func _on_game_started() -> void:
+	var health_bonus: int = SaveManager.get_upgrade_level(&"health") * Constants.META_HEALTH_PER_LEVEL
+	_max_health = Constants.PLAYER_BASE_HEALTH + health_bonus
+	_health = _max_health
+	var dmg_level: int = SaveManager.get_upgrade_level(&"damage")
+	var damage_mult: float = 1.0 + float(dmg_level) * Constants.META_DAMAGE_PER_LEVEL
+	_current_damage = Constants.PLAYER_BASE_DAMAGE * damage_mult
+	var spd_level: int = SaveManager.get_upgrade_level(&"speed")
+	var speed_mult: float = 1.0 + float(spd_level) * Constants.META_SPEED_PER_LEVEL
+	_current_autofire_interval = Constants.PLAYER_AUTOFIRE_INTERVAL / speed_mult
+	_autofire_timer.wait_time = _current_autofire_interval
+	_autofire_timer.start()
+	EventBus.player_health_changed.emit(_health, _max_health)
 
 func _on_powerup_selected(powerup_id: StringName) -> void:
 	match powerup_id:
