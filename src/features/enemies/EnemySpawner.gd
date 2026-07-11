@@ -64,4 +64,4 @@ func _on_enemy_split_requested(spawn_position: Vector2, count: int) -> void:
 		var offset := Vector2(cos(angle), sin(angle)) * 25.0
 		var basic: Node2D = basic_scene.instantiate()
 		basic.position = spawn_position + offset
-		get_parent().add_child(basic)
+		get_parent().call_deferred(&"add_child", basic)
