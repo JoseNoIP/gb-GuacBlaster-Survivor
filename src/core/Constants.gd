@@ -11,8 +11,30 @@ const PLAYER_AUTOFIRE_INTERVAL: float = 0.4
 
 # --- Enemies ---
 const ENEMY_BASIC_HP: int = 1
+const ENEMY_BASIC_SPEED: float = 80.0
+const ENEMY_BASIC_XP: int = 5
+
+const ENEMY_TANK_HP: int = 5
+const ENEMY_TANK_SPEED: float = 50.0
+const ENEMY_TANK_XP: int = 20
 const ENEMY_TANK_SPLIT_COUNT: int = 4
+
+const ENEMY_ZIGZAG_HP: int = 1
+const ENEMY_ZIGZAG_SPEED: float = 130.0
+const ENEMY_ZIGZAG_XP: int = 10
+const ENEMY_ZIGZAG_AMPLITUDE: float = 100.0
+const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
+
 const BOSS_SPAWN_INTERVAL: float = 180.0
+
+# --- Spawner ---
+const SPAWNER_INITIAL_INTERVAL: float = 0.8
+const SPAWNER_MIN_INTERVAL: float = 0.2
+const SPAWNER_INTERVAL_DECREASE_PER_MIN: float = 0.1
+const SPAWNER_TANK_UNLOCK_TIME: float = 60.0
+const SPAWNER_ZIGZAG_UNLOCK_TIME: float = 30.0
+const SPAWNER_TANK_CHANCE: float = 0.15
+const SPAWNER_ZIGZAG_CHANCE: float = 0.25
 
 # --- Power-ups ---
 const POWERUP_POOL: Array = [

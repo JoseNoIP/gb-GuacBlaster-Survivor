@@ -146,6 +146,8 @@ func _exit_tree() -> void:
 10. **`class_name X` + autoload `X`** → conflicto fatal en Godot 4.7. Los singletons de constantes deben ser autoload `*` SIN `class_name`.
 11. **Autoload de constantes PRIMERO** en `[autoload]` de project.godot — los autoloads se registran en orden.
 12. **`change_scene_to_file()` en `_ready()`** → usar `.call_deferred()` siempre.
+13. **Herencia por class_name** → si `B extends A` y `A` no es autoload, usar `extends "res://ruta/A.gd"` (path-based) para forzar la carga. `extends NombreDeClase` falla en headless si A no estaba cargado previamente.
+14. **Preload-consts** → deben ser PascalCase (`const EnemyBasicGd := preload(...)`) — gdlint regla `load-constant-name`.
 
 ---
 

@@ -46,8 +46,9 @@ func _on_player_died() -> void:
 	_state = GameState.GAME_OVER
 	EventBus.game_over.emit(_score, _session_time)
 
-func _on_enemy_destroyed(_enemy_id: int, _position: Vector2, gem_value: int) -> void:
-	_score += gem_value
+func _on_enemy_destroyed(_enemy_id: int, _position: Vector2, xp_value: int) -> void:
+	_score += xp_value
+	EventBus.xp_collected.emit(xp_value, _xp_current + xp_value, _xp_required)
 
 func _on_xp_collected(amount: int, _total: int, _required: int) -> void:
 	_xp_current += amount
