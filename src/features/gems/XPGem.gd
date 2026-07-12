@@ -54,8 +54,30 @@ func collect() -> void:
 	if _collected:
 		return
 	_collected = true
+	_spawn_collect_burst()
 	EventBus.gem_collected.emit(xp_value)
 	queue_free()
+
+func _spawn_collect_burst() -> void:
+	var p := CPUParticles2D.new()
+	p.emitting = true
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.amount = 8
+	p.lifetime = 0.4
+	p.initial_velocity_min = 30.0
+	p.initial_velocity_max = 80.0
+	p.spread = 180.0
+	p.gravity = Vector2(0.0, -40.0)
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 4.0
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0.9, 0.85, 0.1))
+	grad.set_color(1, Color(1.0, 0.9, 0.2, 0.0))
+	p.color_ramp = grad
+	p.position = global_position
+	p.finished.connect(func(): p.queue_free())
+	get_parent().call_deferred(&"add_child", p)
 
 func _on_powerup_selected(powerup_id: StringName) -> void:
 	if powerup_id == &"salsa_magnet":
