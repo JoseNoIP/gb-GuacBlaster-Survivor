@@ -8,12 +8,13 @@ Guía autoritativa de desarrollo para Claude Code. **Lee este archivo completo a
 
 | Capa | Tecnología |
 |---|---|
-| Motor | Godot 4.x (GDScript con tipado estático) |
-| Testing | GUT (Godot Unit Testing) v7.x |
-| Lint/Format | gdtoolkit (`gdlint` / `gdformat`) vía pip |
+| Motor | Godot 4.7 (GDScript con tipado estático) |
+| Testing | GUT (Godot Unit Testing) v9.7.1 — 185 tests |
+| Lint/Format | gdtoolkit (`gdlint` / `gdformat`) vía pipx |
 | Plataforma | iOS 14+ / Android API 24+ |
+| CI/CD | GitHub Actions → APK en Dropbox (`/prod/` o `/stg/`) |
 | Arte | Pixel art / Vector toony |
-| Control | Touch & Drag horizontal (1 dedo) |
+| Control | Touch drag relativo (1 dedo) |
 
 ---
 
@@ -53,17 +54,19 @@ godot --headless --export-release "Android" builds/release/GuacBlaster.apk
 ```
 src/
 ├── core/                   # Singletons / Autoloads globales
+│   ├── Constants.gd        # Constantes tipadas (cargado PRIMERO)
 │   ├── EventBus.gd         # Bus de señales (TODA comunicación cross-feature)
 │   ├── GameManager.gd      # Máquina de estados de partida
-│   ├── Constants.gd        # Constantes tipadas (sin magic numbers)
 │   └── SaveManager.gd      # Persistencia JSON (user://)
 ├── features/
 │   ├── player/             # Input, movimiento, vida del jugador
 │   ├── projectiles/        # Proyectiles y sus variantes
 │   ├── enemies/            # EnemyBase + cada subtipo + Spawner
-│   ├── powerups/           # Sistema de power-ups y UI de selección
+│   ├── powerups/           # PowerUpManager, PowerUpDrop, PowerUpDropper
+│   ├── gems/               # XPGem, GemSpawner
 │   ├── meta/               # ProgressionManager, árbol de mejoras
 │   ├── audio/              # AudioManager + HapticManager
+│   ├── vfx/                # ParticleSpawner
 │   └── ui/                 # HUD, pantallas, menús
 ├── scenes/                 # Escenas raíz (.tscn)
 └── shared/                 # Recursos compartidos (.tres, temas UI)
@@ -148,6 +151,9 @@ func _exit_tree() -> void:
 12. **`change_scene_to_file()` en `_ready()`** → usar `.call_deferred()` siempre.
 13. **Herencia por class_name** → si `B extends A` y `A` no es autoload, usar `extends "res://ruta/A.gd"` (path-based) para forzar la carga. `extends NombreDeClase` falla en headless si A no estaba cargado previamente.
 14. **Preload-consts** → deben ser PascalCase (`const EnemyBasicGd := preload(...)`) — gdlint regla `load-constant-name`.
+15. **`class_name` como tipo en otro script** → falla en parse si la clase no estaba previamente cargada. Usar la clase base (`Area2D`, `Node2D`, etc.) como tipo y `set(&"prop", val)` para asignar propiedades. Ver `PowerUpDropper.gd`.
+16. **`for id: Variant in dict.keys()`** → tipo `Variant` no válido en for-loop en GDScript 4. Usar índice entero: `for i: int in arr.size()` + `arr[i]`, o dejar sin tipo.
+17. **`add_child()` desde callback de física** → usar `call_deferred(&"add_child", node)` siempre que la llamada se origine en `_on_body_entered`, `_on_area_entered` o similares.
 
 ---
 
@@ -197,6 +203,28 @@ d) SANITY    — Verificar que features existentes no se rompieron
 
 ---
 
+## Estado Actual del Juego
+
+### Mecánicas implementadas
+- **Victoria:** matar al jefe (NO timer). Timer en HUD aparece solo en los últimos 90s.
+- **Derrota:** jugador pierde todos los corazones.
+- **Controles:** drag relativo (`event.relative.x × PLAYER_SWIPE_SENSITIVITY`). Primer toque posiciona absolutamente.
+- **Level-up:** el juego NO se pausa. Caen 3 power-up drops; al tocar uno, los otros desaparecen.
+- **Power-ups:** temporales (15s), stackables, con timers independientes por stack.
+- **Oro:** `score × 0.1 × gold_mult + hearts_left × 25` al ganar.
+- **Paleta de fondo:** rota por victorias (`victories % 5`), no por sesiones totales.
+
+### Señales clave en EventBus
+| Señal | Emisor | Receptores principales |
+|---|---|---|
+| `powerup_selected(id)` | PowerUpDrop | PowerUpManager, PowerUpDropper |
+| `powerup_stack_changed(id, count)` | PowerUpManager | Player, ProjectileSpawner, XPGem, HUD |
+| `powerup_expired(id)` | PowerUpManager | (informativa) |
+| `player_shield_changed(hits)` | Player | HUD |
+| `powerup_selection_requested(opts)` | GameManager | PowerUpDropper |
+
+---
+
 ## Referencia Rápida del GDD
 
 ### Valores base del jugador
@@ -205,40 +233,66 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | HP | 3 corazones | +1 corazón/nivel |
 | Velocidad | 200 px/s | +3%/nivel |
 | Daño base | 10 | +5%/nivel |
-| Autofire interval | 0.4s | reducible con Fuego Rápido |
+| Autofire interval | 0.4s | ÷2 por stack de Fuego Rápido (mín 0.05s) |
+| Sensibilidad swipe | 1.0 | Configurable (pendiente Settings screen) |
 
 ### Enemigos
 | Tipo | HP | Comportamiento especial |
 |---|---|---|
 | Burbuja Básica | 1 | Línea recta descendente |
-| Burbuja Tanque | N | Split en 4 básicas al morir |
+| Burbuja Tanque | 5 | Split en 4 básicas al morir |
 | Mosca Nacho | 1 | Zigzag diagonal, rápida |
-| Jefe | Alto | Dispara proyectiles lentos, cada 3 min |
+| Jefe | 100+50×gen | Dispara proyectiles, aparece cada 3 min |
 
-### Power-ups (IDs en Constants.POWERUP_POOL)
-| ID | Nombre | Efecto |
-|---|---|---|
-| `triple_shot` | Disparo Triple | +2 disparos diagonales |
-| `super_guac` | Súper-Guac | Proyectiles grandes que penetran 3 enemigos |
-| `rapid_fire` | Fuego Rápido | +25% cadencia |
-| `mole_grenade` | Granada de Mole | AoE cada 5s |
-| `jalapeno_laser` | Láser de Jalapeño | Haz 2s columna entera |
-| `spicy_bounce` | Rebote Picante | Proyectiles rebotan en bordes |
-| `nacho_wall` | Muro de Nachos | Escudo: absorbe 3 impactos |
-| `salsa_magnet` | Imán de Salsa | Atrae gemas de XP automáticamente |
+### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales 15s, stackables
+| ID | Abrev | Nombre | Efecto por stack |
+|---|---|---|---|
+| `triple_shot` | TS | Disparo Triple | +2 disparos diagonales |
+| `super_guac` | SG | Súper-Guac | Proyectiles penetran 3 enemigos |
+| `rapid_fire` | RF | Fuego Rápido | Cadencia ×2 (apilable) |
+| `mole_grenade` | MG | Granada de Mole | AoE cada 5s automático |
+| `jalapeno_laser` | JL | Láser Jalapeño | Rayo 2s que sigue al jugador |
+| `spicy_bounce` | SB | Rebote Picante | Proyectiles rebotan en bordes |
+| `nacho_wall` | NW | Muro de Nachos | Escudo: absorbe 3 impactos |
+| `salsa_magnet` | SM | Imán de Salsa | Gemas vuelan hacia el jugador |
+| `guac_storm` | GS | Salvo Guac | +1 columna de disparos a ±40×N px |
 
 ### Metagame
-- Moneda: Oro (drop al final de partida + misiones diarias)
-- Árbol de mejoras permanentes: Daño, Velocidad, Vida, Suerte
+- **Moneda:** Oro — score × 0.1 + corazones × 25 (al ganar) / score × 0.1 (al perder)
+- **Upgrades permanentes (6):** Daño, Velocidad, Vida, Suerte, Bono de Oro, Escudo Inicial
+- **Costo:** `50 × 1.8^nivel` — cap nivel 5
 
 ---
 
 ## Autoloads registrados en project.godot
 
+**Orden crítico — Constants debe ir primero:**
+
 | Nombre | Archivo | Rol |
 |---|---|---|
+| `Constants` | `src/core/Constants.gd` | Constantes del juego (cargado primero) |
 | `EventBus` | `src/core/EventBus.gd` | Bus de señales global |
 | `GameManager` | `src/core/GameManager.gd` | Estado de partida |
-| `Constants` | `src/core/Constants.gd` | Constantes del juego |
 | `SaveManager` | `src/core/SaveManager.gd` | Persistencia |
 | `AudioManager` | `src/features/audio/AudioManager.gd` | SFX + Hápticos |
+
+---
+
+## Pendientes Documentados
+
+### Solo código (sin assets externos)
+| Feature | Archivo(s) a crear/modificar | Notas |
+|---|---|---|
+| Settings screen | `SettingsScreen.tscn/gd`, `SaveManager.gd` | Sonido, vibración, sensibilidad swipe |
+| Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
+| Misiones diarias | Sistema de tracking + UI | Oro extra por objetivos |
+| Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
+| Export release iOS | Provisioning profile, Apple Dev account | |
+
+### Assets externos requeridos
+| Asset | Ruta esperada | Notas |
+|---|---|---|
+| 5 fondos de bioma | `assets/sprites/backgrounds/bg_0…4.png` | 390×844 px, pixel art |
+| 7 SFX | `assets/audio/*.ogg` | shoot, enemy_die, boss_die, player_hit, levelup, gem_collect, music_loop |
+| Sprites de personajes | `assets/sprites/` | player, 4 enemigos, proyectil, gema |
+| 9 íconos de power-up | `assets/sprites/powerup_icons/` | ts, sg, rf, mg, jl, sb, nw, sm, gs — 32×32 px |
