@@ -127,11 +127,24 @@ jobs:
         run: |
           DEST_PATH="${{ env.DROPBOX_ROOT }}/${DBX_ENV}/${APK_FILE}"
           echo "Subiendo a: $DEST_PATH"
+
+          # Construir el JSON del header con jq para manejar espacios y caracteres especiales
+          DBX_ARG=$(jq -n \
+            --arg path "$DEST_PATH" \
+            '{"path":$path,"mode":"add","autorename":false,"mute":false}')
+
           RESULT=$(curl -s -X POST https://content.dropboxapi.com/2/files/upload \
             --header "Authorization: Bearer $DBX_TOKEN" \
-            --header "Dropbox-API-Arg: {\"path\":\"$DEST_PATH\",\"mode\":\"add\",\"autorename\":false,\"mute\":false}" \
+            --header "Dropbox-API-Arg: $DBX_ARG" \
             --header "Content-Type: application/octet-stream" \
             --data-binary @"dist/${APK_FILE}")
-          echo "$RESULT" | jq '{name: .name, path: .path_display, size: .size}'
-          # Falla si Dropbox devolvió error
-          echo "$RESULT" | jq -e '.path_display' > /dev/null
+
+          echo "Respuesta de Dropbox: $RESULT"
+
+          if echo "$RESULT" | jq -e '.path_display' > /dev/null 2>&1; then
+            echo "$RESULT" | jq '{name: .name, path: .path_display, size: .size}'
+          else
+            echo "Error de Dropbox:"
+            echo "$RESULT" | jq . 2>/dev/null || echo "$RESULT"
+            exit 1
+          fi
