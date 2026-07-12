@@ -18,10 +18,12 @@ var _elapsed: float = 0.0
 var _boss_timer: float = Constants.BOSS_SPAWN_INTERVAL
 var _boss_alive: bool = false
 var _boss_generation: int = 0
+var _boss_warning_emitted: bool = false
 
 func _ready() -> void:
 	EventBus.game_started.connect(func(): _active = true)
 	EventBus.game_over.connect(func(_s: int, _d: float): _active = false)
+	EventBus.game_won.connect(func(_s: int, _d: float): _active = false)
 	EventBus.player_level_up.connect(func(_lvl: int): _active = false)
 	EventBus.powerup_selected.connect(func(_id: StringName): _active = true)
 	EventBus.enemy_split_requested.connect(_on_enemy_split_requested)
@@ -37,8 +39,12 @@ func _process(delta: float) -> void:
 		_spawn_wave()
 		_update_difficulty()
 	_boss_timer -= delta
+	if not _boss_alive and not _boss_warning_emitted and _boss_timer <= 5.0:
+		_boss_warning_emitted = true
+		EventBus.boss_incoming.emit()
 	if _boss_timer <= 0.0 and not _boss_alive:
 		_boss_timer = Constants.BOSS_SPAWN_INTERVAL
+		_boss_warning_emitted = false
 		_spawn_boss()
 
 func _spawn_wave() -> void:

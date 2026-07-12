@@ -26,6 +26,7 @@ var _heart_labels: Array[Label] = []
 var _xp_bar: ProgressBar
 var _score_label: Label
 var _level_label: Label
+var _timer_label: Label
 var _pause_btn: Button
 var _powerup_panel: Control
 var _card_buttons: Array[Button] = []
@@ -45,6 +46,7 @@ func _ready() -> void:
 func _build_ui() -> void:
 	_build_hearts()
 	_build_score_and_level()
+	_build_timer()
 	_build_xp_bar()
 	_build_powerup_panel()
 	_build_pause_button()
@@ -102,6 +104,33 @@ func _build_xp_bar() -> void:
 	_xp_bar.offset_top = -XP_BAR_HEIGHT
 	_xp_bar.offset_bottom = 0.0
 	add_child(_xp_bar)
+
+func _build_timer() -> void:
+	_timer_label = Label.new()
+	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_timer_label.anchor_left = 0.5
+	_timer_label.anchor_right = 0.5
+	_timer_label.offset_left = -35.0
+	_timer_label.offset_right = 35.0
+	_timer_label.offset_top = 50.0
+	_timer_label.offset_bottom = 70.0
+	_timer_label.add_theme_font_size_override("font_size", 16)
+	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	add_child(_timer_label)
+
+func _process(_delta: float) -> void:
+	if GameManager.get_state() != GameManager.GameState.PLAYING:
+		return
+	var remaining: float = maxf(
+		0.0, Constants.SESSION_TARGET_MIN - GameManager.get_session_time()
+	)
+	var mins: int = int(remaining) / 60
+	var secs: int = int(remaining) % 60
+	_timer_label.text = "%02d:%02d" % [mins, secs]
+	if remaining <= 30.0:
+		_timer_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.1))
+	else:
+		_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 
 func _build_pause_button() -> void:
 	_pause_btn = Button.new()
@@ -212,6 +241,9 @@ func _on_game_started() -> void:
 	_xp_bar.value = 0.0
 	_powerup_panel.hide()
 	_pause_btn.disabled = false
+	var total_secs: int = int(Constants.SESSION_TARGET_MIN)
+	_timer_label.text = "%02d:%02d" % [total_secs / 60, total_secs % 60]
+	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	for lbl: Label in _heart_labels:
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
 

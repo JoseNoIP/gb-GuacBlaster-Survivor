@@ -29,6 +29,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	EventBus.powerup_selected.connect(_on_powerup_selected)
 	EventBus.game_over.connect(func(_s: int, _d: float): queue_free())
+	EventBus.game_won.connect(func(_s: int, _d: float): queue_free())
 
 func _process(delta: float) -> void:
 	if XPGem.magnet_active:

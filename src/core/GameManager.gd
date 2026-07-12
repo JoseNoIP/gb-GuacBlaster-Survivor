@@ -2,7 +2,7 @@ extends Node
 ## Master game state machine. Controls the high-level game loop.
 ## Listens to EventBus signals and drives state transitions.
 
-enum GameState { MENU, PLAYING, PAUSED, LEVEL_UP, GAME_OVER }
+enum GameState { MENU, PLAYING, PAUSED, LEVEL_UP, GAME_OVER, GAME_WON }
 
 var _state: GameState = GameState.MENU
 var _score: int = 0
@@ -20,6 +20,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _state == GameState.PLAYING:
 		_session_time += delta
+		if _session_time >= Constants.SESSION_TARGET_MIN:
+			_trigger_victory()
 
 func start_game() -> void:
 	_state = GameState.PLAYING
@@ -56,14 +58,24 @@ func get_session_time() -> float:
 func get_current_level() -> int:
 	return _current_level
 
-func _on_player_died() -> void:
-	_state = GameState.GAME_OVER
+func _calc_gold() -> int:
 	var gold_level: int = SaveManager.get_upgrade_level(&"gold_bonus")
 	var gold_mult: float = 1.0 + float(gold_level) * Constants.META_GOLD_BONUS_PER_LEVEL
-	var gold: int = int(float(_score) * Constants.GOLD_PER_SCORE_POINT * gold_mult)
+	return int(float(_score) * Constants.GOLD_PER_SCORE_POINT * gold_mult)
+
+func _on_player_died() -> void:
+	_state = GameState.GAME_OVER
+	var gold: int = _calc_gold()
 	if gold > 0:
 		EventBus.gold_earned.emit(gold)
 	EventBus.game_over.emit(_score, _session_time)
+
+func _trigger_victory() -> void:
+	_state = GameState.GAME_WON
+	var gold: int = _calc_gold()
+	if gold > 0:
+		EventBus.gold_earned.emit(gold)
+	EventBus.game_won.emit(_score, _session_time)
 
 func _on_gem_collected(xp_value: int) -> void:
 	var luck_level: int = SaveManager.get_upgrade_level(&"luck")

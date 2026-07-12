@@ -35,3 +35,19 @@ func test_menu_button_emits_menu_requested() -> void:
 	watch_signals(EventBus)
 	_screen.get_menu_button().pressed.emit()
 	assert_signal_emitted(EventBus, "menu_requested")
+
+func test_gold_label_shows_zero_when_no_gold_earned() -> void:
+	EventBus.game_over.emit(0, 0.0)
+	assert_eq(_screen.get_gold_label().text, "+0 oro")
+
+func test_gold_label_accumulates_gold_earned() -> void:
+	EventBus.gold_earned.emit(40)
+	EventBus.gold_earned.emit(20)
+	EventBus.game_over.emit(0, 0.0)
+	assert_eq(_screen.get_gold_label().text, "+60 oro")
+
+func test_gold_resets_on_game_started() -> void:
+	EventBus.gold_earned.emit(100)
+	EventBus.game_started.emit()
+	EventBus.game_over.emit(0, 0.0)
+	assert_eq(_screen.get_gold_label().text, "+0 oro")

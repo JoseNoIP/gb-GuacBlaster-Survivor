@@ -14,8 +14,10 @@ var _bg: ColorRect
 var _panel: Control
 var _score_label: Label
 var _best_label: Label
+var _gold_label: Label
 var _restart_btn: Button
 var _menu_btn: Button
+var _gold_this_run: int = 0
 
 func _ready() -> void:
 	layer = 20
@@ -23,6 +25,8 @@ func _ready() -> void:
 	_bg.visible = false
 	_panel.visible = false
 	EventBus.game_over.connect(_on_game_over)
+	EventBus.gold_earned.connect(_on_gold_earned)
+	EventBus.game_started.connect(_on_game_started_reset)
 
 func _build_ui() -> void:
 	_bg = ColorRect.new()
@@ -65,6 +69,13 @@ func _build_ui() -> void:
 	_best_label.add_theme_font_size_override(&"font_size", 18)
 	_best_label.add_theme_color_override(&"font_color", BEST_COLOR)
 	_panel.add_child(_best_label)
+
+	_gold_label = Label.new()
+	_gold_label.text = "+0 oro"
+	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gold_label.add_theme_font_size_override(&"font_size", 20)
+	_gold_label.add_theme_color_override(&"font_color", Color(1.0, 0.8, 0.1))
+	_panel.add_child(_gold_label)
 
 	var spacer2: Control = Control.new()
 	spacer2.custom_minimum_size = Vector2(0.0, 32.0)
@@ -111,8 +122,15 @@ func _build_ui() -> void:
 func _on_game_over(score: int, _duration: float) -> void:
 	_score_label.text = "Score: %d" % score
 	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
+	_gold_label.text = "+%d oro" % _gold_this_run
 	_bg.visible = true
 	_panel.visible = true
+
+func _on_gold_earned(amount: int) -> void:
+	_gold_this_run += amount
+
+func _on_game_started_reset() -> void:
+	_gold_this_run = 0
 
 func _on_restart_pressed() -> void:
 	EventBus.restart_requested.emit()
@@ -128,6 +146,9 @@ func get_score_label() -> Label:
 
 func get_best_label() -> Label:
 	return _best_label
+
+func get_gold_label() -> Label:
+	return _gold_label
 
 func get_restart_button() -> Button:
 	return _restart_btn

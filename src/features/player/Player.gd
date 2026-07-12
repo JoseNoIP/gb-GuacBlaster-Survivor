@@ -39,6 +39,7 @@ func _ready() -> void:
 	EventBus.player_health_changed.emit(_health, _max_health)
 	EventBus.powerup_selected.connect(_on_powerup_selected)
 	EventBus.game_started.connect(_on_game_started)
+	EventBus.game_won.connect(_on_game_won_fired)
 
 func _setup_contact_area() -> void:
 	var area := Area2D.new()
@@ -87,6 +88,8 @@ func take_damage(amount: int) -> void:
 		_die()
 
 func _on_enemy_contact(body: Node2D) -> void:
+	if GameManager.get_state() != GameManager.GameState.PLAYING:
+		return
 	if _invincibility_timer > 0.0:
 		return
 	if not body.is_in_group(&"enemies"):
@@ -129,6 +132,11 @@ func apply_rapid_fire() -> void:
 
 func set_damage(new_damage: float) -> void:
 	_current_damage = new_damage
+
+func _on_game_won_fired(_score: int, _duration: float) -> void:
+	set_process(false)
+	set_process_input(false)
+	_autofire_timer.stop()
 
 func _die() -> void:
 	AudioManager.play_sfx(&"player_die")

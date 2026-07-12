@@ -21,6 +21,7 @@ var _data: Dictionary = {
 func _ready() -> void:
 	_load()
 	EventBus.game_over.connect(_on_game_over)
+	EventBus.game_won.connect(_on_game_over)
 	EventBus.gold_earned.connect(_on_gold_earned)
 	EventBus.upgrade_purchased.connect(_on_upgrade_purchased)
 

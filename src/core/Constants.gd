@@ -78,7 +78,7 @@ const GEM_FALL_SPEED: float = 90.0
 const GEM_MAGNET_SPEED: float = 300.0
 
 # --- Sessions ---
-const SESSION_TARGET_MIN: float = 120.0
+const SESSION_TARGET_MIN: float = 300.0
 const SESSION_TARGET_MAX: float = 300.0
 
 # --- XP ---

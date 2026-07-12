@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://src/scenes/Game.gd" id="1"]
 [ext_resource type="PackedScene" path="res://src/features/player/Player.tscn" id="2"]
@@ -15,6 +15,8 @@
 [ext_resource type="Script" path="res://src/features/gems/GemSpawner.gd" id="13"]
 [ext_resource type="Script" path="res://src/features/ui/PauseScreen.gd" id="14"]
 [ext_resource type="Script" path="res://src/features/vfx/ParticleSpawner.gd" id="15"]
+[ext_resource type="Script" path="res://src/features/ui/BossWarning.gd" id="16"]
+[ext_resource type="Script" path="res://src/features/ui/VictoryScreen.gd" id="17"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1")
@@ -55,3 +57,9 @@ position = Vector2(195, 422)
 
 [node name="PauseScreen" type="CanvasLayer" parent="."]
 script = ExtResource("14")
+
+[node name="BossWarning" type="CanvasLayer" parent="."]
+script = ExtResource("16")
+
+[node name="VictoryScreen" type="CanvasLayer" parent="."]
+script = ExtResource("17")
