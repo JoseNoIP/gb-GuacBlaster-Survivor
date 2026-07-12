@@ -162,9 +162,14 @@ func _update_laser_positions() -> void:
 func _on_laser_tick(area: Area2D) -> void:
 	if not is_instance_valid(area):
 		return
-	for body: Node2D in area.get_overlapping_bodies():
-		if body.is_in_group(&"enemies") and body.has_method(&"take_damage"):
-			body.call(&"take_damage", Constants.LASER_DAMAGE_PER_TICK)
+	var laser_x: float = area.position.x
+	for enemy: Node in get_tree().get_nodes_in_group(&"enemies"):
+		var en: Node2D = enemy as Node2D
+		if en == null:
+			continue
+		if absf(en.global_position.x - laser_x) <= 7.0:
+			if en.has_method(&"take_damage"):
+				en.call(&"take_damage", Constants.LASER_DAMAGE_PER_TICK)
 
 func _cleanup_laser(
 		tick: Timer, laser_rect: ColorRect, area: Area2D, laser_data: Dictionary

@@ -93,6 +93,14 @@ El workflow parchea automáticamente el path en CI con `sed`.
 
 # Mejoras Implementadas
 
+## Settings Screen — Sensibilidad de Swipe ✅
+- Nueva escena `SettingsScreen.tscn` / `.gd` en `src/scenes/`.
+- Accesible desde el menú principal con botón "CONFIGURACIÓN".
+- Slider de sensibilidad: 100% a 200%, paso 20% (= 1.0× a 2.0× de velocidad base).
+- El valor se guarda en `SaveManager._data["swipe_sensitivity"]` y persiste entre sesiones.
+- `Player._input()` lee `SaveManager.get_swipe_sensitivity()` en cada drag.
+- Pendiente: añadir controles de sonido y vibración a la misma pantalla.
+
 ## Sistema de Power-ups temporal y stackable ✅
 - Cada pick-up agrega un stack con timer de **15 segundos** independiente.
 - Al expirar un stack, los efectos se reducen automáticamente (o desaparecen si era el último).
@@ -100,6 +108,12 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Al subir de nivel caen **3 items físicos** desde arriba de la pantalla (PowerUpDrop).
   El jugador toca el que quiere recoger; al tocarlo, los otros 2 desaparecen.
 - El juego **no se pausa** durante la selección de power-ups.
+
+### Salvo Guac (GS) — distribución simétrica ✅
+- Los streams se distribuyen simétricamente respecto al centro del jugador.
+- 1 stack = X2 = ±20 px, 2 stacks = X3 = −40/0/+40 px, hasta X6 = 5 extras.
+- Cada stream dispara también los proyectiles de Triple Shot si está activo.
+- Triple Shot ahora se aplica a TODOS los streams, no solo al central.
 
 ### Power-ups activos (9 en total)
 | Iniciales | Nombre | Efecto | Duración |
@@ -150,6 +164,25 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - `total_sessions` sigue contando todas las partidas (victorias + derrotas).
 - La **paleta de fondo** rota por victorias (`victories % 5`), no por sesiones totales.
 - Al perder se siente el mismo fondo; al ganar avanza al siguiente bioma.
+
+## Corazones que caen durante la partida ✅
+- Cada 45 segundos cae un corazón (♥ rojo) desde arriba en posición X aleatoria.
+- El jugador lo recoge tocándolo; suma +1 HP hasta el máximo. Si está lleno de vida, el corazón se ignora sin efecto.
+- Independiente del sistema de gemas y power-ups.
+- Constantes: `HEART_DROP_INTERVAL = 45.0`, `HEART_DROP_SPEED = 80.0` en `Constants.gd`.
+- Señal: `EventBus.heart_collected()`. Escuchada por `Player._on_heart_collected()`.
+- Archivos: `HeartDrop.gd`, `HeartDrop.tscn`, `HeartDropper.gd` en `src/features/player/`.
+
+## Láser Jalapeño — daña al moverse ✅
+- Antes usaba `Area2D.get_overlapping_bodies()` que no actualizaba en movimiento.
+- Ahora: en cada tick, itera los enemigos del grupo y compara `absf(enemy.x - laser.x) <= 7px`.
+- El láser sigue dañando correctamente a todo enemigo que esté dentro de la columna mientras se mueve.
+
+## XP más rápido para combinaciones ✅
+- `XP_BASE_REQUIRED`: 60 → **40**
+- `XP_SCALE_FACTOR`: 1.3 → **1.2**
+- `ENEMY_BASIC_XP`: 5 → **8**, `ENEMY_ZIGZAG_XP`: 10 → **15**, `ENEMY_TANK_XP`: 20 → **35**
+- Combinaciones de hasta 5 power-ups simultáneos son alcanzables (~23s para 5 level-ups, 7s de ventana antes de que expire el primero).
 
 ## Rapid Fire — multiplicador subido a ×2 ✅
 - Antes: ×1.25 de cadencia por stack.

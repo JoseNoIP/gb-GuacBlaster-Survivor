@@ -12,16 +12,16 @@ const PLAYER_AUTOFIRE_INTERVAL: float = 0.4
 # --- Enemies ---
 const ENEMY_BASIC_HP: int = 1
 const ENEMY_BASIC_SPEED: float = 80.0
-const ENEMY_BASIC_XP: int = 5
+const ENEMY_BASIC_XP: int = 8
 
 const ENEMY_TANK_HP: int = 5
 const ENEMY_TANK_SPEED: float = 50.0
-const ENEMY_TANK_XP: int = 20
+const ENEMY_TANK_XP: int = 35
 const ENEMY_TANK_SPLIT_COUNT: int = 4
 
 const ENEMY_ZIGZAG_HP: int = 1
 const ENEMY_ZIGZAG_SPEED: float = 130.0
-const ENEMY_ZIGZAG_XP: int = 10
+const ENEMY_ZIGZAG_XP: int = 15
 const ENEMY_ZIGZAG_AMPLITUDE: float = 100.0
 const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
 
@@ -96,8 +96,8 @@ const HEART_DROP_INTERVAL: float = 45.0
 const HEART_DROP_SPEED: float = 80.0
 
 # --- XP ---
-const XP_BASE_REQUIRED: int = 60
-const XP_SCALE_FACTOR: float = 1.3
+const XP_BASE_REQUIRED: int = 40
+const XP_SCALE_FACTOR: float = 1.2
 
 # --- Combat ---
 const PLAYER_CONTACT_INVINCIBILITY: float = 1.0

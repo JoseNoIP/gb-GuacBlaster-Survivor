@@ -17,6 +17,7 @@ var _data: Dictionary = {
 	"best_score": 0,
 	"total_sessions": 0,
 	"victories": 0,
+	"swipe_sensitivity": 1.0,
 }
 
 func _ready() -> void:
@@ -61,6 +62,13 @@ func get_total_sessions() -> int:
 
 func get_victories() -> int:
 	return _data.get("victories", 0)
+
+func get_swipe_sensitivity() -> float:
+	return float(_data.get("swipe_sensitivity", 1.0))
+
+func set_swipe_sensitivity(value: float) -> void:
+	_data["swipe_sensitivity"] = clampf(value, 1.0, 2.0)
+	_save()
 
 func purchase_upgrade(upgrade_id: StringName) -> bool:
 	var current_level: int = get_upgrade_level(upgrade_id)

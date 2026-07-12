@@ -87,7 +87,7 @@ func _input(event: InputEvent) -> void:
 		_drag_anchor_player_x = _target_x
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
-		var delta_x: float = (drag.position.x - _drag_anchor_x) * Constants.PLAYER_SWIPE_SENSITIVITY
+		var delta_x: float = (drag.position.x - _drag_anchor_x) * SaveManager.get_swipe_sensitivity()
 		_target_x = _drag_anchor_player_x + delta_x
 	elif event is InputEventMouseMotion:
 		_target_x = (event as InputEventMouseMotion).position.x

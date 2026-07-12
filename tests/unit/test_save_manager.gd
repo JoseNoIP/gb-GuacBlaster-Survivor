@@ -99,3 +99,20 @@ func test_cost_grows_exponentially() -> void:
 	SaveManager.purchase_upgrade(&"damage")
 	var cost_lvl2: int = SaveManager._data["gold"]
 	assert_gt(100000 - cost_lvl2, 100000 - cost_lvl1)
+
+# --- Swipe sensitivity ---
+
+func test_swipe_sensitivity_defaults_to_one() -> void:
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 1.0, 0.001)
+
+func test_set_swipe_sensitivity_stores_value() -> void:
+	SaveManager.set_swipe_sensitivity(1.4)
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 1.4, 0.001)
+
+func test_set_swipe_sensitivity_clamps_below_one() -> void:
+	SaveManager.set_swipe_sensitivity(0.5)
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 1.0, 0.001)
+
+func test_set_swipe_sensitivity_clamps_above_two() -> void:
+	SaveManager.set_swipe_sensitivity(5.0)
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 2.0, 0.001)

@@ -21,15 +21,16 @@ func _on_player_fired(
 		direction: Vector2,
 		damage: float
 ) -> void:
-	_spawn(spawn_position, direction, damage)
-	if _triple_shot:
-		_spawn(spawn_position, direction.rotated(deg_to_rad(20.0)), damage)
-		_spawn(spawn_position, direction.rotated(deg_to_rad(-20.0)), damage)
-	for i: int in _extra_streams:
-		var mult: float = float(i / 2 + 1) * Constants.MULTI_STREAM_SPACING
-		var sign_val: float = 1.0 if i % 2 == 0 else -1.0
-		var offset: Vector2 = Vector2(mult * sign_val, 0.0)
-		_spawn(spawn_position + offset, direction, damage)
+	var total: int = _extra_streams + 1
+	for i: int in total:
+		var offset_x: float = (
+			(float(i) - float(total - 1) * 0.5) * Constants.MULTI_STREAM_SPACING
+		)
+		var pos: Vector2 = spawn_position + Vector2(offset_x, 0.0)
+		_spawn(pos, direction, damage)
+		if _triple_shot:
+			_spawn(pos, direction.rotated(deg_to_rad(20.0)), damage)
+			_spawn(pos, direction.rotated(deg_to_rad(-20.0)), damage)
 
 func _spawn(spawn_position: Vector2, direction: Vector2, damage: float) -> void:
 	if projectile_scene == null:

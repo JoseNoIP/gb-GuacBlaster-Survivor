@@ -234,7 +234,7 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | Velocidad | 200 px/s | +3%/nivel |
 | Daño base | 10 | +5%/nivel |
 | Autofire interval | 0.4s | ÷2 por stack de Fuego Rápido (mín 0.05s) |
-| Sensibilidad swipe | 1.0 | Configurable (pendiente Settings screen) |
+| Sensibilidad swipe | 1.0 (base) | Configurable en Settings (100%–200%). Guardado en SaveManager. |
 
 ### Enemigos
 | Tipo | HP | Comportamiento especial |
@@ -245,6 +245,9 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | Jefe | 100+50×gen | Dispara proyectiles, aparece cada 3 min |
 
 ### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales **30s**, stackables
+**guac_storm**: streams distribuidos simétricamente. 1 stack=X2 (±20px), 2=X3 (-40/0/+40), …, 5=X6. Triple Shot aplica a todos los streams.
+
+
 | ID | Abrev | Nombre | Efecto por stack |
 |---|---|---|---|
 | `triple_shot` | TS | Disparo Triple | +2 disparos diagonales |
@@ -283,7 +286,7 @@ d) SANITY    — Verificar que features existentes no se rompieron
 ### Solo código (sin assets externos)
 | Feature | Archivo(s) a crear/modificar | Notas |
 |---|---|---|
-| Settings screen | `SettingsScreen.tscn/gd`, `SaveManager.gd` | Sonido, vibración, sensibilidad swipe |
+| Settings screen — sonido/vibración | `SettingsScreen.gd` | Sensibilidad ✅ implementada. Faltan sonido on/off y vibración on/off |
 | Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
 | Misiones diarias | Sistema de tracking + UI | Oro extra por objetivos |
 | Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
