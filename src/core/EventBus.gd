@@ -39,6 +39,9 @@ signal wave_started(wave_number: int)
 signal restart_requested()
 signal menu_requested()
 
+# --- Pickups ---
+signal heart_collected()
+
 # --- Meta ---
 signal gold_earned(amount: int)
 signal upgrade_purchased(upgrade_id: StringName, new_level: int)

@@ -46,6 +46,7 @@ func _ready() -> void:
 	_setup_contact_area()
 	EventBus.player_health_changed.emit(_health, _max_health)
 	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed)
+	EventBus.heart_collected.connect(_on_heart_collected)
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_won.connect(_on_game_won_fired)
 
@@ -156,6 +157,12 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 			if count > _nacho_wall_stacks:
 				_update_shield(_shield_hits + Constants.NACHO_WALL_HITS)
 			_nacho_wall_stacks = count
+
+func _on_heart_collected() -> void:
+	if _health >= _max_health:
+		return
+	_health = mini(_health + 1, _max_health)
+	EventBus.player_health_changed.emit(_health, _max_health)
 
 func get_health() -> int:
 	return _health
