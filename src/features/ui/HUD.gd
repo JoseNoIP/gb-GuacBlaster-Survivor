@@ -32,6 +32,7 @@ var _powerup_panel: Control
 var _card_buttons: Array[Button] = []
 var _current_options: Array = []
 var _displayed_score: int = 0
+var _boss_spawned: bool = false
 
 func _ready() -> void:
 	layer = 10
@@ -42,6 +43,8 @@ func _ready() -> void:
 	EventBus.powerup_selection_requested.connect(_on_powerup_selection_requested)
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(_on_game_over)
+	EventBus.game_won.connect(func(_s: int, _d: float): _powerup_panel.hide())
+	EventBus.boss_spawned.connect(func(_id: int): _boss_spawned = true)
 
 func _build_ui() -> void:
 	_build_hearts()
@@ -121,16 +124,25 @@ func _build_timer() -> void:
 func _process(_delta: float) -> void:
 	if GameManager.get_state() != GameManager.GameState.PLAYING:
 		return
+	if _boss_spawned:
+		_timer_label.text = "¡JEFE!"
+		_timer_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.1))
+		_timer_label.show()
+		return
 	var remaining: float = maxf(
-		0.0, Constants.SESSION_TARGET_MIN - GameManager.get_session_time()
+		0.0, Constants.BOSS_SPAWN_INTERVAL - GameManager.get_session_time()
 	)
+	if remaining > Constants.BOSS_TIMER_SHOW_REMAINING:
+		_timer_label.hide()
+		return
 	var mins: int = int(remaining) / 60
 	var secs: int = int(remaining) % 60
-	_timer_label.text = "%02d:%02d" % [mins, secs]
+	_timer_label.text = "JEFE EN: %02d:%02d" % [mins, secs]
 	if remaining <= 30.0:
 		_timer_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.1))
 	else:
 		_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	_timer_label.show()
 
 func _build_pause_button() -> void:
 	_pause_btn = Button.new()
@@ -241,8 +253,8 @@ func _on_game_started() -> void:
 	_xp_bar.value = 0.0
 	_powerup_panel.hide()
 	_pause_btn.disabled = false
-	var total_secs: int = int(Constants.SESSION_TARGET_MIN)
-	_timer_label.text = "%02d:%02d" % [total_secs / 60, total_secs % 60]
+	_boss_spawned = false
+	_timer_label.hide()
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	for lbl: Label in _heart_labels:
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)

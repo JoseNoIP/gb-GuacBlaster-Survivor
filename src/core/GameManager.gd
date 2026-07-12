@@ -16,12 +16,11 @@ func _ready() -> void:
 	EventBus.powerup_selected.connect(_on_powerup_selected)
 	EventBus.xp_collected.connect(_on_xp_collected)
 	EventBus.gem_collected.connect(_on_gem_collected)
+	EventBus.boss_defeated.connect(_on_boss_defeated)
 
 func _process(delta: float) -> void:
 	if _state == GameState.PLAYING:
 		_session_time += delta
-		if _session_time >= Constants.SESSION_TARGET_MIN:
-			_trigger_victory()
 
 func start_game() -> void:
 	_state = GameState.PLAYING
@@ -77,7 +76,13 @@ func _trigger_victory() -> void:
 		EventBus.gold_earned.emit(gold)
 	EventBus.game_won.emit(_score, _session_time)
 
+func _on_boss_defeated(_boss_id: int) -> void:
+	if _state == GameState.PLAYING:
+		_trigger_victory()
+
 func _on_gem_collected(xp_value: int) -> void:
+	if _state != GameState.PLAYING and _state != GameState.LEVEL_UP:
+		return
 	var luck_level: int = SaveManager.get_upgrade_level(&"luck")
 	var luck_mult: float = 1.0 + float(luck_level) * Constants.META_LUCK_PER_LEVEL
 	var effective_xp: int = int(float(xp_value) * luck_mult)

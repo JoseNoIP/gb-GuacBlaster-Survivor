@@ -96,18 +96,16 @@ func test_warning_label_text() -> void:
 
 # --- GameManager victory ---
 
-func test_victory_triggers_at_session_min() -> void:
-	GameManager._session_time = Constants.SESSION_TARGET_MIN - 0.01
-	GameManager._process(0.02)
+func test_victory_triggers_on_boss_defeated() -> void:
+	EventBus.boss_defeated.emit(1)
 	assert_eq(GameManager.get_state(), GameManager.GameState.GAME_WON)
 
 func test_victory_emits_game_won_signal() -> void:
 	watch_signals(EventBus)
-	GameManager._session_time = Constants.SESSION_TARGET_MIN - 0.01
-	GameManager._process(0.02)
+	EventBus.boss_defeated.emit(1)
 	assert_signal_emitted(EventBus, "game_won")
 
-func test_victory_does_not_trigger_before_min() -> void:
-	GameManager._session_time = Constants.SESSION_TARGET_MIN - 1.0
-	GameManager._process(0.5)
-	assert_eq(GameManager.get_state(), GameManager.GameState.PLAYING)
+func test_victory_does_not_trigger_when_not_playing() -> void:
+	GameManager._on_player_died()
+	EventBus.boss_defeated.emit(1)
+	assert_eq(GameManager.get_state(), GameManager.GameState.GAME_OVER)

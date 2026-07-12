@@ -26,6 +26,7 @@ const ENEMY_ZIGZAG_AMPLITUDE: float = 100.0
 const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
 
 const BOSS_SPAWN_INTERVAL: float = 180.0
+const BOSS_TIMER_SHOW_REMAINING: float = 90.0
 const BOSS_HP_BASE: int = 100
 const BOSS_HP_PER_GENERATION: int = 50
 const BOSS_SPEED: float = 60.0
@@ -76,10 +77,6 @@ const META_UPGRADE_COST_GROWTH: float = 1.8
 const GOLD_PER_SCORE_POINT: float = 0.1
 const GEM_FALL_SPEED: float = 90.0
 const GEM_MAGNET_SPEED: float = 300.0
-
-# --- Sessions ---
-const SESSION_TARGET_MIN: float = 300.0
-const SESSION_TARGET_MAX: float = 300.0
 
 # --- XP ---
 const XP_BASE_REQUIRED: int = 100

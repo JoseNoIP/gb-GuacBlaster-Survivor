@@ -45,3 +45,12 @@ func test_pick_powerup_options_returns_valid_ids() -> void:
 	for opt: Variant in options:
 		assert_true(Constants.POWERUP_POOL.has(opt),
 			"Option '%s' not in POWERUP_POOL" % opt)
+
+func test_boss_defeated_transitions_to_game_won() -> void:
+	GameManager._on_boss_defeated(1)
+	assert_eq(GameManager.get_state(), GameManager.GameState.GAME_WON)
+
+func test_boss_defeated_ignored_when_not_playing() -> void:
+	GameManager._on_player_died()
+	GameManager._on_boss_defeated(1)
+	assert_eq(GameManager.get_state(), GameManager.GameState.GAME_OVER)
