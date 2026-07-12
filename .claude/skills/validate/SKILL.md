@@ -44,3 +44,13 @@ Estado : ✅ GREEN  |  ❌ BLOQUEADO
 ```
 
 No hacer ningún cambio de código desde este skill. Solo reportar.
+
+### Después de GREEN — DOC obligatorio
+
+Si el estado es GREEN y hubo cambios de código en esta sesión, ejecutar el paso DOC **sin esperar a que el usuario lo pida**:
+
+1. `idea-base.md` — agregar o actualizar la sección de la feature/fix implementado
+2. `CLAUDE.md` — actualizar si cambiaron señales, autoloads, anti-patrones o pendientes
+3. `memory/project_guacblaster.md` — actualizar si cambió arquitectura, features, señales o pendientes
+
+Una sesión de trabajo NO está cerrada hasta que la documentación esté actualizada.

@@ -197,9 +197,11 @@ a) PLAN      — Listar: qué archivos se modifican, qué tests se agregan
 b) IMPL      — Código mínimo y tipado (sin over-engineering)
 c) VALIDATE  — Ejecutar: gdlint src/ && tests GUT headless → BUILD GREEN
 d) SANITY    — Verificar que features existentes no se rompieron
+e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblaster.md)
 ```
 
-**Una tarea NO está terminada hasta que el paso (c) pase en verde.**
+**Una tarea NO está terminada hasta que los pasos (c) y (e) estén completos.**  
+**El paso (e) es OBLIGATORIO y debe ejecutarse SIN que el usuario lo pida.**
 
 ---
 
