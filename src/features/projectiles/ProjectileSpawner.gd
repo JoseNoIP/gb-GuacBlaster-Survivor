@@ -40,6 +40,7 @@ func _spawn(spawn_position: Vector2, direction: Vector2, damage: float) -> void:
 	get_parent().add_child(proj)
 	proj.global_position = spawn_position
 	proj.call(&"setup", damage, direction, _pierce_count, _bouncy)
+	AudioManager.play_sfx(&"shoot")
 
 func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 	match powerup_id:

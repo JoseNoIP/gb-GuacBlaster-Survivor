@@ -17,15 +17,21 @@ func _ready() -> void:
 	circle.radius = 10.0
 	shape.shape = circle
 	add_child(shape)
-	var diamond: Polygon2D = Polygon2D.new()
-	diamond.color = Color(0.9, 0.85, 0.1)
-	diamond.polygon = PackedVector2Array([
-		Vector2(0.0, -10.0),
-		Vector2(7.0, 0.0),
-		Vector2(0.0, 10.0),
-		Vector2(-7.0, 0.0),
-	])
-	add_child(diamond)
+	var visual: Node2D
+	const GEM_TEX := "res://assets/sprites/gem.png"
+	if ResourceLoader.exists(GEM_TEX):
+		var sprite := Sprite2D.new()
+		sprite.texture = load(GEM_TEX) as Texture2D
+		visual = sprite
+	else:
+		var diamond := Polygon2D.new()
+		diamond.color = Color(0.9, 0.85, 0.1)
+		diamond.polygon = PackedVector2Array([
+			Vector2(0.0, -10.0), Vector2(7.0, 0.0),
+			Vector2(0.0, 10.0), Vector2(-7.0, 0.0),
+		])
+		visual = diamond
+	add_child(visual)
 	body_entered.connect(_on_body_entered)
 	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed)
 	EventBus.game_over.connect(func(_s: int, _d: float): queue_free())

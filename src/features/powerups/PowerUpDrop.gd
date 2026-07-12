@@ -44,21 +44,26 @@ func _ready() -> void:
 	EventBus.game_won.connect(func(_s: int, _d: float): queue_free())
 
 func _build_visual() -> void:
-	var bg: ColorRect = ColorRect.new()
-	bg.size = Vector2(32.0, 32.0)
-	bg.position = Vector2(-16.0, -16.0)
-	bg.color = DROP_COLORS.get(powerup_id, Color(0.5, 0.5, 0.5))
-	add_child(bg)
-
-	var lbl: Label = Label.new()
-	lbl.text = POWERUP_ABBREV.get(powerup_id, str(powerup_id).left(2).to_upper())
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 13)
-	lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
-	lbl.size = Vector2(32.0, 32.0)
-	lbl.position = Vector2(-16.0, -16.0)
-	add_child(lbl)
+	var icon_path := "res://assets/sprites/powerup_icons/%s.png" % str(powerup_id)
+	if ResourceLoader.exists(icon_path):
+		var sprite := Sprite2D.new()
+		sprite.texture = load(icon_path) as Texture2D
+		add_child(sprite)
+	else:
+		var bg := ColorRect.new()
+		bg.size = Vector2(32.0, 32.0)
+		bg.position = Vector2(-16.0, -16.0)
+		bg.color = DROP_COLORS.get(powerup_id, Color(0.5, 0.5, 0.5))
+		add_child(bg)
+		var lbl := Label.new()
+		lbl.text = POWERUP_ABBREV.get(powerup_id, str(powerup_id).left(2).to_upper())
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		lbl.size = Vector2(32.0, 32.0)
+		lbl.position = Vector2(-16.0, -16.0)
+		add_child(lbl)
 
 func _process(delta: float) -> void:
 	position.y += FALL_SPEED * delta
@@ -67,5 +72,5 @@ func _process(delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group(&"player"):
-		EventBus.powerup_selected.emit(powerup_id)
+		EventBus.powerup_selected.emit.call_deferred(powerup_id)
 		queue_free()

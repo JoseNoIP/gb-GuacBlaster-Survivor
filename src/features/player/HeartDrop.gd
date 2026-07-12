@@ -18,12 +18,18 @@ func _build_collision() -> void:
 	add_child(shape)
 
 func _build_visual() -> void:
-	var lbl := Label.new()
-	lbl.text = "♥"
-	lbl.add_theme_font_size_override("font_size", 30)
-	lbl.add_theme_color_override("font_color", Color(0.9, 0.15, 0.15))
-	lbl.position = Vector2(-11.0, -16.0)
-	add_child(lbl)
+	const HEART_TEX := "res://assets/sprites/heart.png"
+	if ResourceLoader.exists(HEART_TEX):
+		var sprite := Sprite2D.new()
+		sprite.texture = load(HEART_TEX) as Texture2D
+		add_child(sprite)
+	else:
+		var lbl := Label.new()
+		lbl.text = "♥"
+		lbl.add_theme_font_size_override("font_size", 30)
+		lbl.add_theme_color_override("font_color", Color(0.9, 0.15, 0.15))
+		lbl.position = Vector2(-11.0, -16.0)
+		add_child(lbl)
 
 func _process(delta: float) -> void:
 	position.y += Constants.HEART_DROP_SPEED * delta

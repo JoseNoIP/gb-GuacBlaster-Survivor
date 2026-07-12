@@ -234,41 +234,26 @@ El workflow parchea automáticamente el path en CI con `sed`.
 
 ---
 
-# Assets Externos Pendientes
+## Sprites y SFX placeholder ✅
+- **`tools/gen_assets.py`** — script Python stdlib que genera todos los assets sin dependencias externas.
+- **8 sprites PNG**: player (32×32), enemy_basic (28×28), enemy_tank (42×42), enemy_zigzag (26×26), enemy_boss (72×72), projectile (14×14), gem (18×18), heart (26×26).
+- **9 íconos de power-up** (32×32) en `assets/sprites/powerup_icons/` — uno por ID, con diseño único por tipo.
+- **7 archivos WAV** en `assets/audio/`: shoot, enemy_die, player_hit, gem_collect, levelup, boss_die, music_loop.
+- Escenas .tscn actualizadas: Sprite2D reemplaza Polygon2D en Player, EnemyBasic, EnemyTank, EnemyZigzag, EnemyBoss, Projectile.
+- XPGem.gd, HeartDrop.gd y PowerUpDrop.gd cargan sprite si existe, con fallback a forma geométrica.
+- AudioManager carga los WAVs automáticamente, conecta todos los eventos del juego, reproduce música en loop.
+- Para sustituir por arte final: reemplazar los PNG/WAV en las mismas rutas y volver a importar con `godot --headless -e --quit`.
 
-## Backgrounds por ronda
-La lógica ya está implementada: cada victoria avanza `SaveManager.get_victories() % 5`
-y aplica un color de `Constants.BACKGROUND_PALETTE`. Para reemplazar colores por imágenes:
+# Assets Externos Pendientes (arte final)
 
-- Crear 5 imágenes de fondo (390×844 px, pixel art) para los biomas:
-  1. Jungla oscura (default) — `bg_0.png`
-  2. Crepúsculo / índigo — `bg_1.png`
-  3. Volcánico / brasa — `bg_2.png`
-  4. Abismo / océano profundo — `bg_3.png`
-  5. Luna de sangre / desierto nocturno — `bg_4.png`
-- Colocar en `assets/sprites/backgrounds/`
-- En `Game.gd._ready()`, reemplazar `_background.color = ...` por:
-  ```gdscript
-  var tex := load("res://assets/sprites/backgrounds/bg_%d.png" % palette_index) as Texture2D
-  _background.texture = tex  # cambiar ColorRect → TextureRect en Game.tscn
-  ```
+## Fondos de bioma (arte final)
+La lógica ya está implementada. Para reemplazar colores por imágenes reales:
+- Crear 5 imágenes 390×844 px (jungla, crepúsculo, volcánico, abismo, luna de sangre)
+- Colocar en `assets/sprites/backgrounds/bg_0.png` … `bg_4.png`
+- En `Game.gd._ready()`, reemplazar `_background.color = ...` por `TextureRect` con `load("res://assets/sprites/backgrounds/bg_%d.png" % palette_index)`
 
-## SFX / Música
-`AudioManager` autoload existe en `src/features/audio/AudioManager.gd`.
-Archivos necesarios en `assets/audio/`:
-- `shoot.ogg` — disparo del jugador
-- `enemy_die.ogg` — muerte de enemigo básico
-- `boss_die.ogg` — derrota del jefe
-- `player_hit.ogg` — daño al jugador
-- `levelup.ogg` — subida de nivel
-- `gem_collect.ogg` — recolección de gema
-- `music_loop.ogg` — loop de música de fondo
-
-## Sprites
-Placeholders actuales son `ColorRect` y `CharacterBody2D` sin textura.
-Archivos necesarios en `assets/sprites/`:
-- `player.png` (32×32 px)
-- `enemy_basic.png`, `enemy_tank.png`, `enemy_zigzag.png`, `enemy_boss.png`
-- `projectile.png`, `gem.png`
-- `powerup_icons/` — 9 íconos (32×32 px), uno por power-up:
-  `ts.png`, `sg.png`, `rf.png`, `mg.png`, `jl.png`, `sb.png`, `nw.png`, `sm.png`, `gs.png`
+## SFX / Sprites (arte final)
+Los placeholders en `assets/` ya funcionan en juego. Para arte final:
+- Reemplazar PNG en `assets/sprites/` (mismas rutas y dimensiones aproximadas)
+- Reemplazar WAV en `assets/audio/` con archivos OGG de calidad
+- Ejecutar `godot --headless -e --quit` después de reemplazar para reimportar
