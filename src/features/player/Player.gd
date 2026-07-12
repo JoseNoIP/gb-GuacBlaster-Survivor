@@ -106,6 +106,8 @@ func _on_game_started() -> void:
 	_current_autofire_interval = Constants.PLAYER_AUTOFIRE_INTERVAL / speed_mult
 	_autofire_timer.wait_time = _current_autofire_interval
 	_autofire_timer.start()
+	var shield_level: int = SaveManager.get_upgrade_level(&"starter_shield")
+	_shield_hits = shield_level * Constants.META_STARTER_SHIELD_PER_LEVEL
 	EventBus.player_health_changed.emit(_health, _max_health)
 
 func _on_powerup_selected(powerup_id: StringName) -> void:

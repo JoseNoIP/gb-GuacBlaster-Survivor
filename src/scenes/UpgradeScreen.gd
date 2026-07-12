@@ -13,10 +13,12 @@ const BTN_DISABLED_COLOR: Color = Color(0.3, 0.3, 0.3)
 const GOLD_COLOR: Color = Color(1.0, 0.8, 0.1)
 
 const UPGRADE_DEFS: Array = [
-	{id = &"damage", label = "DAÑO", desc = "+5% daño por nivel"},
-	{id = &"speed",  label = "CADENCIA", desc = "+3% vel. disparo/nivel"},
-	{id = &"health", label = "VIDA", desc = "+1 corazón por nivel"},
-	{id = &"luck",   label = "SUERTE", desc = "+5% XP por nivel"},
+	{id = &"damage",         label = "DAÑO",      desc = "+5% daño por nivel"},
+	{id = &"speed",          label = "CADENCIA",  desc = "+3% vel. disparo/nivel"},
+	{id = &"health",         label = "VIDA",       desc = "+1 corazón por nivel"},
+	{id = &"luck",           label = "SUERTE",    desc = "+5% XP por nivel"},
+	{id = &"gold_bonus",     label = "BONUS ORO", desc = "+15% oro por partida/nivel"},
+	{id = &"starter_shield", label = "ESCUDO",    desc = "+1 escudo inicial por nivel"},
 ]
 
 var _gold_label: Label
@@ -164,13 +166,21 @@ func _build_card(parent: Control, def: Dictionary) -> void:
 
 func _refresh_card(upgrade_id: StringName) -> void:
 	var current_level: int = SaveManager.get_upgrade_level(upgrade_id)
-	var cost: int = (current_level + 1) * Constants.META_UPGRADE_COST_BASE
+	var is_maxed: bool = current_level >= Constants.META_MAX_UPGRADE_LEVEL
+	var btn: Button = _buy_buttons[upgrade_id] as Button
+	if is_maxed:
+		(_level_labels[upgrade_id] as Label).text = "Nivel %d — MAX" % current_level
+		(_cost_labels[upgrade_id] as Label).text = ""
+		btn.text = "MAX"
+		btn.disabled = true
+		return
+	var base: float = float(Constants.META_UPGRADE_COST_BASE)
+	var growth: float = pow(Constants.META_UPGRADE_COST_GROWTH, float(current_level))
+	var cost: int = int(base * growth)
 	var can_afford: bool = SaveManager.get_gold() >= cost
-
 	(_level_labels[upgrade_id] as Label).text = "Nivel %d" % current_level
 	(_cost_labels[upgrade_id] as Label).text = "Costo: %d oro" % cost
-
-	var btn: Button = _buy_buttons[upgrade_id] as Button
+	btn.text = "COMPRAR"
 	btn.disabled = not can_afford
 	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color = BTN_BUY_COLOR if can_afford else BTN_DISABLED_COLOR

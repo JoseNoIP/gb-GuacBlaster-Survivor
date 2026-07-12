@@ -8,7 +8,10 @@ var _screen: UpgradeScreen
 func before_each() -> void:
 	SaveManager._data = {
 		"gold": 0,
-		"upgrades": {"damage": 0, "speed": 0, "health": 0, "luck": 0},
+		"upgrades": {
+			"damage": 0, "speed": 0, "health": 0, "luck": 0,
+			"gold_bonus": 0, "starter_shield": 0,
+		},
 		"best_score": 0,
 		"total_sessions": 0,
 	}
@@ -58,3 +61,16 @@ func test_buy_with_gold_emits_upgrade_purchased() -> void:
 	watch_signals(EventBus)
 	_screen.get_buy_button(&"damage").pressed.emit()
 	assert_signal_emitted(EventBus, "upgrade_purchased")
+
+func test_upgrade_screen_has_gold_bonus_button() -> void:
+	assert_not_null(_screen.get_buy_button(&"gold_bonus"))
+
+func test_upgrade_screen_has_starter_shield_button() -> void:
+	assert_not_null(_screen.get_buy_button(&"starter_shield"))
+
+func test_buy_button_disabled_at_max_level() -> void:
+	SaveManager._data["gold"] = 100000
+	SaveManager._data["upgrades"]["damage"] = Constants.META_MAX_UPGRADE_LEVEL
+	var new_screen: UpgradeScreenGd = UpgradeScreenGd.new()
+	add_child_autofree(new_screen)
+	assert_true(new_screen.get_buy_button(&"damage").disabled)

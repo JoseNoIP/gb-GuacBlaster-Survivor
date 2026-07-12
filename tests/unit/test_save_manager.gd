@@ -5,7 +5,10 @@ extends GutTest
 func before_each() -> void:
 	SaveManager._data = {
 		"gold": 0,
-		"upgrades": {"damage": 0, "speed": 0, "health": 0, "luck": 0},
+		"upgrades": {
+			"damage": 0, "speed": 0, "health": 0, "luck": 0,
+			"gold_bonus": 0, "starter_shield": 0,
+		},
 		"best_score": 0,
 		"total_sessions": 0,
 	}
@@ -46,7 +49,10 @@ func test_purchase_upgrade_increments_level() -> void:
 
 func test_purchase_upgrade_deducts_gold() -> void:
 	SaveManager._data["gold"] = 1000
-	var cost: int = (SaveManager.get_upgrade_level(&"damage") + 1) * Constants.META_UPGRADE_COST_BASE
+	var level: int = SaveManager.get_upgrade_level(&"damage")
+	var base: float = float(Constants.META_UPGRADE_COST_BASE)
+	var growth: float = pow(Constants.META_UPGRADE_COST_GROWTH, float(level))
+	var cost: int = int(base * growth)
 	SaveManager.purchase_upgrade(&"damage")
 	assert_eq(SaveManager.get_gold(), 1000 - cost)
 
@@ -59,3 +65,24 @@ func test_purchase_upgrade_emits_upgrade_purchased() -> void:
 	watch_signals(EventBus)
 	SaveManager.purchase_upgrade(&"damage")
 	assert_signal_emitted(EventBus, "upgrade_purchased")
+
+func test_purchase_upgrade_at_max_level_returns_false() -> void:
+	SaveManager._data["gold"] = 100000
+	SaveManager._data["upgrades"]["damage"] = Constants.META_MAX_UPGRADE_LEVEL
+	assert_false(SaveManager.purchase_upgrade(&"damage"))
+
+func test_purchase_upgrade_at_max_level_does_not_deduct_gold() -> void:
+	SaveManager._data["gold"] = 100000
+	SaveManager._data["upgrades"]["damage"] = Constants.META_MAX_UPGRADE_LEVEL
+	SaveManager.purchase_upgrade(&"damage")
+	assert_eq(SaveManager.get_gold(), 100000)
+
+func test_cost_grows_exponentially() -> void:
+	SaveManager._data["gold"] = 100000
+	SaveManager.purchase_upgrade(&"damage")
+	var cost_lvl1: int = SaveManager._data["gold"]
+	SaveManager._data["gold"] = 100000
+	SaveManager._data["upgrades"]["damage"] = 1
+	SaveManager.purchase_upgrade(&"damage")
+	var cost_lvl2: int = SaveManager._data["gold"]
+	assert_gt(100000 - cost_lvl2, 100000 - cost_lvl1)

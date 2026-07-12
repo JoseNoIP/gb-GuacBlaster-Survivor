@@ -11,6 +11,8 @@ var _data: Dictionary = {
 		"speed": 0,
 		"health": 0,
 		"luck": 0,
+		"gold_bonus": 0,
+		"starter_shield": 0,
 	},
 	"best_score": 0,
 	"total_sessions": 0,
@@ -47,7 +49,11 @@ func get_best_score() -> int:
 
 func purchase_upgrade(upgrade_id: StringName) -> bool:
 	var current_level: int = get_upgrade_level(upgrade_id)
-	var cost: int = (current_level + 1) * Constants.META_UPGRADE_COST_BASE
+	if current_level >= Constants.META_MAX_UPGRADE_LEVEL:
+		return false
+	var base: float = float(Constants.META_UPGRADE_COST_BASE)
+	var growth: float = pow(Constants.META_UPGRADE_COST_GROWTH, float(current_level))
+	var cost: int = int(base * growth)
 	if get_gold() < cost:
 		return false
 	_data["gold"] = get_gold() - cost

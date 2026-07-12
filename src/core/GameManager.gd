@@ -58,7 +58,9 @@ func get_current_level() -> int:
 
 func _on_player_died() -> void:
 	_state = GameState.GAME_OVER
-	var gold: int = int(float(_score) * Constants.GOLD_PER_SCORE_POINT)
+	var gold_level: int = SaveManager.get_upgrade_level(&"gold_bonus")
+	var gold_mult: float = 1.0 + float(gold_level) * Constants.META_GOLD_BONUS_PER_LEVEL
+	var gold: int = int(float(_score) * Constants.GOLD_PER_SCORE_POINT * gold_mult)
 	if gold > 0:
 		EventBus.gold_earned.emit(gold)
 	EventBus.game_over.emit(_score, _session_time)
