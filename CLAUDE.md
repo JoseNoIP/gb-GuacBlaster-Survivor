@@ -222,6 +222,8 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | `powerup_expired(id)` | PowerUpManager | (informativa) |
 | `player_shield_changed(hits)` | Player | HUD |
 | `powerup_selection_requested(opts)` | GameManager | PowerUpDropper |
+| `boss_health_changed(current, maximum)` | EnemyBoss | HUD |
+| `heart_collected` | HeartDrop | Player |
 
 ---
 
@@ -278,6 +280,36 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | `GameManager` | `src/core/GameManager.gd` | Estado de partida |
 | `SaveManager` | `src/core/SaveManager.gd` | Persistencia |
 | `AudioManager` | `src/features/audio/AudioManager.gd` | SFX + Hápticos |
+
+---
+
+## Skills y Agentes Disponibles
+
+### Skills (slash commands)
+
+| Comando | Cuándo usar |
+|---|---|
+| `/validate` | Antes de cualquier commit — corre gdlint + GUT y reporta GREEN/BLOQUEADO |
+| `/feature [nombre]` | Al implementar cualquier feature nueva — guía completa PLAN→IMPL→VALIDATE→SANITY→DOC |
+| `/doc` | Al cerrar cualquier tarea — sincroniza idea-base.md, CLAUDE.md y memorias |
+| `/new-game [gdd.md]` | Para construir un juego nuevo desde cero — autónomo hasta build funcional |
+
+Los skills viven en `.claude/skills/<nombre>/SKILL.md`.
+
+### Agentes sub-agent
+
+| Agente | Cuándo delegar |
+|---|---|
+| `godot-architect` | Code review de arquitectura — detecta violaciones SOLID, acoplamiento directo, anti-patrones |
+| `godot-qa` | Auditoría de tests — identifica cobertura faltante, escribe tests GUT |
+| `game-designer` | Balance review — verifica que los valores numéricos den una buena experiencia |
+
+Los agentes viven en `.claude/agents/<nombre>.md`.
+
+### Hook automático
+
+`.claude/hooks/lint-on-edit.sh` corre `gdlint` en cada archivo `.gd` que se edita o escribe.
+El resultado aparece como `additionalContext` — informativo, no bloquea.
 
 ---
 
