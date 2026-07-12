@@ -1,0 +1,76 @@
+name: Build Android APK
+
+# merge a staging → APK de staging
+# merge a main    → APK de producción
+on:
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7"       # solo el número; el workflow agrega "-stable"
+  EXPORT_PRESET: "Android"   # debe coincidir exactamente con export_presets.cfg
+
+jobs:
+  build:
+    name: "Compilar APK (${{ github.ref_name }})"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Determina si es staging o prod y asigna el nombre del APK
+      - name: Determinar entorno
+        id: ctx
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "env=prod"                         >> $GITHUB_OUTPUT
+            echo "apk=GuacBlaster-prod.apk"         >> $GITHUB_OUTPUT
+          else
+            echo "env=staging"                      >> $GITHUB_OUTPUT
+            echo "apk=GuacBlaster-staging.apk"      >> $GITHUB_OUTPUT
+          fi
+
+      - name: Instalar Godot ${{ env.GODOT_VERSION }}
+        run: |
+          wget -q \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64.zip" \
+            -O godot.zip
+          unzip -q godot.zip
+          mv "Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64" /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+          godot --version
+
+      - name: Instalar export templates de Android
+        run: |
+          wget -q \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz" \
+            -O templates.tpz
+          TEMPLATES_DIR="$HOME/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable"
+          mkdir -p "$TEMPLATES_DIR"
+          unzip -q templates.tpz -d templates_tmp
+          mv templates_tmp/templates/* "$TEMPLATES_DIR/"
+          rm -rf templates_tmp templates.tpz godot.zip
+
+      - name: Verificar Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms" | head -5
+
+      - name: Exportar APK
+        run: |
+          mkdir -p builds/
+          godot --headless \
+            --export-debug "${{ env.EXPORT_PRESET }}" \
+            "builds/${{ steps.ctx.outputs.apk }}"
+
+      - name: Verificar APK generado
+        run: ls -lh builds/
+
+      - name: Guardar artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ steps.ctx.outputs.env }}
+          path: "builds/${{ steps.ctx.outputs.apk }}"
+          retention-days: 14
