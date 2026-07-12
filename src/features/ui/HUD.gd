@@ -34,6 +34,7 @@ const XP_BAR_HEIGHT: float = 14.0
 
 var _heart_labels: Array[Label] = []
 var _xp_bar: ProgressBar
+var _boss_hp_bar: ProgressBar
 var _score_label: Label
 var _level_label: Label
 var _timer_label: Label
@@ -53,12 +54,15 @@ func _ready() -> void:
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(_on_game_over)
 	EventBus.boss_spawned.connect(func(_id: int): _boss_spawned = true)
+	EventBus.boss_health_changed.connect(_on_boss_health_changed)
+	EventBus.boss_defeated.connect(func(_id: int): _boss_hp_bar.hide())
 
 func _build_ui() -> void:
 	_build_hearts()
 	_build_score_and_level()
 	_build_timer()
 	_build_xp_bar()
+	_build_boss_hp_bar()
 	_build_powerup_strip()
 	_build_pause_button()
 
@@ -115,6 +119,29 @@ func _build_xp_bar() -> void:
 	_xp_bar.offset_top = -XP_BAR_HEIGHT
 	_xp_bar.offset_bottom = 0.0
 	add_child(_xp_bar)
+
+func _build_boss_hp_bar() -> void:
+	_boss_hp_bar = ProgressBar.new()
+	_boss_hp_bar.min_value = 0.0
+	_boss_hp_bar.max_value = 100.0
+	_boss_hp_bar.value = 100.0
+	_boss_hp_bar.show_percentage = false
+	_boss_hp_bar.anchor_left = 0.5
+	_boss_hp_bar.anchor_right = 0.5
+	_boss_hp_bar.anchor_top = 0.0
+	_boss_hp_bar.anchor_bottom = 0.0
+	_boss_hp_bar.offset_left = -90.0
+	_boss_hp_bar.offset_right = 90.0
+	_boss_hp_bar.offset_top = 52.0
+	_boss_hp_bar.offset_bottom = 68.0
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = Color(0.9, 0.15, 0.1)
+	_boss_hp_bar.add_theme_stylebox_override(&"fill", fill_style)
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.25, 0.05, 0.05)
+	_boss_hp_bar.add_theme_stylebox_override(&"background", bg_style)
+	_boss_hp_bar.hide()
+	add_child(_boss_hp_bar)
 
 func _build_timer() -> void:
 	_timer_label = Label.new()
@@ -221,6 +248,11 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 			(_strip_pills[powerup_id] as Label).queue_free()
 			_strip_pills.erase(powerup_id)
 
+func _on_boss_health_changed(current: int, maximum: int) -> void:
+	_boss_hp_bar.max_value = float(maximum)
+	_boss_hp_bar.value = float(current)
+	_boss_hp_bar.show()
+
 func _on_game_started() -> void:
 	_displayed_score = 0
 	_score_label.text = "0"
@@ -228,6 +260,7 @@ func _on_game_started() -> void:
 	_xp_bar.value = 0.0
 	_pause_btn.disabled = false
 	_boss_spawned = false
+	_boss_hp_bar.hide()
 	_timer_label.hide()
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	for lbl: Label in _heart_labels:
@@ -238,3 +271,4 @@ func _on_game_started() -> void:
 
 func _on_game_over(_score: int, _duration: float) -> void:
 	_pause_btn.disabled = true
+	_boss_hp_bar.hide()

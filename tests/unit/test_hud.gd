@@ -62,3 +62,30 @@ func test_score_resets_on_game_started() -> void:
 func test_level_label_updates_on_level_up() -> void:
 	EventBus.player_level_up.emit(3)
 	assert_eq(_hud._level_label.text, "Lvl 3")
+
+# --- Boss HP bar ---
+
+func test_boss_hp_bar_hidden_initially() -> void:
+	assert_false(_hud._boss_hp_bar.visible)
+
+func test_boss_hp_bar_shows_on_health_changed() -> void:
+	EventBus.boss_health_changed.emit(80, 100)
+	assert_true(_hud._boss_hp_bar.visible)
+
+func test_boss_hp_bar_value_updated() -> void:
+	EventBus.boss_health_changed.emit(60, 100)
+	assert_eq(_hud._boss_hp_bar.value, 60.0)
+
+func test_boss_hp_bar_max_updated() -> void:
+	EventBus.boss_health_changed.emit(50, 150)
+	assert_eq(_hud._boss_hp_bar.max_value, 150.0)
+
+func test_boss_hp_bar_hides_on_boss_defeated() -> void:
+	EventBus.boss_health_changed.emit(50, 100)
+	EventBus.boss_defeated.emit(1)
+	assert_false(_hud._boss_hp_bar.visible)
+
+func test_boss_hp_bar_hides_on_game_started() -> void:
+	EventBus.boss_health_changed.emit(50, 100)
+	EventBus.game_started.emit()
+	assert_false(_hud._boss_hp_bar.visible)

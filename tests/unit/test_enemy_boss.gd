@@ -51,3 +51,16 @@ func test_generation_scales_hp_correctly() -> void:
 	add_child_autofree(boss_gen3)
 	var expected_hp: int = Constants.BOSS_HP_BASE + 3 * Constants.BOSS_HP_PER_GENERATION
 	assert_eq(boss_gen3.get_health(), expected_hp)
+
+func test_take_damage_emits_boss_health_changed() -> void:
+	watch_signals(EventBus)
+	_boss.take_damage(10)
+	assert_signal_emitted(EventBus, "boss_health_changed")
+
+func test_boss_health_changed_carries_correct_current() -> void:
+	watch_signals(EventBus)
+	_boss.take_damage(10)
+	assert_signal_emitted_with_parameters(
+		EventBus, "boss_health_changed",
+		[Constants.BOSS_HP_BASE - 10, Constants.BOSS_HP_BASE]
+	)

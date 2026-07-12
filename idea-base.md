@@ -155,6 +155,20 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Antes: solo un `ColorRect` semitransparente.
 - Ahora: **anillo Line2D naranja** + flash interior con fade animado (tween).
 
+## Barra de HP del jefe ✅
+- `EnemyBoss.gd` guarda `_max_health` en `_initialize()` y emite `EventBus.boss_health_changed(current, maximum)` en cada `take_damage()`.
+- `HUD.gd` tiene `_boss_hp_bar: ProgressBar` (ProgressBar roja, top-center, offset_left=-90/right=90, top=52/bottom=68).
+- La barra es visible solo mientras el jefe está vivo: muestra en `boss_health_changed`, oculta en `boss_defeated` y `game_started`.
+
+## Auto-pausa al perder el foco ✅
+- `Game.gd` implementa `_notification(what: int)`: si `NOTIFICATION_APPLICATION_FOCUS_OUT` y estado es PLAYING → `GameManager.pause_game()`.
+- Al volver al foco el usuario debe reanudar manualmente con CONTINUAR (intencional).
+
+## Botón REINICIAR en PauseScreen ✅
+- Botón entre CONTINUAR y MENU PRINCIPAL en la pantalla de pausa.
+- `_on_restart_pressed()`: `GameManager.resume_game()` + `EventBus.restart_requested.emit()`.
+- Panel expandido de 220px → 260px de alto para acomodar el tercer botón.
+
 ## Oro por corazones conservados ✅
 - Al ganar, se recibe **25 oro adicional por cada corazón restante**.
 - Constante: `GOLD_PER_HEART_KEPT = 25` en `Constants.gd`.

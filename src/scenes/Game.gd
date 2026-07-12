@@ -27,6 +27,11 @@ func _process(delta: float) -> void:
 	elif _camera.offset != Vector2.ZERO:
 		_camera.offset = Vector2.ZERO
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		if GameManager.get_state() == GameManager.GameState.PLAYING:
+			GameManager.pause_game()
+
 func _on_player_damaged() -> void:
 	_shake_timer = SHAKE_DURATION
 

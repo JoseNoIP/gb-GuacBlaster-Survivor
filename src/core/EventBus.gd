@@ -13,6 +13,7 @@ signal enemy_destroyed(enemy_id: int, position: Vector2, xp_value: int)
 signal enemy_split_requested(spawn_position: Vector2, count: int)
 signal boss_spawned(boss_id: int)
 signal boss_defeated(boss_id: int)
+signal boss_health_changed(current: int, maximum: int)
 
 # --- Projectiles ---
 signal player_fired(spawn_position: Vector2, direction: Vector2, damage: float)

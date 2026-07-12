@@ -8,9 +8,11 @@ const BossProjectileGd := preload("res://src/features/enemies/BossProjectile.gd"
 var _generation: int = 0
 var _direction: float = 1.0
 var _fire_timer: float = 0.0
+var _max_health: int = 0
 
 func _initialize() -> void:
 	_health = Constants.BOSS_HP_BASE + _generation * Constants.BOSS_HP_PER_GENERATION
+	_max_health = _health
 	_xp_value = Constants.BOSS_XP
 	_fire_timer = maxf(
 		Constants.BOSS_FIRE_INTERVAL_MIN,
@@ -34,6 +36,10 @@ func _fire() -> void:
 	var proj: Area2D = BossProjectileGd.new()
 	proj.position = global_position
 	get_parent().call_deferred(&"add_child", proj)
+
+func take_damage(amount: int) -> void:
+	super.take_damage(amount)
+	EventBus.boss_health_changed.emit(_health, _max_health)
 
 func _die() -> void:
 	EventBus.boss_defeated.emit(get_instance_id())

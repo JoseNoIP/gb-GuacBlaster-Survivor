@@ -5,6 +5,7 @@ extends CanvasLayer
 
 var _panel: Control
 var _resume_btn: Button
+var _restart_btn: Button
 var _menu_btn: Button
 var _confirm_panel: Control
 var _confirm_cancel_btn: Button
@@ -31,8 +32,8 @@ func _build_ui() -> void:
 	_panel.anchor_bottom = 0.5
 	_panel.offset_left = -120.0
 	_panel.offset_right = 120.0
-	_panel.offset_top = -110.0
-	_panel.offset_bottom = 110.0
+	_panel.offset_top = -130.0
+	_panel.offset_bottom = 130.0
 	add_child(_panel)
 
 	var vbox := VBoxContainer.new()
@@ -52,6 +53,11 @@ func _build_ui() -> void:
 	_resume_btn.text = "CONTINUAR"
 	_resume_btn.pressed.connect(_on_resume_pressed)
 	vbox.add_child(_resume_btn)
+
+	_restart_btn = Button.new()
+	_restart_btn.text = "REINICIAR"
+	_restart_btn.pressed.connect(_on_restart_pressed)
+	vbox.add_child(_restart_btn)
 
 	_menu_btn = Button.new()
 	_menu_btn.text = "MENU PRINCIPAL"
@@ -113,6 +119,10 @@ func _on_game_paused(is_paused: bool) -> void:
 func _on_resume_pressed() -> void:
 	GameManager.resume_game()
 
+func _on_restart_pressed() -> void:
+	GameManager.resume_game()
+	EventBus.restart_requested.emit()
+
 func _on_menu_pressed() -> void:
 	_confirm_panel.show()
 
@@ -129,6 +139,9 @@ func get_panel() -> Control:
 
 func get_resume_button() -> Button:
 	return _resume_btn
+
+func get_restart_button() -> Button:
+	return _restart_btn
 
 func get_menu_button() -> Button:
 	return _menu_btn
