@@ -13,7 +13,7 @@ func _ready() -> void:
 func _build_collision() -> void:
 	var shape := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
-	circle.radius = 14.0
+	circle.radius = 28.0
 	shape.shape = circle
 	add_child(shape)
 
@@ -22,13 +22,14 @@ func _build_visual() -> void:
 	if ResourceLoader.exists(HEART_TEX):
 		var sprite := Sprite2D.new()
 		sprite.texture = load(HEART_TEX) as Texture2D
+		sprite.scale = Vector2(2.0, 2.0)
 		add_child(sprite)
 	else:
 		var lbl := Label.new()
 		lbl.text = "♥"
-		lbl.add_theme_font_size_override("font_size", 30)
+		lbl.add_theme_font_size_override("font_size", 48)
 		lbl.add_theme_color_override("font_color", Color(0.9, 0.15, 0.15))
-		lbl.position = Vector2(-11.0, -16.0)
+		lbl.position = Vector2(-22.0, -32.0)
 		add_child(lbl)
 
 func _process(delta: float) -> void:

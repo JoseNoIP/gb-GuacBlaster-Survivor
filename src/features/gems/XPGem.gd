@@ -14,7 +14,7 @@ func _ready() -> void:
 	collision_mask = 1
 	var shape: CollisionShape2D = CollisionShape2D.new()
 	var circle: CircleShape2D = CircleShape2D.new()
-	circle.radius = 10.0
+	circle.radius = 20.0
 	shape.shape = circle
 	add_child(shape)
 	var visual: Node2D
@@ -22,13 +22,14 @@ func _ready() -> void:
 	if ResourceLoader.exists(GEM_TEX):
 		var sprite := Sprite2D.new()
 		sprite.texture = load(GEM_TEX) as Texture2D
+		sprite.scale = Vector2(2.0, 2.0)
 		visual = sprite
 	else:
 		var diamond := Polygon2D.new()
 		diamond.color = Color(0.9, 0.85, 0.1)
 		diamond.polygon = PackedVector2Array([
-			Vector2(0.0, -10.0), Vector2(7.0, 0.0),
-			Vector2(0.0, 10.0), Vector2(-7.0, 0.0),
+			Vector2(0.0, -20.0), Vector2(14.0, 0.0),
+			Vector2(0.0, 20.0), Vector2(-14.0, 0.0),
 		])
 		visual = diamond
 	add_child(visual)

@@ -35,7 +35,7 @@ func _ready() -> void:
 	collision_mask = 1
 	var shape: CollisionShape2D = CollisionShape2D.new()
 	var rs: RectangleShape2D = RectangleShape2D.new()
-	rs.size = Vector2(32.0, 32.0)
+	rs.size = Vector2(64.0, 64.0)
 	shape.shape = rs
 	add_child(shape)
 	_build_visual()
@@ -48,21 +48,22 @@ func _build_visual() -> void:
 	if ResourceLoader.exists(icon_path):
 		var sprite := Sprite2D.new()
 		sprite.texture = load(icon_path) as Texture2D
+		sprite.scale = Vector2(2.0, 2.0)
 		add_child(sprite)
 	else:
 		var bg := ColorRect.new()
-		bg.size = Vector2(32.0, 32.0)
-		bg.position = Vector2(-16.0, -16.0)
+		bg.size = Vector2(64.0, 64.0)
+		bg.position = Vector2(-32.0, -32.0)
 		bg.color = DROP_COLORS.get(powerup_id, Color(0.5, 0.5, 0.5))
 		add_child(bg)
 		var lbl := Label.new()
 		lbl.text = POWERUP_ABBREV.get(powerup_id, str(powerup_id).left(2).to_upper())
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_font_size_override("font_size", 22)
 		lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
-		lbl.size = Vector2(32.0, 32.0)
-		lbl.position = Vector2(-16.0, -16.0)
+		lbl.size = Vector2(64.0, 64.0)
+		lbl.position = Vector2(-32.0, -32.0)
 		add_child(lbl)
 
 func _process(delta: float) -> void:

@@ -10,7 +10,7 @@ extends CharacterBody2D
 ## Collision layers: Layer 1 (player). Masks: Layer 8 (enemy projectiles).
 ## Enemy contact is detected via a programmatic Area2D (mask layer 2).
 
-const HALF_WIDTH: float = 20.0
+const HALF_WIDTH: float = 35.0
 
 var _health: int = 0
 var _max_health: int = 0
@@ -58,7 +58,7 @@ func _build_shield_visual() -> void:
 	var pts: PackedVector2Array = PackedVector2Array()
 	for i: int in 20:
 		var angle: float = float(i) / 20.0 * TAU
-		pts.append(Vector2(cos(angle), sin(angle)) * 28.0)
+		pts.append(Vector2(cos(angle), sin(angle)) * 56.0)
 	_shield_visual.points = pts
 	_shield_visual.hide()
 	add_child(_shield_visual)
@@ -69,7 +69,7 @@ func _setup_contact_area() -> void:
 	area.collision_mask = 2
 	var shape := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
-	circle.radius = 20.0
+	circle.radius = 40.0
 	shape.shape = circle
 	area.add_child(shape)
 	area.body_entered.connect(_on_enemy_contact)

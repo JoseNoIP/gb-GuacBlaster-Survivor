@@ -210,6 +210,34 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Antes: ×1.25 de cadencia por stack.
 - Ahora: ×2.0 por stack (apilable: 2 stacks = ×4, 3 stacks = ×8, mínimo 0.05s).
 
+## Backgrounds generados — 5 biomas × 3 variantes ✅
+- **15 imágenes** `bg_{bioma}_{variante}.png` (390×844 px) generadas por `tools/gen_assets.py` con Python stdlib.
+- Selector en `Game.gd`: `biome = victories % 5`, `variant = (victories / 5) % 3`, `gen = victories / 15`.
+- **Tint por generación** (`_get_gen_tint()`): gen 0 sin cambio, gen 1 frío/azulado, gen 2 cálido/rojizo, gen 3+ violáceo.
+- Efecto: el jugador ve 15 fondos visualmente distintos antes de repetir exactamente el mismo, con variación de tono indefinida.
+- Biomas: 0=Jungla nocturna, 1=Crepúsculo urbano, 2=Volcánico, 3=Abismo oceánico, 4=Luna de Sangre.
+- Cada variante escala dramátismo: v0 normal, v1 más intensa (tormenta, más volcanes, más profundidad), v2 extrema (eclipse, erupción total, noche total).
+- La textura se carga como `TextureRect` hijo del `$Background` ColorRect; si no existe PNG usa el color de `BACKGROUND_PALETTE` como fallback.
+
+## Escalado 2× de todos los elementos de gameplay ✅
+- Todos los sprites renderizados al doble de tamaño vía `scale = Vector2(2, 2)` en Sprite2D (sin regenerar PNG).
+- Formas de colisión también duplicadas para mantener la proporción hitbox/visual.
+- **Elementos escalados:**
+  | Elemento | Colisión antes | Colisión después |
+  |---|---|---|
+  | Player | Cápsula r=15, h=30 | Cápsula r=30, h=60 |
+  | EnemyBasic | Círculo r=12 | Círculo r=24 |
+  | EnemyTank | Círculo r=24 | Círculo r=48 |
+  | EnemyZigzag | Cápsula r=8, h=20 | Cápsula r=16, h=40 |
+  | EnemyBoss | Círculo r=40 | Círculo r=80 |
+  | Projectile | Círculo r=6 | Círculo r=12 |
+  | XPGem | Círculo r=10 | Círculo r=20 |
+  | HeartDrop | Círculo r=14 | Círculo r=28 |
+  | PowerUpDrop | Rect 32×32 | Rect 64×64 |
+- `Player.HALF_WIDTH` actualizado 20→35 para que el jugador no salga de pantalla al moverse.
+- Shield ring (Nacho Wall): radio visual 28→56. Punto de spawn de proyectil: y=-28→-56.
+- Sprites de código (XPGem, HeartDrop, PowerUpDrop): `sprite.scale = Vector2(2, 2)` en `_ready()`.
+
 ---
 
 # Pendientes — Solo Código
@@ -247,10 +275,11 @@ El workflow parchea automáticamente el path en CI con `sed`.
 # Assets Externos Pendientes (arte final)
 
 ## Fondos de bioma (arte final)
-La lógica ya está implementada. Para reemplazar colores por imágenes reales:
-- Crear 5 imágenes 390×844 px (jungla, crepúsculo, volcánico, abismo, luna de sangre)
-- Colocar en `assets/sprites/backgrounds/bg_0.png` … `bg_4.png`
-- En `Game.gd._ready()`, reemplazar `_background.color = ...` por `TextureRect` con `load("res://assets/sprites/backgrounds/bg_%d.png" % palette_index)`
+Backgrounds placeholder ya generados y funcionando. Para reemplazar por arte final:
+- Crear 15 imágenes 390×844 px: `bg_{0-4}_{0-2}.png` (bioma × variante)
+- Colocar en `assets/sprites/backgrounds/`
+- Ejecutar `godot --headless -e --quit` para reimportar
+- El sistema de tint por generación (`_get_gen_tint`) funciona sobre cualquier textura automáticamente.
 
 ## SFX / Sprites (arte final)
 Los placeholders en `assets/` ya funcionan en juego. Para arte final:
