@@ -81,10 +81,6 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		_target_x += (event as InputEventScreenDrag).relative.x * Constants.PLAYER_SWIPE_SENSITIVITY
-	elif event is InputEventScreenTouch:
-		var touch := event as InputEventScreenTouch
-		if touch.pressed:
-			_target_x = touch.position.x
 	elif event is InputEventMouseMotion:
 		_target_x = (event as InputEventMouseMotion).position.x
 
