@@ -532,6 +532,343 @@ _ICON_MAKERS = {
 }
 
 # ---------------------------------------------------------------------------
+# Background generation  (390 × 844 px — 5 biomas × 3 variantes)
+# ---------------------------------------------------------------------------
+
+_W, _H = 390, 844
+
+
+def _lc(c1: tuple, c2: tuple, t: float) -> tuple:
+    """Lerp between two RGB(A) colors, returns (r, g, b, 255)."""
+    return (
+        int(c1[0] + (c2[0] - c1[0]) * t),
+        int(c1[1] + (c2[1] - c1[1]) * t),
+        int(c1[2] + (c2[2] - c1[2]) * t),
+        255,
+    )
+
+
+def _grad(g: list, c_top: tuple, c_bot: tuple, y0: int = 0, y1: int = 0) -> None:
+    """Vertical gradient fill. y1=0 means full image height."""
+    h, w = len(g), len(g[0])
+    if y1 == 0:
+        y1 = h
+    span = max(1, y1 - y0)
+    for y in range(y0, min(h, y1)):
+        c = _lc(c_top, c_bot, (y - y0) / span)
+        for x in range(w):
+            g[y][x] = list(c)
+
+
+def _tpoly(g: list, xs: list, ys: list, color: tuple) -> None:
+    """Fill terrain silhouette polygon from xs/ys edge down to image bottom."""
+    h = len(g)
+    pts = list(zip(xs, ys)) + [(xs[-1], h), (xs[0], h)]
+    _poly(g, pts, color)
+
+
+def _bg_stars(g: list, count: int, y_max: int, seed: int) -> None:
+    """Scatter star pixels (white, slightly blue-tinted)."""
+    rng = random.Random(seed)
+    w = len(g[0])
+    for _ in range(count):
+        x = rng.randint(0, w - 1)
+        y = rng.randint(0, y_max)
+        br = rng.randint(160, 255)
+        c = (br, br, min(255, br + 20), 255)
+        _set(g, x, y, c)
+        if rng.random() < 0.12:
+            _set(g, x + 1, y, c)
+            _set(g, x, y + 1, c)
+
+
+def _bg_dots(g: list, count: int, y0: int, y1: int,
+             color: tuple, seed: int, r: int = 0) -> None:
+    """Scatter colored single pixels or small circles."""
+    rng = random.Random(seed)
+    w = len(g[0])
+    for _ in range(count):
+        x = rng.randint(0, w - 1)
+        y = rng.randint(y0, y1)
+        if r == 0:
+            _set(g, x, y, color)
+        else:
+            _circle(g, x, y, r, color)
+
+
+def _bg_city(g: list, seed: int, bld_c: tuple, win_c: tuple,
+             min_h: int = 90, max_h: int = 380) -> None:
+    """Draw city skyline silhouette with randomly lit windows."""
+    rng = random.Random(seed)
+    w, h = len(g[0]), len(g)
+    x = 0
+    while x < w:
+        bw = rng.randint(22, 58)
+        bh = rng.randint(min_h, max_h)
+        by = h - bh
+        _rect(g, x, by, x + bw, h - 1, bld_c)
+        for wy in range(by + 10, h - 15, 14):
+            for wx in range(x + 5, x + bw - 5, 10):
+                if rng.random() < 0.5:
+                    _rect(g, wx, wy, wx + 4, wy + 6, win_c)
+        x += bw + rng.randint(2, 10)
+
+
+def _bg_dead_tree(g: list, cx: int, base_y: int, height: int,
+                  color: tuple, rng: random.Random) -> None:
+    """Draw a bare branching tree silhouette."""
+    _vline(g, cx, base_y - height, base_y, color)
+    for i in range(3):
+        by = base_y - int(height * (0.35 + i * 0.2))
+        bl = int(height * (0.22 - i * 0.04))
+        for t in range(bl):
+            _set(g, cx - t - 1, by - t // 2, color)
+            _set(g, cx + t + 1, by - t // 2, color)
+        for t in range(bl // 2):
+            _set(g, cx - bl - t, by - bl // 2 - t // 2, color)
+            _set(g, cx + bl + t, by - bl // 2 - t // 2, color)
+
+
+# --- Bioma 0: Jungla nocturna -----------------------------------------------
+
+def make_bg_0(v: int = 0) -> list:
+    sky_top = [(8, 18, 50, 255), (4, 10, 35, 255), (2, 6, 20, 255)][v]
+    sky_bot = [(10, 48, 22, 255), (6, 28, 14, 255), (3, 15, 7, 255)][v]
+    hill_c  = [(7, 38, 12, 255), (5, 26, 8, 255), (3, 16, 5, 255)][v]
+    mid_c   = [(5, 28, 8, 255), (3, 20, 6, 255), (2, 12, 4, 255)][v]
+    fore_c  = [(3, 18, 5, 255), (2, 12, 4, 255), (1, 8, 3, 255)][v]
+    n_stars = [110, 60, 160][v]
+    ff0     = [28, 12, 5][v]
+    ff1     = [12, 4, 2][v]
+
+    g = _grid(_W, _H)
+    _grad(g, sky_top, sky_bot)
+    _bg_stars(g, n_stars, int(_H * 0.5), seed=200 + v)
+
+    if v == 0:  # crescent moon
+        _circle(g, 310, 85, 32, (230, 228, 195, 255))
+        _circle(g, 324, 79, 30, (8, 16, 50, 255))
+    elif v == 1:  # storm clouds
+        for cx_, cy_, cw_, ch_ in [
+            (80, 55, 120, 35), (220, 38, 100, 28), (310, 65, 80, 22)
+        ]:
+            _rect(g, cx_, cy_, cx_ + cw_, cy_ + ch_, (12, 12, 18, 255))
+    else:  # full bright moon
+        _circle(g, 300, 90, 45, (220, 218, 185, 255))
+        _circle(g, 288, 100, 10, (180, 178, 150, 255))
+
+    _tpoly(g,
+           [0, 50, 110, 175, 235, 295, 355, 390],
+           [660, 590, 545, 615, 555, 600, 570, 660], hill_c)
+    _tpoly(g,
+           [0, 30, 65, 100, 140, 180, 215, 255, 295, 330, 360, 390],
+           [770, 700, 720, 675, 730, 695, 715, 685, 720, 700, 710, 770], mid_c)
+    _tpoly(g,
+           [0, 20, 50, 80, 115, 150, 185, 220, 255, 285, 320, 355, 390],
+           [844, 790, 772, 800, 778, 808, 782, 800, 776, 805, 785, 792, 844],
+           fore_c)
+    _rect(g, 0, 820, _W - 1, _H - 1, (6, 25, 6, 255))
+    _bg_dots(g, ff0, int(_H * 0.42), int(_H * 0.84),
+             (170, 255, 70, 255), seed=201 + v)
+    _bg_dots(g, ff1, int(_H * 0.42), int(_H * 0.84),
+             (255, 240, 90, 255), seed=202 + v)
+    return _flat(g)
+
+
+# --- Bioma 1: Crepúsculo urbano ---------------------------------------------
+
+def make_bg_1(v: int = 0) -> list:
+    sky_top = [(65, 12, 95, 255), (40, 8, 70, 255), (12, 8, 30, 255)][v]
+    sky_mid = [(255, 110, 30, 255), (180, 70, 15, 255), (25, 15, 55, 255)][v]
+    sky_bot = [(30, 15, 45, 255), (20, 10, 35, 255), (8, 5, 18, 255)][v]
+    horizon = int(_H * 0.62)
+    n_stars = [45, 30, 75][v]
+    bld_c   = [(22, 12, 38, 255), (16, 8, 28, 255), (10, 5, 18, 255)][v]
+    win_c   = [(255, 220, 80, 255), (255, 200, 60, 255), (255, 240, 120, 255)][v]
+    bld_min = [90, 110, 130][v]
+
+    g = _grid(_W, _H)
+    _grad(g, sky_top, sky_mid, y0=0, y1=horizon)
+    _grad(g, sky_mid, sky_bot, y0=horizon, y1=_H)
+    _bg_stars(g, n_stars, int(_H * 0.3), seed=300 + v)
+
+    if v < 2:
+        _tpoly(g,
+               [0, 80, 150, 230, 310, 390],
+               [horizon, int(_H * 0.55), int(_H * 0.58),
+                int(_H * 0.52), int(_H * 0.56), horizon],
+               (40, 18, 60, 255))
+
+    _bg_city(g, seed=301 + v, bld_c=bld_c, win_c=win_c, min_h=bld_min)
+
+    if v == 2:  # neon sign
+        _rect(g, 38, _H - 162, 122, _H - 138, (255, 30, 80, 255))
+        _rect(g, 41, _H - 159, 119, _H - 141, (10, 5, 18, 255))
+        _rect(g, 44, _H - 156, 116, _H - 144, (255, 65, 105, 255))
+
+    _rect(g, 0, _H - 20, _W - 1, _H - 1, (12, 6, 22, 255))
+    return _flat(g)
+
+
+# --- Bioma 2: Volcánico ------------------------------------------------------
+
+def make_bg_2(v: int = 0) -> list:
+    sky_top   = [(8, 4, 4, 255), (6, 3, 3, 255), (12, 5, 2, 255)][v]
+    sky_bot   = [(55, 12, 6, 255), (80, 20, 5, 255), (120, 35, 5, 255)][v]
+    ash_count = [40, 80, 130][v]
+    glow_r    = [18, 26, 38][v]
+    glow_r2   = [0, 20, 28][v]
+    flow_len  = [80, 130, 200][v]
+
+    g = _grid(_W, _H)
+    _grad(g, sky_top, sky_bot)
+    if v == 2:
+        _grad(g, (80, 25, 5, 255), (120, 35, 5, 255),
+              y0=int(_H * 0.5), y1=_H)
+
+    _tpoly(g,
+           [0, 80, 145, 210, 390],
+           [_H, int(_H * 0.42), int(_H * 0.28), int(_H * 0.42), _H],
+           (18, 10, 8, 255))
+    if v >= 1:
+        _tpoly(g,
+               [200, 290, 345, 390],
+               [_H, int(_H * 0.35), int(_H * 0.45), _H],
+               (22, 12, 8, 255))
+    if v == 2:
+        _tpoly(g, [300, 360, 390], [_H, int(_H * 0.52), _H], (25, 14, 8, 255))
+
+    for r in range(glow_r, 0, -1):
+        t = 1.0 - r / glow_r
+        _circle(g, 145, int(_H * 0.28), r,
+                _lc((255, 80, 0, 255), (200, 30, 5, 255), t))
+    if glow_r2 > 0:
+        for r in range(glow_r2, 0, -1):
+            t = 1.0 - r / glow_r2
+            _circle(g, 345, int(_H * 0.45), r,
+                    _lc((255, 60, 0, 255), (180, 20, 5, 255), t))
+
+    for lx in [140, 148, 135]:
+        _vline(g, lx, int(_H * 0.3), int(_H * 0.3) + flow_len,
+               (200, 60, 10, 255))
+
+    _bg_dots(g, ash_count, 0, int(_H * 0.65), (90, 85, 82, 255), seed=400 + v)
+    _rect(g, 0, _H - 25, _W - 1, _H - 1, (30, 8, 4, 255))
+    _bg_dots(g, 8 + v * 4, _H - 50, _H - 5,
+             (220, 80, 20, 255), seed=401 + v, r=4 + v)
+    return _flat(g)
+
+
+# --- Bioma 3: Abismo oceánico ------------------------------------------------
+
+def make_bg_3(v: int = 0) -> list:
+    sky_top  = [(4, 8, 48, 255), (3, 5, 35, 255), (2, 3, 22, 255)][v]
+    sky_bot  = [(2, 4, 28, 255), (1, 3, 20, 255), (1, 2, 12, 255)][v]
+    dc0      = [120, 70, 30][v]
+    dc1      = [50, 30, 12][v]
+    dc2      = [25, 15, 8][v]
+    jelly_n  = [6, 4, 2][v]
+    base_r   = [8, 12, 18][v]
+    coral_n  = [12, 8, 4][v]
+
+    g = _grid(_W, _H)
+    _grad(g, sky_top, sky_bot)
+    _bg_dots(g, dc0, 0, int(_H * 0.85), (30, 220, 220, 255), seed=500 + v)
+    _bg_dots(g, dc1, 0, int(_H * 0.85), (80, 140, 255, 255), seed=501 + v)
+    _bg_dots(g, dc2, 0, int(_H * 0.85), (200, 80, 255, 255), seed=502 + v)
+
+    jc = [(50, 200, 220, 255), (30, 180, 255, 255), (180, 60, 255, 255)][v]
+    rng_j = random.Random(503 + v)
+    for _ in range(jelly_n):
+        jx = rng_j.randint(20, _W - 20)
+        jy = rng_j.randint(int(_H * 0.1), int(_H * 0.75))
+        jr = rng_j.randint(base_r, base_r + 10)
+        _circle(g, jx, jy, jr, jc)
+        _circle(g, jx, jy, max(1, jr - 4), (30, 240, 250, 180))
+        for t in range(jr + 8):
+            _set(g, jx + rng_j.randint(-2, 2), jy + jr + t, jc)
+
+    if v == 2:
+        rng_a = random.Random(510)
+        for _ in range(3):
+            ax = rng_a.randint(30, _W - 30)
+            ay = rng_a.randint(int(_H * 0.2), int(_H * 0.7))
+            _circle(g, ax, ay, 20, (5, 30, 40, 255))
+            _circle(g, ax + 8, ay - 5, 3, (100, 200, 220, 255))
+
+    _tpoly(g,
+           [0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 390],
+           [800, 790, 810, 795, 802, 788, 806, 795, 800, 810, 800],
+           (5, 35, 40, 255))
+    rng_c = random.Random(504 + v)
+    for _ in range(coral_n):
+        cx_ = rng_c.randint(10, _W - 10)
+        ch_ = rng_c.randint(15, 40)
+        _vline(g, cx_, _H - ch_, _H - 1, (20, 120, 100, 255))
+        _circle(g, cx_, _H - ch_, ch_ // 3, (30, 160, 130, 255))
+    _rect(g, 0, _H - 15, _W - 1, _H - 1, (3, 18, 22, 255))
+    return _flat(g)
+
+
+# --- Bioma 4: Luna de Sangre -------------------------------------------------
+
+def make_bg_4(v: int = 0) -> list:
+    sky_top  = [(8, 4, 8, 255), (5, 2, 6, 255), (3, 1, 4, 255)][v]
+    sky_bot  = [(22, 5, 10, 255), (14, 3, 7, 255), (8, 2, 5, 255)][v]
+    n_stars  = [70, 50, 30][v]
+    moon_r   = [55, 70, 65][v]
+    tree_min = [120, 150, 180][v]
+    tree_max = [180, 220, 260][v]
+    mist_h   = [40, 65, 90][v]
+
+    g = _grid(_W, _H)
+    _grad(g, sky_top, sky_bot)
+    _bg_stars(g, n_stars, int(_H * 0.65), seed=600 + v)
+
+    moon_x, moon_y = 280, 130
+    if v < 2:
+        for r in range(moon_r, 0, -1):
+            mc = _lc((255, 40, 20, 255), (200, 55, 30, 255), 1.0 - r / moon_r)
+            _circle(g, moon_x, moon_y, r, mc)
+        for ccx, ccy, cr in [(265, 115, 10), (295, 148, 7), (255, 145, 5)]:
+            _circle(g, ccx, ccy, cr, (160, 25, 15, 255))
+    else:  # eclipse: dark center + red ring
+        _circle(g, moon_x, moon_y, moon_r, (15, 5, 8, 255))
+        for r in range(moon_r, moon_r - 12, -1):
+            t_ = (moon_r - r) / 12.0
+            _circle(g, moon_x, moon_y, r,
+                    _lc((220, 20, 10, 255), (80, 8, 4, 255), t_))
+
+    for r in range(moon_r + 30, moon_r + 1, -1):
+        fade = (r - moon_r) / 30.0
+        add_r = int(80 * (1.0 - fade))
+        for deg in range(0, 360, 4):
+            a = math.radians(deg)
+            hx = int(moon_x + r * math.cos(a))
+            hy = int(moon_y + r * math.sin(a))
+            if 0 <= hx < _W and 0 <= hy < _H:
+                c = g[hy][hx]
+                g[hy][hx] = [min(255, c[0] + add_r), c[1], c[2], 255]
+
+    rng_t = random.Random(602 + v)
+    tree_xs = [45, 120, 200, 320, 365]
+    if v == 2:
+        tree_xs.append(260)
+    for tx in tree_xs:
+        th = rng_t.randint(tree_min, tree_max)
+        _bg_dead_tree(g, tx, _H - 20, th, (18, 6, 10, 255), rng_t)
+
+    _tpoly(g,
+           [0, 60, 130, 200, 265, 330, 390],
+           [_H - mist_h, _H - mist_h - 30, _H - mist_h - 15,
+            _H - mist_h - 35, _H - mist_h - 10, _H - mist_h - 25,
+            _H - mist_h],
+           (35, 8, 12, 255))
+    _rect(g, 0, _H - 20, _W - 1, _H - 1, (16, 4, 7, 255))
+    return _flat(g)
+
+
+# ---------------------------------------------------------------------------
 # WAV helpers
 # ---------------------------------------------------------------------------
 
@@ -695,7 +1032,16 @@ def main():
     for path, samples in sfx.items():
         save_wav(path, samples)
 
-    print("\nDone. Run 'godot --headless --quit' to import new assets.")
+    print("\n=== Generating backgrounds (5 biomas × 3 variantes) ===")
+    bg_makers = [make_bg_0, make_bg_1, make_bg_2, make_bg_3, make_bg_4]
+    for biome_idx, maker in enumerate(bg_makers):
+        for variant in range(3):
+            save_png(
+                f"assets/sprites/backgrounds/bg_{biome_idx}_{variant}.png",
+                _W, _H, maker(variant)
+            )
+
+    print("\nDone. Run 'godot --headless -e --quit' to reimport assets.")
 
 
 if __name__ == "__main__":

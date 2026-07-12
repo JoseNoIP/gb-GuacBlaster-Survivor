@@ -10,8 +10,12 @@ var _shake_timer: float = 0.0
 @onready var _background: ColorRect = $Background
 
 func _ready() -> void:
-	var palette_index: int = SaveManager.get_victories() % Constants.BACKGROUND_PALETTE.size()
-	_background.color = Constants.BACKGROUND_PALETTE[palette_index]
+	var wins: int = SaveManager.get_victories()
+	var biome: int = wins % 5
+	var variant: int = (wins / 5) % 3
+	var gen: int = wins / 15
+	_background.color = Constants.BACKGROUND_PALETTE[biome]
+	_load_bg_texture(biome, variant, gen)
 	GameManager.start_game()
 	EventBus.restart_requested.connect(_on_restart_requested)
 	EventBus.menu_requested.connect(_on_menu_requested)
@@ -37,6 +41,29 @@ func _on_player_damaged() -> void:
 
 func _on_restart_requested() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://src/scenes/Game.tscn")
+
+func _load_bg_texture(biome: int, variant: int, gen: int) -> void:
+	var path := "res://assets/sprites/backgrounds/bg_%d_%d.png" % [biome, variant]
+	if not ResourceLoader.exists(path):
+		return
+	var tex := load(path) as Texture2D
+	if tex == null:
+		return
+	var tr := TextureRect.new()
+	tr.texture = tex
+	tr.size = _background.size
+	tr.stretch_mode = TextureRect.STRETCH_SCALE
+	tr.modulate = _get_gen_tint(gen)
+	_background.add_child(tr)
+
+
+func _get_gen_tint(gen: int) -> Color:
+	match min(gen, 3):
+		1: return Color(0.82, 0.88, 1.0)
+		2: return Color(1.0, 0.82, 0.82)
+		3: return Color(0.85, 0.78, 1.0)
+		_: return Color(1.0, 1.0, 1.0)
+
 
 func _on_menu_requested() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://src/scenes/MainMenu.tscn")
