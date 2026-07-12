@@ -15,6 +15,8 @@ const HALF_WIDTH: float = 20.0
 var _health: int = 0
 var _max_health: int = 0
 var _target_x: float = 0.0
+var _drag_anchor_x: float = 0.0
+var _drag_anchor_player_x: float = 0.0
 var _current_damage: float = 0.0
 var _current_autofire_interval: float = 0.0
 var _base_autofire_interval: float = 0.0
@@ -79,8 +81,13 @@ func _process(delta: float) -> void:
 		_invincibility_timer -= delta
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenDrag:
-		_target_x += (event as InputEventScreenDrag).relative.x * Constants.PLAYER_SWIPE_SENSITIVITY
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		_drag_anchor_x = (event as InputEventScreenTouch).position.x
+		_drag_anchor_player_x = _target_x
+	elif event is InputEventScreenDrag:
+		var drag := event as InputEventScreenDrag
+		var delta_x: float = (drag.position.x - _drag_anchor_x) * Constants.PLAYER_SWIPE_SENSITIVITY
+		_target_x = _drag_anchor_player_x + delta_x
 	elif event is InputEventMouseMotion:
 		_target_x = (event as InputEventMouseMotion).position.x
 

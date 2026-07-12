@@ -14,6 +14,17 @@ const POWERUP_ABBREV: Dictionary = {
 	&"salsa_magnet": "SM",
 	&"guac_storm": "GS",
 }
+const POWERUP_COLORS: Dictionary = {
+	&"triple_shot": Color(0.4, 0.8, 1.0),
+	&"super_guac": Color(0.3, 0.95, 0.3),
+	&"rapid_fire": Color(1.0, 0.5, 0.1),
+	&"mole_grenade": Color(1.0, 0.3, 0.3),
+	&"jalapeno_laser": Color(1.0, 0.95, 0.1),
+	&"spicy_bounce": Color(0.85, 0.3, 0.95),
+	&"nacho_wall": Color(0.95, 0.85, 0.2),
+	&"salsa_magnet": Color(0.3, 0.95, 0.95),
+	&"guac_storm": Color(0.5, 1.0, 0.3),
+}
 const HEART_FULL_COLOR: Color = Color(0.9, 0.15, 0.15)
 const HEART_EMPTY_COLOR: Color = Color(0.35, 0.35, 0.35)
 const SCORE_COLOR: Color = Color(1.0, 1.0, 1.0)
@@ -27,7 +38,7 @@ var _score_label: Label
 var _level_label: Label
 var _timer_label: Label
 var _pause_btn: Button
-var _powerup_strip: HBoxContainer
+var _powerup_strip: VBoxContainer
 var _strip_pills: Dictionary = {}
 var _displayed_score: int = 0
 var _boss_spawned: bool = false
@@ -119,15 +130,16 @@ func _build_timer() -> void:
 	add_child(_timer_label)
 
 func _build_powerup_strip() -> void:
-	_powerup_strip = HBoxContainer.new()
-	_powerup_strip.add_theme_constant_override("separation", 4)
-	_powerup_strip.anchor_left = 0.0
+	_powerup_strip = VBoxContainer.new()
+	_powerup_strip.add_theme_constant_override("separation", 6)
+	_powerup_strip.anchor_left = 1.0
 	_powerup_strip.anchor_right = 1.0
-	_powerup_strip.anchor_top = 1.0
-	_powerup_strip.anchor_bottom = 1.0
-	_powerup_strip.offset_top = -(XP_BAR_HEIGHT + 28.0)
-	_powerup_strip.offset_bottom = -XP_BAR_HEIGHT
-	_powerup_strip.offset_left = 4.0
+	_powerup_strip.anchor_top = 0.0
+	_powerup_strip.anchor_bottom = 0.0
+	_powerup_strip.offset_left = -68.0
+	_powerup_strip.offset_right = -4.0
+	_powerup_strip.offset_top = 52.0
+	_powerup_strip.offset_bottom = 420.0
 	add_child(_powerup_strip)
 
 func _build_pause_button() -> void:
@@ -196,8 +208,10 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 	if count > 0:
 		if not _strip_pills.has(powerup_id):
 			var pill := Label.new()
-			pill.add_theme_font_size_override("font_size", 13)
-			pill.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+			pill.add_theme_font_size_override("font_size", 16)
+			var pill_color: Color = POWERUP_COLORS.get(powerup_id, Color(1.0, 1.0, 1.0)) as Color
+			pill.add_theme_color_override("font_color", pill_color)
+			pill.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			_powerup_strip.add_child(pill)
 			_strip_pills[powerup_id] = pill
 		var abbrev: String = POWERUP_ABBREV.get(powerup_id, str(powerup_id).left(2).to_upper())
@@ -218,8 +232,8 @@ func _on_game_started() -> void:
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	for lbl: Label in _heart_labels:
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
-	for id: Variant in _strip_pills.keys():
-		(_strip_pills[id] as Label).queue_free()
+	for pill: Label in _strip_pills.values():
+		pill.queue_free()
 	_strip_pills.clear()
 
 func _on_game_over(_score: int, _duration: float) -> void:

@@ -104,22 +104,28 @@ El workflow parchea automáticamente el path en CI con `sed`.
 ### Power-ups activos (9 en total)
 | Iniciales | Nombre | Efecto | Duración |
 |---|---|---|---|
-| **TS** | Disparo Triple | +2 disparos diagonales | 15s por stack |
-| **SG** | Súper-Guac | Proyectiles penetran 3 enemigos | 15s por stack |
-| **RF** | Fuego Rápido | Cadencia ×2 por stack | 15s por stack |
-| **MG** | Granada Mole | AoE automático cada 5s | 15s por stack |
+| **TS** | Disparo Triple | +2 disparos diagonales | 30s por stack |
+| **SG** | Súper-Guac | Proyectiles penetran 3 enemigos | 30s por stack |
+| **RF** | Fuego Rápido | Cadencia ×2 por stack | 30s por stack |
+| **MG** | Granada Mole | AoE automático cada 5s | 30s por stack |
 | **JL** | Láser Jalapeño | Rayo de columna que sigue al jugador | 2s por stack |
-| **SB** | Rebote Picante | Proyectiles rebotan en bordes | 15s por stack |
-| **NW** | Muro Nachos | Escudo: absorbe 3 impactos por stack | 15s por stack |
-| **SM** | Imán Salsa | Gemas vuelan hacia el jugador | 15s por stack |
-| **GS** | Salvo Guac | +1 columna de disparos por stack (a ±40×N px del centro) | 15s por stack |
+| **SB** | Rebote Picante | Proyectiles rebotan en bordes | 30s por stack |
+| **NW** | Muro Nachos | Escudo: absorbe 3 impactos por stack | 30s por stack |
+| **SM** | Imán Salsa | Gemas vuelan hacia el jugador | 30s por stack |
+| **GS** | Salvo Guac | +1 columna de disparos por stack (a ±40×N px del centro) | 30s por stack |
 
-### Tira de power-ups activos en HUD
-Aparece en la parte inferior izquierda mientras hay efectos activos, ejemplo: `RF×2  TS×1  GS×3`
+### Tira de power-ups activos en HUD ✅
+- `VBoxContainer` anclado a la derecha de la pantalla, debajo del botón de pausa.
+- Cada power-up activo aparece como `RF×2`, `TS×1`, `GS×3`, etc. con color propio por tipo.
+- Colores: RF=naranja, TS=azul claro, SG=verde, MG=rojo, JL=amarillo, SB=morado, NW=dorado, SM=cian, GS=verde lima.
+- Fuente de 16px para legibilidad en móvil.
+- Al llegar a count=0 la pastilla desaparece; al reiniciar la sesión se limpian todas.
 
-## Controles — Drag relativo ✅
-- El jugador ya no salta al punto exacto del dedo.
-- Se mueve proporcionalmente al desplazamiento del dedo (`event.relative.x × PLAYER_SWIPE_SENSITIVITY`).
+## Controles — Drag con ancla ✅
+- El jugador NO salta al tocar la pantalla.
+- `InputEventScreenTouch` (pressed) registra `_drag_anchor_x` (posición X del dedo) y `_drag_anchor_player_x` (posición X del jugador en ese momento).
+- `InputEventScreenDrag` aplica: `_target_x = _drag_anchor_player_x + (drag.position.x - _drag_anchor_x) × PLAYER_SWIPE_SENSITIVITY`.
+- El jugador se mueve proporcionalmente a cuánto se desplaza el dedo desde donde aterrizó, sin ningún salto inicial.
 - Valor por defecto: `PLAYER_SWIPE_SENSITIVITY = 1.0` en `Constants.gd`.
 - El mouse (editor) sigue siendo absoluto para no romper el flujo de pruebas en desktop.
 

@@ -66,7 +66,7 @@ const POWERUP_POOL: Array = [
 	&"guac_storm",
 ]
 const POWERUP_CARDS_PER_LEVEL: int = 3
-const POWERUP_DURATION: float = 15.0
+const POWERUP_DURATION: float = 30.0
 const RAPID_FIRE_MULTIPLIER: float = 2.0
 const PLAYER_AUTOFIRE_MIN: float = 0.05
 const MOLE_GRENADE_COOLDOWN: float = 5.0
@@ -92,8 +92,8 @@ const GEM_FALL_SPEED: float = 90.0
 const GEM_MAGNET_SPEED: float = 300.0
 
 # --- XP ---
-const XP_BASE_REQUIRED: int = 100
-const XP_SCALE_FACTOR: float = 1.5
+const XP_BASE_REQUIRED: int = 60
+const XP_SCALE_FACTOR: float = 1.3
 
 # --- Combat ---
 const PLAYER_CONTACT_INVINCIBILITY: float = 1.0

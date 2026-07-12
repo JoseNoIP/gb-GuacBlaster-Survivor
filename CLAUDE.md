@@ -208,9 +208,9 @@ d) SANITY    — Verificar que features existentes no se rompieron
 ### Mecánicas implementadas
 - **Victoria:** matar al jefe (NO timer). Timer en HUD aparece solo en los últimos 90s.
 - **Derrota:** jugador pierde todos los corazones.
-- **Controles:** drag relativo (`event.relative.x × PLAYER_SWIPE_SENSITIVITY`). Primer toque posiciona absolutamente.
+- **Controles:** drag con ancla — `InputEventScreenTouch` registra `_drag_anchor_x` y `_drag_anchor_player_x`; `InputEventScreenDrag` aplica `_target_x = anchor_player + (finger_x - anchor_x) × sensitivity`. El jugador NO salta al primer toque.
 - **Level-up:** el juego NO se pausa. Caen 3 power-up drops; al tocar uno, los otros desaparecen.
-- **Power-ups:** temporales (15s), stackables, con timers independientes por stack.
+- **Power-ups:** temporales (**30s**), stackables, con timers independientes por stack.
 - **Oro:** `score × 0.1 × gold_mult + hearts_left × 25` al ganar.
 - **Paleta de fondo:** rota por victorias (`victories % 5`), no por sesiones totales.
 
@@ -244,7 +244,7 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | Mosca Nacho | 1 | Zigzag diagonal, rápida |
 | Jefe | 100+50×gen | Dispara proyectiles, aparece cada 3 min |
 
-### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales 15s, stackables
+### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales **30s**, stackables
 | ID | Abrev | Nombre | Efecto por stack |
 |---|---|---|---|
 | `triple_shot` | TS | Disparo Triple | +2 disparos diagonales |
