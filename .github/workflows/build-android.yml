@@ -59,6 +59,17 @@ jobs:
       - name: Verificar Android SDK
         run: echo "ANDROID_HOME=$ANDROID_HOME"
 
+      - name: Configurar keystore de firma
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > /tmp/guacblaster.keystore
+          sed -i "s|keystore/debug=\"[^\"]*\"|keystore/debug=\"/tmp/guacblaster.keystore\"|" export_presets.cfg
+          sed -i "s|keystore/debug_user=\"[^\"]*\"|keystore/debug_user=\"$KEYSTORE_ALIAS\"|" export_presets.cfg
+          sed -i "s|keystore/debug_password=\"[^\"]*\"|keystore/debug_password=\"$KEYSTORE_PASS\"|" export_presets.cfg
+
       - name: Exportar APK
         run: |
           mkdir -p builds/

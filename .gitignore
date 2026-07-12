@@ -37,5 +37,6 @@ Desktop.ini
 *.suo
 *.user
 
+*.keystore
 
 local/

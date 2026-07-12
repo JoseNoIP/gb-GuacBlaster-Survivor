@@ -51,9 +51,43 @@ curl -X POST https://api.dropbox.com/oauth2/token \
 # El campo "refresh_token" de la respuesta es el que va al secret de GitHub.
 ```
 
+### Keystore de firma (evita el "no se puede actualizar" en Android)
+
+Android rechaza actualizaciones si la firma cambia entre builds. Solución: keystore fijo en todos los entornos.
+
+**Generar keystore (una sola vez):**
+```bash
+keytool -genkey -v \
+  -keystore guacblaster.keystore \
+  -alias guacblasterkey \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass guacblaster2024 -keypass guacblaster2024 \
+  -dname "CN=GuacamoleBit, OU=GuacBlaster, O=GuacamoleBit, L=MX, ST=MX, C=MX"
+
+# Codificar para GitHub Secret:
+base64 -i guacblaster.keystore | pbcopy
+```
+
+**Secrets requeridos (además de los de Dropbox):**
+
+| Secret | Valor |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | base64 del archivo .keystore |
+| `ANDROID_KEYSTORE_ALIAS` | `guacblasterkey` |
+| `ANDROID_KEYSTORE_PASS` | `guacblaster2024` |
+
+**En el editor de Godot (local):**
+Project → Export → Android → Options → Keystore → Debug:
+- Keystore: apunta al archivo `guacblaster.keystore` local
+- User: `guacblasterkey`
+- Password: `guacblaster2024`
+
+El workflow parchea automáticamente el path en CI con `sed`.
+
 ### Notas
-- `export_presets.cfg` está en el repo (debug build, sin claves de producción).
-- Para release build necesitarás un keystore firmado y agregarlo como secret.
+- `export_presets.cfg` está en el repo (debug build).
+- **No commitear el archivo `.keystore`** — solo vive como GitHub Secret y en tu máquina local.
+- Para release build en Play Store se necesitará un keystore separado con firma de producción.
 
 ---
 
