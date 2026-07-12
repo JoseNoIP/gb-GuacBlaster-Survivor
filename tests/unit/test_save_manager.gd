@@ -116,3 +116,31 @@ func test_set_swipe_sensitivity_clamps_below_one() -> void:
 func test_set_swipe_sensitivity_clamps_above_two() -> void:
 	SaveManager.set_swipe_sensitivity(5.0)
 	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 2.0, 0.001)
+
+# --- Sound ---
+
+func test_sound_enabled_defaults_to_true() -> void:
+	assert_true(SaveManager.get_sound_enabled())
+
+func test_set_sound_enabled_stores_false() -> void:
+	SaveManager.set_sound_enabled(false)
+	assert_false(SaveManager.get_sound_enabled())
+
+func test_set_sound_enabled_stores_true() -> void:
+	SaveManager.set_sound_enabled(false)
+	SaveManager.set_sound_enabled(true)
+	assert_true(SaveManager.get_sound_enabled())
+
+# --- Vibration ---
+
+func test_vibration_enabled_defaults_to_true() -> void:
+	assert_true(SaveManager.get_vibration_enabled())
+
+func test_set_vibration_enabled_stores_false() -> void:
+	SaveManager.set_vibration_enabled(false)
+	assert_false(SaveManager.get_vibration_enabled())
+
+func test_set_vibration_enabled_stores_true() -> void:
+	SaveManager.set_vibration_enabled(false)
+	SaveManager.set_vibration_enabled(true)
+	assert_true(SaveManager.get_vibration_enabled())

@@ -18,6 +18,8 @@ var _data: Dictionary = {
 	"total_sessions": 0,
 	"victories": 0,
 	"swipe_sensitivity": 1.0,
+	"sound_enabled": true,
+	"vibration_enabled": true,
 }
 
 func _ready() -> void:
@@ -68,6 +70,20 @@ func get_swipe_sensitivity() -> float:
 
 func set_swipe_sensitivity(value: float) -> void:
 	_data["swipe_sensitivity"] = clampf(value, 1.0, 2.0)
+	_save()
+
+func get_sound_enabled() -> bool:
+	return bool(_data.get("sound_enabled", true))
+
+func set_sound_enabled(value: bool) -> void:
+	_data["sound_enabled"] = value
+	_save()
+
+func get_vibration_enabled() -> bool:
+	return bool(_data.get("vibration_enabled", true))
+
+func set_vibration_enabled(value: bool) -> void:
+	_data["vibration_enabled"] = value
 	_save()
 
 func purchase_upgrade(upgrade_id: StringName) -> bool:

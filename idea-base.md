@@ -93,13 +93,12 @@ El workflow parchea automáticamente el path en CI con `sed`.
 
 # Mejoras Implementadas
 
-## Settings Screen — Sensibilidad de Swipe ✅
-- Nueva escena `SettingsScreen.tscn` / `.gd` en `src/scenes/`.
-- Accesible desde el menú principal con botón "CONFIGURACIÓN".
-- Slider de sensibilidad: 100% a 200%, paso 20% (= 1.0× a 2.0× de velocidad base).
-- El valor se guarda en `SaveManager._data["swipe_sensitivity"]` y persiste entre sesiones.
-- `Player._input()` lee `SaveManager.get_swipe_sensitivity()` en cada drag.
-- Pendiente: añadir controles de sonido y vibración a la misma pantalla.
+## Settings Screen — Sensibilidad, Sonido y Vibración ✅
+- Escena `SettingsScreen.tscn` / `.gd` en `src/scenes/`, accesible desde el menú principal.
+- **Sensibilidad de control:** slider 100%–200%, paso 20%. Guardado en `SaveManager._data["swipe_sensitivity"]`.
+- **Sonido on/off:** `CheckButton` que guarda en `SaveManager._data["sound_enabled"]`. `AudioManager.play_sfx()` comprueba la flag antes de reproducir.
+- **Vibración on/off:** `CheckButton` que guarda en `SaveManager._data["vibration_enabled"]`. `AudioManager.trigger_haptic_*()` comprueba la flag antes de vibrar.
+- Los tres valores persisten entre sesiones vía `user://save.json`.
 
 ## Sistema de Power-ups temporal y stackable ✅
 - Cada pick-up agrega un stack con timer de **15 segundos** independiente.
@@ -215,13 +214,7 @@ El workflow parchea automáticamente el path en CI con `sed`.
 
 # Pendientes — Solo Código
 
-## Settings Screen
-- Pantalla accesible desde el menú principal con:
-  - Sonido on/off
-  - Vibración on/off
-  - Sensibilidad del swipe (slider que modifica `PLAYER_SWIPE_SENSITIVITY`)
-- Requiere nueva escena `SettingsScreen.tscn` y persistencia en `SaveManager`.
-- `PLAYER_SWIPE_SENSITIVITY = 1.0` actualmente en `Constants.gd`; para que sea configurable en runtime necesita vivir en `SaveManager._data`.
+## Settings Screen ✅ (completado)
 
 ## Cuentas de usuario
 - Login con Facebook / Google / cuenta propia de Guacamole Bit.

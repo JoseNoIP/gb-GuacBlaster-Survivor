@@ -318,7 +318,7 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 ### Solo código (sin assets externos)
 | Feature | Archivo(s) a crear/modificar | Notas |
 |---|---|---|
-| Settings screen — sonido/vibración | `SettingsScreen.gd` | Sensibilidad ✅ implementada. Faltan sonido on/off y vibración on/off |
+| ~~Settings screen~~ | ✅ Completado | Sensibilidad + sonido on/off + vibración on/off |
 | Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
 | Misiones diarias | Sistema de tracking + UI | Oro extra por objetivos |
 | Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |

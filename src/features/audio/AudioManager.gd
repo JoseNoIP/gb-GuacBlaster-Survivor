@@ -23,6 +23,8 @@ func register_sfx(sound_id: StringName, player: AudioStreamPlayer) -> void:
 	_missing_warned.erase(sound_id)
 
 func play_sfx(sound_id: StringName) -> void:
+	if not SaveManager.get_sound_enabled():
+		return
 	if not _sfx_players.has(sound_id):
 		if not _missing_warned.get(sound_id, false):
 			push_warning("AudioManager: SFX '%s' not registered — add an AudioStreamPlayer" % sound_id)
@@ -33,7 +35,11 @@ func play_sfx(sound_id: StringName) -> void:
 		player.play()
 
 func trigger_haptic_light() -> void:
+	if not SaveManager.get_vibration_enabled():
+		return
 	Input.vibrate_handheld(10)
 
 func trigger_haptic_heavy() -> void:
+	if not SaveManager.get_vibration_enabled():
+		return
 	Input.vibrate_handheld(50)
