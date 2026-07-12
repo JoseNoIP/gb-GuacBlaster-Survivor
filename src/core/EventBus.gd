@@ -5,6 +5,7 @@ extends Node
 # --- Player ---
 signal player_health_changed(current: int, maximum: int)
 signal player_died()
+signal player_damaged()
 signal player_level_up(new_level: int)
 
 # --- Enemies ---

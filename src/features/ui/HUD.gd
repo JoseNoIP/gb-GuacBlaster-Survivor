@@ -26,6 +26,7 @@ var _heart_labels: Array[Label] = []
 var _xp_bar: ProgressBar
 var _score_label: Label
 var _level_label: Label
+var _pause_btn: Button
 var _powerup_panel: Control
 var _card_buttons: Array[Button] = []
 var _current_options: Array = []
@@ -46,6 +47,7 @@ func _build_ui() -> void:
 	_build_score_and_level()
 	_build_xp_bar()
 	_build_powerup_panel()
+	_build_pause_button()
 
 func _build_hearts() -> void:
 	var container := HBoxContainer.new()
@@ -81,8 +83,8 @@ func _build_score_and_level() -> void:
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_level_label.anchor_left = 1.0
 	_level_label.anchor_right = 1.0
-	_level_label.offset_left = -90.0
-	_level_label.offset_right = -10.0
+	_level_label.offset_left = -140.0
+	_level_label.offset_right = -50.0
 	_level_label.offset_top = 16.0
 	_level_label.offset_bottom = 44.0
 	add_child(_level_label)
@@ -100,6 +102,21 @@ func _build_xp_bar() -> void:
 	_xp_bar.offset_top = -XP_BAR_HEIGHT
 	_xp_bar.offset_bottom = 0.0
 	add_child(_xp_bar)
+
+func _build_pause_button() -> void:
+	_pause_btn = Button.new()
+	_pause_btn.text = "||"
+	_pause_btn.anchor_left = 1.0
+	_pause_btn.anchor_right = 1.0
+	_pause_btn.offset_left = -44.0
+	_pause_btn.offset_right = -4.0
+	_pause_btn.offset_top = 4.0
+	_pause_btn.offset_bottom = 40.0
+	_pause_btn.pressed.connect(func(): GameManager.pause_game())
+	add_child(_pause_btn)
+
+func get_pause_button() -> Button:
+	return _pause_btn
 
 func _build_powerup_panel() -> void:
 	_powerup_panel = Control.new()
@@ -194,8 +211,10 @@ func _on_game_started() -> void:
 	_level_label.text = "Lvl 0"
 	_xp_bar.value = 0.0
 	_powerup_panel.hide()
+	_pause_btn.disabled = false
 	for lbl: Label in _heart_labels:
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
 
 func _on_game_over(_score: int, _duration: float) -> void:
 	_powerup_panel.hide()
+	_pause_btn.disabled = true

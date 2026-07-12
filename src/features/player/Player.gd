@@ -82,6 +82,7 @@ func take_damage(amount: int) -> void:
 		return
 	_health = maxi(_health - amount, 0)
 	EventBus.player_health_changed.emit(_health, _max_health)
+	EventBus.player_damaged.emit()
 	if _health == 0:
 		_die()
 

@@ -33,6 +33,20 @@ func start_game() -> void:
 func get_state() -> GameState:
 	return _state
 
+func pause_game() -> void:
+	if _state != GameState.PLAYING:
+		return
+	_state = GameState.PAUSED
+	get_tree().paused = true
+	EventBus.game_paused.emit(true)
+
+func resume_game() -> void:
+	if _state != GameState.PAUSED:
+		return
+	_state = GameState.PLAYING
+	get_tree().paused = false
+	EventBus.game_paused.emit(false)
+
 func get_score() -> int:
 	return _score
 

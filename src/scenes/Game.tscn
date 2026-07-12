@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://src/scenes/Game.gd" id="1"]
 [ext_resource type="PackedScene" path="res://src/features/player/Player.tscn" id="2"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://src/features/ui/GameOverScreen.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://src/features/enemies/EnemyBoss.tscn" id="12"]
 [ext_resource type="Script" path="res://src/features/gems/GemSpawner.gd" id="13"]
+[ext_resource type="Script" path="res://src/features/ui/PauseScreen.gd" id="14"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1")
@@ -44,3 +45,9 @@ script = ExtResource("10")
 script = ExtResource("13")
 
 [node name="GameOverScreen" parent="." instance=ExtResource("11")]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(195, 422)
+
+[node name="PauseScreen" type="CanvasLayer" parent="."]
+script = ExtResource("14")
