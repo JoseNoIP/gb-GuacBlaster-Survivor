@@ -1,35 +1,38 @@
 name: Build Android APK
 
-# merge a staging → APK de staging
-# merge a main    → APK de producción
 on:
   push:
     branches: [main, staging]
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: "4.7"       # solo el número; el workflow agrega "-stable"
-  EXPORT_PRESET: "Android"   # debe coincidir exactamente con export_presets.cfg
+  GODOT_VERSION: "4.7"
+  EXPORT_PRESET: "Android"
+  # Raíz de todos los compilados de Guacamole Bit en Dropbox
+  DROPBOX_ROOT: "/Guacamole Bit/GuacBlaster"
 
 jobs:
+  # ══════════════════════════════════════════
+  # JOB 1 — Compilar APK
+  # ══════════════════════════════════════════
   build:
-    name: "Compilar APK (${{ github.ref_name }})"
+    name: "① Compilar APK (${{ github.ref_name }})"
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Determina si es staging o prod y asigna el nombre del APK
       - name: Determinar entorno
         id: ctx
         run: |
+          BUILD="${{ github.run_number }}"
           if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "env=prod"                         >> $GITHUB_OUTPUT
-            echo "apk=GuacBlaster-prod.apk"         >> $GITHUB_OUTPUT
+            echo "env=prod"                              >> $GITHUB_OUTPUT
+            echo "apk=GuacBlaster-prod-${BUILD}.apk"    >> $GITHUB_OUTPUT
           else
-            echo "env=staging"                      >> $GITHUB_OUTPUT
-            echo "apk=GuacBlaster-staging.apk"      >> $GITHUB_OUTPUT
+            echo "env=stg"                               >> $GITHUB_OUTPUT
+            echo "apk=GuacBlaster-stg-${BUILD}.apk"     >> $GITHUB_OUTPUT
           fi
 
       - name: Instalar Godot ${{ env.GODOT_VERSION }}
@@ -54,9 +57,7 @@ jobs:
           rm -rf templates_tmp templates.tpz godot.zip
 
       - name: Verificar Android SDK
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          ls "$ANDROID_HOME/platforms" | head -5
+        run: echo "ANDROID_HOME=$ANDROID_HOME"
 
       - name: Exportar APK
         run: |
@@ -68,9 +69,69 @@ jobs:
       - name: Verificar APK generado
         run: ls -lh builds/
 
-      - name: Guardar artefacto
+      - name: Guardar artefacto en GitHub
         uses: actions/upload-artifact@v4
         with:
           name: apk-${{ steps.ctx.outputs.env }}
           path: "builds/${{ steps.ctx.outputs.apk }}"
           retention-days: 14
+
+  # ══════════════════════════════════════════
+  # JOB 2 — Subir APK a Dropbox
+  # Secrets requeridos: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN
+  # ══════════════════════════════════════════
+  upload-dropbox:
+    name: "② Subir a Dropbox (${{ github.ref_name }})"
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Determinar entorno
+        id: ctx
+        run: |
+          BUILD="${{ github.run_number }}"
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "env=prod"                              >> $GITHUB_OUTPUT
+            echo "apk=GuacBlaster-prod-${BUILD}.apk"    >> $GITHUB_OUTPUT
+          else
+            echo "env=stg"                               >> $GITHUB_OUTPUT
+            echo "apk=GuacBlaster-stg-${BUILD}.apk"     >> $GITHUB_OUTPUT
+          fi
+
+      - name: Descargar APK del artefacto
+        uses: actions/download-artifact@v4
+        with:
+          name: apk-${{ steps.ctx.outputs.env }}
+          path: dist/
+
+      - name: Obtener access token de Dropbox
+        id: dbx-token
+        run: |
+          RESPONSE=$(curl -s -X POST https://api.dropbox.com/oauth2/token \
+            -d grant_type=refresh_token \
+            -d "refresh_token=${{ secrets.DROPBOX_REFRESH_TOKEN }}" \
+            -u "${{ secrets.DROPBOX_APP_KEY }}:${{ secrets.DROPBOX_APP_SECRET }}")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+            echo "ERROR al obtener token de Dropbox:"
+            echo "$RESPONSE" | jq .
+            exit 1
+          fi
+          echo "access_token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Subir APK a Dropbox
+        env:
+          DBX_TOKEN: ${{ steps.dbx-token.outputs.access_token }}
+          APK_FILE: ${{ steps.ctx.outputs.apk }}
+          DBX_ENV: ${{ steps.ctx.outputs.env }}
+        run: |
+          DEST_PATH="${{ env.DROPBOX_ROOT }}/${DBX_ENV}/${APK_FILE}"
+          echo "Subiendo a: $DEST_PATH"
+          RESULT=$(curl -s -X POST https://content.dropboxapi.com/2/files/upload \
+            --header "Authorization: Bearer $DBX_TOKEN" \
+            --header "Dropbox-API-Arg: {\"path\":\"$DEST_PATH\",\"mode\":\"add\",\"autorename\":false,\"mute\":false}" \
+            --header "Content-Type: application/octet-stream" \
+            --data-binary @"dist/${APK_FILE}")
+          echo "$RESULT" | jq '{name: .name, path: .path_display, size: .size}'
+          # Falla si Dropbox devolvió error
+          echo "$RESULT" | jq -e '.path_display' > /dev/null
