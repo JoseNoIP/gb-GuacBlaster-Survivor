@@ -7,8 +7,11 @@ const SHAKE_STRENGTH: float = 5.0
 var _shake_timer: float = 0.0
 
 @onready var _camera: Camera2D = $Camera2D
+@onready var _background: ColorRect = $Background
 
 func _ready() -> void:
+	var palette_index: int = SaveManager.get_total_sessions() % Constants.BACKGROUND_PALETTE.size()
+	_background.color = Constants.BACKGROUND_PALETTE[palette_index]
 	GameManager.start_game()
 	EventBus.restart_requested.connect(_on_restart_requested)
 	EventBus.menu_requested.connect(_on_menu_requested)

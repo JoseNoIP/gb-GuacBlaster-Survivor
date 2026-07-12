@@ -48,6 +48,9 @@ func get_upgrade_level(upgrade_id: StringName) -> int:
 func get_best_score() -> int:
 	return _data.get("best_score", 0)
 
+func get_total_sessions() -> int:
+	return _data.get("total_sessions", 0)
+
 func purchase_upgrade(upgrade_id: StringName) -> bool:
 	var current_level: int = get_upgrade_level(upgrade_id)
 	if current_level >= Constants.META_MAX_UPGRADE_LEVEL:

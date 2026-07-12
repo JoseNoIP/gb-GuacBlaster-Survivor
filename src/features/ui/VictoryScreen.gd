@@ -3,6 +3,7 @@ extends CanvasLayer
 ## Victory overlay shown when the player survives SESSION_TARGET_MIN seconds.
 
 var _panel: Control
+var _run_label: Label
 var _score_label: Label
 var _time_label: Label
 var _best_label: Label
@@ -50,6 +51,12 @@ func _build_ui() -> void:
 	title.add_theme_color_override("font_color", Color(0.3, 0.9, 0.2))
 	vbox.add_child(title)
 
+	_run_label = Label.new()
+	_run_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_run_label.add_theme_font_size_override("font_size", 16)
+	_run_label.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
+	vbox.add_child(_run_label)
+
 	_score_label = Label.new()
 	_score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_score_label.add_theme_font_size_override("font_size", 20)
@@ -88,6 +95,7 @@ func _build_ui() -> void:
 	vbox.add_child(_menu_btn)
 
 func _on_game_won(score: int, duration: float) -> void:
+	_run_label.text = "— Ronda %d —" % SaveManager.get_total_sessions()
 	_score_label.text = "Score: %d" % score
 	var mins: int = int(duration) / 60
 	var secs: int = int(duration) % 60
@@ -111,6 +119,9 @@ func _on_menu_pressed() -> void:
 
 func get_panel() -> Control:
 	return _panel
+
+func get_run_label() -> Label:
+	return _run_label
 
 func get_score_label() -> Label:
 	return _score_label
