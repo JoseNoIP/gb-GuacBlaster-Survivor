@@ -38,6 +38,8 @@ var _boss_hp_bar: ProgressBar
 var _score_label: Label
 var _level_label: Label
 var _timer_label: Label
+var _world_label: Label
+var _world_tween: Tween
 var _pause_btn: Button
 var _powerup_strip: VBoxContainer
 var _strip_pills: Dictionary = {}
@@ -65,6 +67,7 @@ func _build_ui() -> void:
 	_build_boss_hp_bar()
 	_build_powerup_strip()
 	_build_pause_button()
+	_build_world_label()
 
 func _build_hearts() -> void:
 	var container := HBoxContainer.new()
@@ -155,6 +158,22 @@ func _build_timer() -> void:
 	_timer_label.add_theme_font_size_override("font_size", 16)
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	add_child(_timer_label)
+
+func _build_world_label() -> void:
+	_world_label = Label.new()
+	_world_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_world_label.anchor_left = 0.5
+	_world_label.anchor_right = 0.5
+	_world_label.anchor_top = 0.5
+	_world_label.anchor_bottom = 0.5
+	_world_label.offset_left = -80.0
+	_world_label.offset_right = 80.0
+	_world_label.offset_top = -40.0
+	_world_label.offset_bottom = 10.0
+	_world_label.add_theme_font_size_override(&"font_size", 32)
+	_world_label.add_theme_color_override(&"font_color", Color(1.0, 1.0, 1.0))
+	_world_label.hide()
+	add_child(_world_label)
 
 func _build_powerup_strip() -> void:
 	_powerup_strip = VBoxContainer.new()
@@ -253,6 +272,17 @@ func _on_boss_health_changed(current: int, maximum: int) -> void:
 	_boss_hp_bar.value = float(current)
 	_boss_hp_bar.show()
 
+func _show_world_banner() -> void:
+	var world_idx: int = SaveManager.get_victories() % Constants.BACKGROUND_PALETTE.size()
+	_world_label.text = "BIOMA %d" % (world_idx + 1)
+	_world_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	_world_label.show()
+	if _world_tween:
+		_world_tween.kill()
+	_world_tween = create_tween()
+	_world_tween.tween_interval(1.8)
+	_world_tween.tween_property(_world_label, "modulate:a", 0.0, 0.8)
+
 func _on_game_started() -> void:
 	_displayed_score = 0
 	_score_label.text = "0"
@@ -268,6 +298,7 @@ func _on_game_started() -> void:
 	for pill: Label in _strip_pills.values():
 		pill.queue_free()
 	_strip_pills.clear()
+	_show_world_banner()
 
 func _on_game_over(_score: int, _duration: float) -> void:
 	_pause_btn.disabled = true

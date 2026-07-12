@@ -198,6 +198,15 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - `ENEMY_BASIC_XP`: 5 → **8**, `ENEMY_ZIGZAG_XP`: 10 → **15**, `ENEMY_TANK_XP`: 20 → **35**
 - Combinaciones de hasta 5 power-ups simultáneos son alcanzables (~23s para 5 level-ups, 7s de ventana antes de que expire el primero).
 
+## Duración de power-ups: 30s → 45s ✅
+- `POWERUP_DURATION` en `Constants.gd` cambiado de `30.0` a `45.0`.
+
+## Paleta de biomas — colores claramente distintos ✅
+- Los colores anteriores eran todos prácticamente negros (0.04–0.13), visualmente indistinguibles.
+- Colores actualizados a valores más saturados y visibles: verde, índigo, rojo volcánico, azul océano, rojo sangre.
+- HUD agrega un `Label` "BIOMA X" centrado en pantalla al inicio de cada partida que hace fade-out en 2.6s.
+- El índice del bioma es `SaveManager.get_victories() % 5` (0-based internamente, se muestra 1-based).
+
 ## Rapid Fire — multiplicador subido a ×2 ✅
 - Antes: ×1.25 de cadencia por stack.
 - Ahora: ×2.0 por stack (apilable: 2 stacks = ×4, 3 stacks = ×8, mínimo 0.05s).

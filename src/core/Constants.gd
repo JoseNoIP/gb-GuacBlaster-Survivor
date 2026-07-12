@@ -27,11 +27,11 @@ const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
 
 const BOSS_SPAWN_INTERVAL: float = 180.0
 const BACKGROUND_PALETTE: Array = [
-	Color(0.08, 0.10, 0.08),  # jungla oscura (default)
-	Color(0.08, 0.06, 0.13),  # crepúsculo / índigo
-	Color(0.13, 0.06, 0.04),  # volcánico / brasa
-	Color(0.04, 0.08, 0.13),  # abismo / océano profundo
-	Color(0.10, 0.04, 0.07),  # luna sangre / desierto nocturno
+	Color(0.02, 0.18, 0.03),  # jungla oscura (default)
+	Color(0.05, 0.02, 0.28),  # crepúsculo / índigo
+	Color(0.26, 0.04, 0.01),  # volcánico / brasa
+	Color(0.01, 0.07, 0.26),  # abismo / océano profundo
+	Color(0.22, 0.02, 0.08),  # luna sangre / desierto nocturno
 ]
 const BOSS_TIMER_SHOW_REMAINING: float = 90.0
 const BOSS_HP_BASE: int = 100
@@ -66,7 +66,7 @@ const POWERUP_POOL: Array = [
 	&"guac_storm",
 ]
 const POWERUP_CARDS_PER_LEVEL: int = 3
-const POWERUP_DURATION: float = 30.0
+const POWERUP_DURATION: float = 45.0
 const RAPID_FIRE_MULTIPLIER: float = 2.0
 const PLAYER_AUTOFIRE_MIN: float = 0.05
 const MOLE_GRENADE_COOLDOWN: float = 5.0
