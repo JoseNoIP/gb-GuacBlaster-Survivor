@@ -63,13 +63,17 @@ const POWERUP_POOL: Array = [
 	&"spicy_bounce",
 	&"nacho_wall",
 	&"salsa_magnet",
+	&"guac_storm",
 ]
 const POWERUP_CARDS_PER_LEVEL: int = 3
-const RAPID_FIRE_MULTIPLIER: float = 1.25
+const POWERUP_DURATION: float = 15.0
+const RAPID_FIRE_MULTIPLIER: float = 2.0
+const PLAYER_AUTOFIRE_MIN: float = 0.05
 const MOLE_GRENADE_COOLDOWN: float = 5.0
 const JALAPENO_LASER_DURATION: float = 2.0
 const NACHO_WALL_HITS: int = 3
 const SUPER_GUAC_PENETRATION: int = 3
+const MULTI_STREAM_SPACING: float = 40.0
 
 # --- Meta Upgrades ---
 const META_DAMAGE_PER_LEVEL: float = 0.05
@@ -82,6 +86,8 @@ const META_MAX_UPGRADE_LEVEL: int = 5
 const META_UPGRADE_COST_BASE: int = 50
 const META_UPGRADE_COST_GROWTH: float = 1.8
 const GOLD_PER_SCORE_POINT: float = 0.1
+const GOLD_PER_HEART_KEPT: int = 25
+const PLAYER_SWIPE_SENSITIVITY: float = 1.0
 const GEM_FALL_SPEED: float = 90.0
 const GEM_MAGNET_SPEED: float = 300.0
 

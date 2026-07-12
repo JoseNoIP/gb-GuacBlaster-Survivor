@@ -77,6 +77,18 @@ y aplica un color de `Constants.BACKGROUND_PALETTE`. Para reemplazar colores por
   _background.texture = tex  # cambiar ColorRect → TextureRect en Game.tscn
   ```
 
+## Settings Screen (pendiente)
+- Sonido on/off, vibración on/off
+- Sensibilidad del swipe (actualmente usa `Constants.PLAYER_SWIPE_SENSITIVITY = 1.0`)
+- Requiere pantalla de configuración nueva y persistencia en SaveManager
+
+## Cuentas de usuario (pendiente)
+- Login con Facebook / Google / cuenta propia de Guacamole Bit
+- Requiere SDK externo (GodotFacebook / GodotGameServices / backend propio)
+- No implementable sin integración de plataforma
+
+---
+
 ## SFX / Música
 AudioManager autoload existe en `src/features/audio/AudioManager.gd`.
 Archivos necesarios en `assets/audio/`:

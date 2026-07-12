@@ -24,8 +24,6 @@ func _ready() -> void:
 	EventBus.game_started.connect(func(): _active = true)
 	EventBus.game_over.connect(func(_s: int, _d: float): _active = false)
 	EventBus.game_won.connect(func(_s: int, _d: float): _active = false)
-	EventBus.player_level_up.connect(func(_lvl: int): _active = false)
-	EventBus.powerup_selected.connect(func(_id: StringName): _active = true)
 	EventBus.enemy_split_requested.connect(_on_enemy_split_requested)
 	EventBus.boss_defeated.connect(func(_id: int): _boss_alive = false)
 

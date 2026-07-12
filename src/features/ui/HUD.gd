@@ -1,25 +1,24 @@
 class_name HUD
 extends CanvasLayer
-## Heads-up display: hearts, XP bar, score, level, and power-up selection overlay.
+## Heads-up display: hearts, XP bar, score, level, boss timer, and active power-up strip.
 ## Listens to EventBus signals — never references player or enemies directly.
 
-const POWERUP_NAMES: Dictionary = {
-	&"triple_shot": "Disparo Triple",
-	&"super_guac": "Super-Guac",
-	&"rapid_fire": "Fuego Rapido",
-	&"mole_grenade": "Granada Mole",
-	&"jalapeno_laser": "Laser Jalapeno",
-	&"spicy_bounce": "Rebote Picante",
-	&"nacho_wall": "Muro Nachos",
-	&"salsa_magnet": "Iman Salsa",
+const POWERUP_ABBREV: Dictionary = {
+	&"triple_shot": "TS",
+	&"super_guac": "SG",
+	&"rapid_fire": "RF",
+	&"mole_grenade": "MG",
+	&"jalapeno_laser": "JL",
+	&"spicy_bounce": "SB",
+	&"nacho_wall": "NW",
+	&"salsa_magnet": "SM",
+	&"guac_storm": "GS",
 }
 const HEART_FULL_COLOR: Color = Color(0.9, 0.15, 0.15)
 const HEART_EMPTY_COLOR: Color = Color(0.35, 0.35, 0.35)
 const SCORE_COLOR: Color = Color(1.0, 1.0, 1.0)
 const LEVEL_COLOR: Color = Color(1.0, 0.85, 0.2)
 const TITLE_COLOR: Color = Color(1.0, 0.85, 0.2)
-const OVERLAY_COLOR: Color = Color(0.0, 0.0, 0.0, 0.65)
-const CARD_MIN_SIZE: Vector2 = Vector2(100.0, 140.0)
 const XP_BAR_HEIGHT: float = 14.0
 
 var _heart_labels: Array[Label] = []
@@ -28,9 +27,8 @@ var _score_label: Label
 var _level_label: Label
 var _timer_label: Label
 var _pause_btn: Button
-var _powerup_panel: Control
-var _card_buttons: Array[Button] = []
-var _current_options: Array = []
+var _powerup_strip: HBoxContainer
+var _strip_pills: Dictionary = {}
 var _displayed_score: int = 0
 var _boss_spawned: bool = false
 
@@ -40,10 +38,9 @@ func _ready() -> void:
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.xp_collected.connect(_on_xp_collected)
 	EventBus.player_level_up.connect(_on_player_level_up)
-	EventBus.powerup_selection_requested.connect(_on_powerup_selection_requested)
+	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed)
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(_on_game_over)
-	EventBus.game_won.connect(func(_s: int, _d: float): _powerup_panel.hide())
 	EventBus.boss_spawned.connect(func(_id: int): _boss_spawned = true)
 
 func _build_ui() -> void:
@@ -51,7 +48,7 @@ func _build_ui() -> void:
 	_build_score_and_level()
 	_build_timer()
 	_build_xp_bar()
-	_build_powerup_panel()
+	_build_powerup_strip()
 	_build_pause_button()
 
 func _build_hearts() -> void:
@@ -121,6 +118,33 @@ func _build_timer() -> void:
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	add_child(_timer_label)
 
+func _build_powerup_strip() -> void:
+	_powerup_strip = HBoxContainer.new()
+	_powerup_strip.add_theme_constant_override("separation", 4)
+	_powerup_strip.anchor_left = 0.0
+	_powerup_strip.anchor_right = 1.0
+	_powerup_strip.anchor_top = 1.0
+	_powerup_strip.anchor_bottom = 1.0
+	_powerup_strip.offset_top = -(XP_BAR_HEIGHT + 28.0)
+	_powerup_strip.offset_bottom = -XP_BAR_HEIGHT
+	_powerup_strip.offset_left = 4.0
+	add_child(_powerup_strip)
+
+func _build_pause_button() -> void:
+	_pause_btn = Button.new()
+	_pause_btn.text = "||"
+	_pause_btn.anchor_left = 1.0
+	_pause_btn.anchor_right = 1.0
+	_pause_btn.offset_left = -44.0
+	_pause_btn.offset_right = -4.0
+	_pause_btn.offset_top = 4.0
+	_pause_btn.offset_bottom = 40.0
+	_pause_btn.pressed.connect(func(): GameManager.pause_game())
+	add_child(_pause_btn)
+
+func get_pause_button() -> Button:
+	return _pause_btn
+
 func _process(_delta: float) -> void:
 	if GameManager.get_state() != GameManager.GameState.PLAYING:
 		return
@@ -143,65 +167,6 @@ func _process(_delta: float) -> void:
 	else:
 		_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	_timer_label.show()
-
-func _build_pause_button() -> void:
-	_pause_btn = Button.new()
-	_pause_btn.text = "||"
-	_pause_btn.anchor_left = 1.0
-	_pause_btn.anchor_right = 1.0
-	_pause_btn.offset_left = -44.0
-	_pause_btn.offset_right = -4.0
-	_pause_btn.offset_top = 4.0
-	_pause_btn.offset_bottom = 40.0
-	_pause_btn.pressed.connect(func(): GameManager.pause_game())
-	add_child(_pause_btn)
-
-func get_pause_button() -> Button:
-	return _pause_btn
-
-func _build_powerup_panel() -> void:
-	_powerup_panel = Control.new()
-	_powerup_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_powerup_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_powerup_panel.hide()
-	add_child(_powerup_panel)
-
-	var dim := ColorRect.new()
-	dim.color = OVERLAY_COLOR
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_powerup_panel.add_child(dim)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	vbox.anchor_left = 0.5
-	vbox.anchor_right = 0.5
-	vbox.anchor_top = 0.5
-	vbox.anchor_bottom = 0.5
-	vbox.offset_left = -165.0
-	vbox.offset_right = 165.0
-	vbox.offset_top = -110.0
-	vbox.offset_bottom = 110.0
-	_powerup_panel.add_child(vbox)
-
-	var title := Label.new()
-	title.text = "¡Sube de nivel!"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", TITLE_COLOR)
-	vbox.add_child(title)
-
-	var cards_row := HBoxContainer.new()
-	cards_row.add_theme_constant_override("separation", 10)
-	cards_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_child(cards_row)
-
-	for i: int in Constants.POWERUP_CARDS_PER_LEVEL:
-		var btn := Button.new()
-		btn.text = "???"
-		btn.custom_minimum_size = CARD_MIN_SIZE
-		btn.pressed.connect(_on_card_pressed.bind(i))
-		cards_row.add_child(btn)
-		_card_buttons.append(btn)
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
 	while _heart_labels.size() < maximum:
@@ -227,38 +192,35 @@ func _on_player_level_up(new_level: int) -> void:
 	_level_label.text = "Lvl %d" % new_level
 	_xp_bar.value = 0.0
 
-func _on_powerup_selection_requested(options: Array) -> void:
-	_current_options = options
-	for i: int in _card_buttons.size():
-		var btn: Button = _card_buttons[i]
-		if i < options.size():
-			var id: StringName = options[i] as StringName
-			btn.text = POWERUP_NAMES.get(id, str(id))
-			btn.show()
-		else:
-			btn.hide()
-	_powerup_panel.show()
-
-func _on_card_pressed(index: int) -> void:
-	if index >= _current_options.size():
-		return
-	var id: StringName = _current_options[index] as StringName
-	_powerup_panel.hide()
-	EventBus.powerup_selected.emit(id)
+func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
+	if count > 0:
+		if not _strip_pills.has(powerup_id):
+			var pill := Label.new()
+			pill.add_theme_font_size_override("font_size", 13)
+			pill.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+			_powerup_strip.add_child(pill)
+			_strip_pills[powerup_id] = pill
+		var abbrev: String = POWERUP_ABBREV.get(powerup_id, str(powerup_id).left(2).to_upper())
+		(_strip_pills[powerup_id] as Label).text = "%s×%d" % [abbrev, count]
+	else:
+		if _strip_pills.has(powerup_id):
+			(_strip_pills[powerup_id] as Label).queue_free()
+			_strip_pills.erase(powerup_id)
 
 func _on_game_started() -> void:
 	_displayed_score = 0
 	_score_label.text = "0"
 	_level_label.text = "Lvl 0"
 	_xp_bar.value = 0.0
-	_powerup_panel.hide()
 	_pause_btn.disabled = false
 	_boss_spawned = false
 	_timer_label.hide()
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	for lbl: Label in _heart_labels:
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
+	for id: Variant in _strip_pills.keys():
+		(_strip_pills[id] as Label).queue_free()
+	_strip_pills.clear()
 
 func _on_game_over(_score: int, _duration: float) -> void:
-	_powerup_panel.hide()
 	_pause_btn.disabled = true

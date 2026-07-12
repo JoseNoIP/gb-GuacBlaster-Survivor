@@ -10,7 +10,7 @@ var _shake_timer: float = 0.0
 @onready var _background: ColorRect = $Background
 
 func _ready() -> void:
-	var palette_index: int = SaveManager.get_total_sessions() % Constants.BACKGROUND_PALETTE.size()
+	var palette_index: int = SaveManager.get_victories() % Constants.BACKGROUND_PALETTE.size()
 	_background.color = Constants.BACKGROUND_PALETTE[palette_index]
 	GameManager.start_game()
 	EventBus.restart_requested.connect(_on_restart_requested)

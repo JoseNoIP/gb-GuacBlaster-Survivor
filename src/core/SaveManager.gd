@@ -16,12 +16,13 @@ var _data: Dictionary = {
 	},
 	"best_score": 0,
 	"total_sessions": 0,
+	"victories": 0,
 }
 
 func _ready() -> void:
 	_load()
 	EventBus.game_over.connect(_on_game_over)
-	EventBus.game_won.connect(_on_game_over)
+	EventBus.game_won.connect(_on_game_won)
 	EventBus.gold_earned.connect(_on_gold_earned)
 	EventBus.upgrade_purchased.connect(_on_upgrade_purchased)
 
@@ -29,6 +30,13 @@ func _on_game_over(score: int, _duration: float) -> void:
 	if score > _data.get("best_score", 0):
 		_data["best_score"] = score
 	_data["total_sessions"] = _data.get("total_sessions", 0) + 1
+	_save()
+
+func _on_game_won(score: int, _duration: float) -> void:
+	if score > _data.get("best_score", 0):
+		_data["best_score"] = score
+	_data["total_sessions"] = _data.get("total_sessions", 0) + 1
+	_data["victories"] = _data.get("victories", 0) + 1
 	_save()
 
 func _on_gold_earned(amount: int) -> void:
@@ -50,6 +58,9 @@ func get_best_score() -> int:
 
 func get_total_sessions() -> int:
 	return _data.get("total_sessions", 0)
+
+func get_victories() -> int:
+	return _data.get("victories", 0)
 
 func purchase_upgrade(upgrade_id: StringName) -> bool:
 	var current_level: int = get_upgrade_level(upgrade_id)

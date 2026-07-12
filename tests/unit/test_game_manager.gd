@@ -29,11 +29,6 @@ func test_xp_below_threshold_does_not_level_up() -> void:
 func test_xp_at_threshold_triggers_level_up() -> void:
 	GameManager._on_xp_collected(100, 100, 100)
 	assert_eq(GameManager.get_current_level(), 1)
-	assert_eq(GameManager.get_state(), GameManager.GameState.LEVEL_UP)
-
-func test_powerup_selected_resumes_playing() -> void:
-	GameManager._on_xp_collected(100, 100, 100)
-	GameManager._on_powerup_selected(&"rapid_fire")
 	assert_eq(GameManager.get_state(), GameManager.GameState.PLAYING)
 
 func test_pick_powerup_options_returns_correct_count() -> void:

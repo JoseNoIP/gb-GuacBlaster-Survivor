@@ -25,6 +25,9 @@ signal gem_collected(xp_value: int)
 # --- Power-ups ---
 signal powerup_selection_requested(options: Array)
 signal powerup_selected(powerup_id: StringName)
+signal powerup_stack_changed(powerup_id: StringName, count: int)
+signal powerup_expired(powerup_id: StringName)
+signal player_shield_changed(hits_remaining: int)
 
 # --- Game State ---
 signal game_started()

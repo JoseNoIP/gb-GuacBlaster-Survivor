@@ -27,7 +27,7 @@ func _ready() -> void:
 	])
 	add_child(diamond)
 	body_entered.connect(_on_body_entered)
-	EventBus.powerup_selected.connect(_on_powerup_selected)
+	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed)
 	EventBus.game_over.connect(func(_s: int, _d: float): queue_free())
 	EventBus.game_won.connect(func(_s: int, _d: float): queue_free())
 
@@ -80,6 +80,6 @@ func _spawn_collect_burst() -> void:
 	p.finished.connect(func(): p.queue_free())
 	get_parent().call_deferred(&"add_child", p)
 
-func _on_powerup_selected(powerup_id: StringName) -> void:
+func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 	if powerup_id == &"salsa_magnet":
-		XPGem.magnet_active = true
+		XPGem.magnet_active = count > 0

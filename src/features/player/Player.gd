@@ -17,8 +17,12 @@ var _max_health: int = 0
 var _target_x: float = 0.0
 var _current_damage: float = 0.0
 var _current_autofire_interval: float = 0.0
+var _base_autofire_interval: float = 0.0
+var _rapid_fire_stacks: int = 0
 var _shield_hits: int = 0
+var _nacho_wall_stacks: int = 0
 var _invincibility_timer: float = 0.0
+var _shield_visual: Line2D
 
 @onready var _autofire_timer: Timer = $AutofireTimer
 @onready var _spawn_point: Marker2D = $ProjectileSpawnPoint
@@ -29,17 +33,32 @@ func _ready() -> void:
 	_health = _max_health
 	_current_damage = Constants.PLAYER_BASE_DAMAGE
 	_current_autofire_interval = Constants.PLAYER_AUTOFIRE_INTERVAL
+	_base_autofire_interval = _current_autofire_interval
 	_target_x = global_position.x
 
 	_autofire_timer.wait_time = _current_autofire_interval
 	_autofire_timer.timeout.connect(_on_autofire_timeout)
 	_autofire_timer.start()
 
+	_build_shield_visual()
 	_setup_contact_area()
 	EventBus.player_health_changed.emit(_health, _max_health)
-	EventBus.powerup_selected.connect(_on_powerup_selected)
+	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed)
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_won.connect(_on_game_won_fired)
+
+func _build_shield_visual() -> void:
+	_shield_visual = Line2D.new()
+	_shield_visual.width = 3.0
+	_shield_visual.default_color = Color(0.9, 0.85, 0.2, 0.85)
+	_shield_visual.closed = true
+	var pts: PackedVector2Array = PackedVector2Array()
+	for i: int in 20:
+		var angle: float = float(i) / 20.0 * TAU
+		pts.append(Vector2(cos(angle), sin(angle)) * 28.0)
+	_shield_visual.points = pts
+	_shield_visual.hide()
+	add_child(_shield_visual)
 
 func _setup_contact_area() -> void:
 	var area := Area2D.new()
@@ -61,7 +80,7 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
-		_target_x = (event as InputEventScreenDrag).position.x
+		_target_x += (event as InputEventScreenDrag).relative.x * Constants.PLAYER_SWIPE_SENSITIVITY
 	elif event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.pressed:
@@ -79,13 +98,18 @@ func _fire() -> void:
 
 func take_damage(amount: int) -> void:
 	if _shield_hits > 0:
-		_shield_hits -= 1
+		_update_shield(_shield_hits - 1)
 		return
 	_health = maxi(_health - amount, 0)
 	EventBus.player_health_changed.emit(_health, _max_health)
 	EventBus.player_damaged.emit()
 	if _health == 0:
 		_die()
+
+func _update_shield(value: int) -> void:
+	_shield_hits = value
+	_shield_visual.visible = _shield_hits > 0
+	EventBus.player_shield_changed.emit(_shield_hits)
 
 func _on_enemy_contact(body: Node2D) -> void:
 	if GameManager.get_state() != GameManager.GameState.PLAYING:
@@ -106,29 +130,35 @@ func _on_game_started() -> void:
 	_current_damage = Constants.PLAYER_BASE_DAMAGE * damage_mult
 	var spd_level: int = SaveManager.get_upgrade_level(&"speed")
 	var speed_mult: float = 1.0 + float(spd_level) * Constants.META_SPEED_PER_LEVEL
-	_current_autofire_interval = Constants.PLAYER_AUTOFIRE_INTERVAL / speed_mult
+	_base_autofire_interval = Constants.PLAYER_AUTOFIRE_INTERVAL / speed_mult
+	_current_autofire_interval = _base_autofire_interval
+	_rapid_fire_stacks = 0
 	_autofire_timer.wait_time = _current_autofire_interval
 	_autofire_timer.start()
 	var shield_level: int = SaveManager.get_upgrade_level(&"starter_shield")
-	_shield_hits = shield_level * Constants.META_STARTER_SHIELD_PER_LEVEL
+	_update_shield(shield_level * Constants.META_STARTER_SHIELD_PER_LEVEL)
+	_nacho_wall_stacks = 0
 	EventBus.player_health_changed.emit(_health, _max_health)
 
-func _on_powerup_selected(powerup_id: StringName) -> void:
+func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 	match powerup_id:
 		&"rapid_fire":
-			apply_rapid_fire()
+			_rapid_fire_stacks = count
+			var interval: float = (
+				_base_autofire_interval / pow(Constants.RAPID_FIRE_MULTIPLIER, float(count))
+			)
+			_current_autofire_interval = maxf(Constants.PLAYER_AUTOFIRE_MIN, interval)
+			_autofire_timer.wait_time = _current_autofire_interval
 		&"nacho_wall":
-			_shield_hits += Constants.NACHO_WALL_HITS
+			if count > _nacho_wall_stacks:
+				_update_shield(_shield_hits + Constants.NACHO_WALL_HITS)
+			_nacho_wall_stacks = count
 
 func get_health() -> int:
 	return _health
 
 func get_max_health() -> int:
 	return _max_health
-
-func apply_rapid_fire() -> void:
-	_current_autofire_interval /= Constants.RAPID_FIRE_MULTIPLIER
-	_autofire_timer.wait_time = _current_autofire_interval
 
 func set_damage(new_damage: float) -> void:
 	_current_damage = new_damage

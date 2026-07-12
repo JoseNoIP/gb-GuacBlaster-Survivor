@@ -68,13 +68,13 @@ func test_autofire_timer_matches_constant() -> void:
 func test_rapid_fire_reduces_timer_wait_time() -> void:
 	var timer: Timer = _player.get_node("AutofireTimer")
 	var original: float = timer.wait_time
-	_player.apply_rapid_fire()
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
 	assert_lt(timer.wait_time, original)
 
 func test_rapid_fire_applies_correct_multiplier() -> void:
 	var timer: Timer = _player.get_node("AutofireTimer")
 	var original: float = timer.wait_time
-	_player.apply_rapid_fire()
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
 	assert_almost_eq(
 		timer.wait_time,
 		original / Constants.RAPID_FIRE_MULTIPLIER,
