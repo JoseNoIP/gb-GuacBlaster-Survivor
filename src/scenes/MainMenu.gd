@@ -1,6 +1,6 @@
 class_name MainMenu
 extends Node2D
-## Main menu scene. Shows title, best score, and play button.
+## Main menu scene. Animated background, icon-button grid, stats display.
 
 const GAME_SCENE: String = "res://src/scenes/Game.tscn"
 const SETTINGS_SCENE: String = "res://src/scenes/SettingsScreen.tscn"
@@ -10,21 +10,28 @@ const CHARACTER_SELECT_SCENE: String = "res://src/scenes/CharacterSelectScreen.t
 const BIOME_MAP_SCENE: String = "res://src/scenes/BiomeMapScreen.tscn"
 const WEEKLY_CHALLENGE_SCENE: String = "res://src/scenes/WeeklyChallengeScreen.tscn"
 
-const BG_COLOR: Color = Color(0.08, 0.1, 0.08)
+const BG_COLOR: Color = Color(0.05, 0.08, 0.05)
 const TITLE_COLOR: Color = Color(0.3, 0.85, 0.2)
-const SUBTITLE_COLOR: Color = Color(0.7, 0.9, 0.4)
-const BEST_COLOR: Color = Color(0.75, 0.75, 0.75)
-const BTN_COLOR: Color = Color(0.15, 0.6, 0.2)
-const BTN_HOVER_COLOR: Color = Color(0.2, 0.75, 0.28)
+const SUBTITLE_COLOR: Color = Color(0.55, 0.78, 0.35)
+const GOLD_COLOR: Color = Color(1.0, 0.85, 0.2)
+const STAT_COLOR: Color = Color(0.55, 0.75, 0.55)
+const BTN_PLAY_COLOR: Color = Color(0.12, 0.62, 0.18)
+const BTN_PLAY_HOVER: Color = Color(0.18, 0.78, 0.25)
+const BTN_GRID_COLOR: Color = Color(0.10, 0.18, 0.10)
+const BTN_GRID_BORDER: Color = Color(0.22, 0.50, 0.22)
+const BTN_GRID_HOVER: Color = Color(0.14, 0.26, 0.14)
+const BTN_CFG_COLOR: Color = Color(0.12, 0.14, 0.12)
+const MUTED_COLOR: Color = Color(0.45, 0.45, 0.45)
 
 var _title_label: Label
 var _best_label: Label
 var _play_btn: Button
 
 func _ready() -> void:
+	_build_animated_bg()
 	_build_ui()
 
-func _build_ui() -> void:
+func _build_animated_bg() -> void:
 	var vp: Vector2 = get_viewport_rect().size
 
 	var bg: ColorRect = ColorRect.new()
@@ -32,145 +39,201 @@ func _build_ui() -> void:
 	bg.size = vp
 	add_child(bg)
 
+	var p: CPUParticles2D = CPUParticles2D.new()
+	p.emitting = true
+	p.one_shot = false
+	p.explosiveness = 0.0
+	p.amount = 28
+	p.lifetime = 7.0
+	p.direction = Vector2(0.0, -1.0)
+	p.spread = 38.0
+	p.gravity = Vector2(0.0, 0.0)
+	p.initial_velocity_min = 28.0
+	p.initial_velocity_max = 70.0
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 6.0
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = Vector2(vp.x * 0.5, 4.0)
+	var grad: Gradient = Gradient.new()
+	grad.set_color(0, Color(0.3, 0.85, 0.2, 0.0))
+	grad.add_point(0.25, Color(0.35, 0.9, 0.25, 0.35))
+	grad.add_point(0.75, Color(0.25, 0.7, 0.15, 0.2))
+	grad.set_color(1, Color(0.3, 0.85, 0.2, 0.0))
+	p.color_ramp = grad
+	p.position = Vector2(vp.x * 0.5, vp.y + 10.0)
+	add_child(p)
+
+func _build_ui() -> void:
+	var vp: Vector2 = get_viewport_rect().size
+
 	var canvas: CanvasLayer = CanvasLayer.new()
 	canvas.layer = 1
 	add_child(canvas)
 
 	var root: VBoxContainer = VBoxContainer.new()
-	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_theme_constant_override(&"separation", 0)
 	canvas.add_child(root)
 
-	var top_spacer: Control = Control.new()
-	top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(top_spacer)
+	# --- Top spacer ---
+	var top_pad: Control = Control.new()
+	top_pad.custom_minimum_size = Vector2(0.0, 36.0)
+	root.add_child(top_pad)
 
+	# --- Title ---
 	_title_label = Label.new()
 	_title_label.text = "GUACBLASTER"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_size_override(&"font_size", 52)
+	_title_label.add_theme_font_size_override(&"font_size", 50)
 	_title_label.add_theme_color_override(&"font_color", TITLE_COLOR)
+	_title_label.pivot_offset = Vector2(vp.x * 0.5, 30.0)
 	root.add_child(_title_label)
 
 	var subtitle: Label = Label.new()
-	subtitle.text = "SURVIVOR"
+	subtitle.text = "S U R V I V O R"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override(&"font_size", 24)
+	subtitle.add_theme_font_size_override(&"font_size", 20)
 	subtitle.add_theme_color_override(&"font_color", SUBTITLE_COLOR)
 	root.add_child(subtitle)
 
-	var mid_spacer: Control = Control.new()
-	mid_spacer.custom_minimum_size = Vector2(0.0, 48.0)
-	root.add_child(mid_spacer)
+	_animate_title()
+
+	# --- Stats row ---
+	var stats_pad: Control = Control.new()
+	stats_pad.custom_minimum_size = Vector2(0.0, 18.0)
+	root.add_child(stats_pad)
+
+	var stats_row: HBoxContainer = HBoxContainer.new()
+	stats_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	stats_row.add_theme_constant_override(&"separation", 28)
+	root.add_child(stats_row)
+
+	var gold_lbl: Label = Label.new()
+	gold_lbl.text = "★  %d oro" % SaveManager.get_gold()
+	gold_lbl.add_theme_color_override(&"font_color", GOLD_COLOR)
+	gold_lbl.add_theme_font_size_override(&"font_size", 16)
+	stats_row.add_child(gold_lbl)
+
+	var div: Label = Label.new()
+	div.text = "·"
+	div.add_theme_color_override(&"font_color", MUTED_COLOR)
+	div.add_theme_font_size_override(&"font_size", 16)
+	stats_row.add_child(div)
+
+	var vic_lbl: Label = Label.new()
+	vic_lbl.text = "▲  %d victorias" % SaveManager.get_victories()
+	vic_lbl.add_theme_color_override(&"font_color", STAT_COLOR)
+	vic_lbl.add_theme_font_size_override(&"font_size", 16)
+	stats_row.add_child(vic_lbl)
+
+	# --- Play button ---
+	var play_pad: Control = Control.new()
+	play_pad.custom_minimum_size = Vector2(0.0, 22.0)
+	root.add_child(play_pad)
+
+	var play_margin: MarginContainer = MarginContainer.new()
+	play_margin.add_theme_constant_override(&"margin_left", 32)
+	play_margin.add_theme_constant_override(&"margin_right", 32)
+	root.add_child(play_margin)
 
 	_play_btn = Button.new()
-	_play_btn.text = "JUGAR"
-	_play_btn.custom_minimum_size = Vector2(200.0, 60.0)
-	_play_btn.add_theme_font_size_override(&"font_size", 26)
-	var normal_sb: StyleBoxFlat = StyleBoxFlat.new()
-	normal_sb.bg_color = BTN_COLOR
-	normal_sb.corner_radius_top_left = 12
-	normal_sb.corner_radius_top_right = 12
-	normal_sb.corner_radius_bottom_left = 12
-	normal_sb.corner_radius_bottom_right = 12
-	_play_btn.add_theme_stylebox_override(&"normal", normal_sb)
-	var hover_sb: StyleBoxFlat = normal_sb.duplicate() as StyleBoxFlat
-	hover_sb.bg_color = BTN_HOVER_COLOR
-	_play_btn.add_theme_stylebox_override(&"hover", hover_sb)
+	_play_btn.text = "▶   JUGAR"
+	_play_btn.custom_minimum_size = Vector2(0.0, 62.0)
+	_play_btn.add_theme_font_size_override(&"font_size", 28)
+	_play_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_play_btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_PLAY_COLOR, Color.TRANSPARENT, 14))
+	_play_btn.add_theme_stylebox_override(&"hover", _make_sb(BTN_PLAY_HOVER, Color.TRANSPARENT, 14))
+	_play_btn.add_theme_stylebox_override(&"pressed", _make_sb(BTN_PLAY_HOVER, Color.TRANSPARENT, 14))
 	_play_btn.pressed.connect(_on_play_pressed)
-	root.add_child(_play_btn)
+	play_margin.add_child(_play_btn)
 
-	var upgrades_spacer: Control = Control.new()
-	upgrades_spacer.custom_minimum_size = Vector2(0.0, 12.0)
-	root.add_child(upgrades_spacer)
+	# --- Secondary button grid ---
+	var grid_pad: Control = Control.new()
+	grid_pad.custom_minimum_size = Vector2(0.0, 16.0)
+	root.add_child(grid_pad)
 
-	var upgrades_btn: Button = Button.new()
-	upgrades_btn.text = "MEJORAS"
-	upgrades_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	upgrades_btn.add_theme_font_size_override(&"font_size", 18)
-	upgrades_btn.pressed.connect(_on_upgrades_pressed)
-	root.add_child(upgrades_btn)
+	var grid_margin: MarginContainer = MarginContainer.new()
+	grid_margin.add_theme_constant_override(&"margin_left", 20)
+	grid_margin.add_theme_constant_override(&"margin_right", 20)
+	root.add_child(grid_margin)
 
-	var settings_spacer: Control = Control.new()
-	settings_spacer.custom_minimum_size = Vector2(0.0, 8.0)
-	root.add_child(settings_spacer)
+	var grid: GridContainer = GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override(&"h_separation", 10)
+	grid.add_theme_constant_override(&"v_separation", 10)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid_margin.add_child(grid)
 
-	var settings_btn: Button = Button.new()
-	settings_btn.text = "CONFIGURACIÓN"
-	settings_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	settings_btn.add_theme_font_size_override(&"font_size", 18)
-	settings_btn.pressed.connect(_on_settings_pressed)
-	root.add_child(settings_btn)
+	_add_grid_btn(grid, "◆", "PERSONAJE", _on_characters_pressed)
+	_add_grid_btn(grid, "▲", "MEJORAS", _on_upgrades_pressed)
+	_add_grid_btn(grid, "≡", "MISIONES", _on_missions_pressed)
+	_add_grid_btn(grid, "★", "LOGROS", _on_achievements_pressed)
+	_add_grid_btn(grid, "◉", "MAPA", _on_biome_map_pressed)
+	_add_grid_btn(grid, "⚡", "DESAFÍO", _on_weekly_challenge_pressed)
 
-	var missions_spacer: Control = Control.new()
-	missions_spacer.custom_minimum_size = Vector2(0.0, 8.0)
-	root.add_child(missions_spacer)
+	# --- Settings (bottom, subtle) ---
+	var cfg_pad: Control = Control.new()
+	cfg_pad.custom_minimum_size = Vector2(0.0, 12.0)
+	root.add_child(cfg_pad)
 
-	var missions_btn: Button = Button.new()
-	missions_btn.text = "MISIONES DIARIAS"
-	missions_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	missions_btn.add_theme_font_size_override(&"font_size", 18)
-	missions_btn.pressed.connect(_on_missions_pressed)
-	root.add_child(missions_btn)
+	var cfg_btn: Button = Button.new()
+	cfg_btn.text = "⚙  CONFIGURACIÓN"
+	cfg_btn.custom_minimum_size = Vector2(180.0, 38.0)
+	cfg_btn.add_theme_font_size_override(&"font_size", 14)
+	cfg_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var cfg_hover_color: Color = Color(0.16, 0.18, 0.16)
+	cfg_btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_CFG_COLOR, MUTED_COLOR, 8, 1))
+	cfg_btn.add_theme_stylebox_override(&"hover", _make_sb(cfg_hover_color, MUTED_COLOR, 8, 1))
+	cfg_btn.add_theme_stylebox_override(&"pressed", _make_sb(cfg_hover_color, MUTED_COLOR, 8, 1))
+	cfg_btn.add_theme_color_override(&"font_color", MUTED_COLOR)
+	cfg_btn.pressed.connect(_on_settings_pressed)
+	root.add_child(cfg_btn)
 
-	var achievements_spacer: Control = Control.new()
-	achievements_spacer.custom_minimum_size = Vector2(0.0, 8.0)
-	root.add_child(achievements_spacer)
-
-	var achievements_btn: Button = Button.new()
-	achievements_btn.text = "LOGROS"
-	achievements_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	achievements_btn.add_theme_font_size_override(&"font_size", 18)
-	achievements_btn.pressed.connect(_on_achievements_pressed)
-	root.add_child(achievements_btn)
-
-	var chars_spacer: Control = Control.new()
-	chars_spacer.custom_minimum_size = Vector2(0.0, 8.0)
-	root.add_child(chars_spacer)
-
-	var chars_btn: Button = Button.new()
-	chars_btn.text = "PERSONAJE"
-	chars_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	chars_btn.add_theme_font_size_override(&"font_size", 18)
-	chars_btn.pressed.connect(_on_characters_pressed)
-	root.add_child(chars_btn)
-
-	var biome_spacer: Control = Control.new()
-	biome_spacer.custom_minimum_size = Vector2(0.0, 8.0)
-	root.add_child(biome_spacer)
-
-	var biome_btn: Button = Button.new()
-	biome_btn.text = "MAPA"
-	biome_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	biome_btn.add_theme_font_size_override(&"font_size", 18)
-	biome_btn.pressed.connect(_on_biome_map_pressed)
-	root.add_child(biome_btn)
-
-	var weekly_spacer: Control = Control.new()
-	weekly_spacer.custom_minimum_size = Vector2(0.0, 8.0)
-	root.add_child(weekly_spacer)
-
-	var weekly_btn: Button = Button.new()
-	weekly_btn.text = "DESAFÍO SEMANAL"
-	weekly_btn.custom_minimum_size = Vector2(160.0, 44.0)
-	weekly_btn.add_theme_font_size_override(&"font_size", 18)
-	weekly_btn.pressed.connect(_on_weekly_challenge_pressed)
-	root.add_child(weekly_btn)
-
-	var btn_spacer: Control = Control.new()
-	btn_spacer.custom_minimum_size = Vector2(0.0, 24.0)
-	root.add_child(btn_spacer)
+	# --- Best score ---
+	var score_pad: Control = Control.new()
+	score_pad.custom_minimum_size = Vector2(0.0, 10.0)
+	root.add_child(score_pad)
 
 	_best_label = Label.new()
-	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
+	_best_label.text = "Mejor puntuación: %d" % SaveManager.get_best_score()
 	_best_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_best_label.add_theme_font_size_override(&"font_size", 18)
-	_best_label.add_theme_color_override(&"font_color", BEST_COLOR)
+	_best_label.add_theme_font_size_override(&"font_size", 14)
+	_best_label.add_theme_color_override(&"font_color", MUTED_COLOR)
 	root.add_child(_best_label)
 
-	var bottom_spacer: Control = Control.new()
-	bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(bottom_spacer)
+	var bottom_pad: Control = Control.new()
+	bottom_pad.custom_minimum_size = Vector2(0.0, 18.0)
+	root.add_child(bottom_pad)
+
+func _animate_title() -> void:
+	var tween: Tween = create_tween().set_loops()
+	tween.tween_property(_title_label, "scale", Vector2(1.04, 1.04), 1.4)
+	tween.tween_property(_title_label, "scale", Vector2(1.0, 1.0), 1.4)
+
+func _add_grid_btn(parent: Control, icon: String, label: String, cb: Callable) -> void:
+	var btn: Button = Button.new()
+	btn.text = icon + "  " + label
+	btn.custom_minimum_size = Vector2(0.0, 52.0)
+	btn.add_theme_font_size_override(&"font_size", 15)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_GRID_COLOR, BTN_GRID_BORDER, 10, 1))
+	btn.add_theme_stylebox_override(&"hover", _make_sb(BTN_GRID_HOVER, BTN_GRID_BORDER, 10, 1))
+	btn.add_theme_stylebox_override(&"pressed", _make_sb(BTN_GRID_HOVER, BTN_GRID_BORDER, 10, 1))
+	btn.pressed.connect(cb)
+	parent.add_child(btn)
+
+func _make_sb(
+	bg: Color,
+	border: Color,
+	radius: int,
+	border_w: int = 0
+) -> StyleBoxFlat:
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(border_w)
+	sb.set_corner_radius_all(radius)
+	return sb
 
 func _on_play_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(GAME_SCENE)

@@ -31,6 +31,12 @@ const SPAWNER_ELITE_UNLOCK_TIME: float = 45.0
 const SPAWNER_ELITE_CHANCE: float = 0.08
 
 const BOSS_SPAWN_INTERVAL: float = 180.0
+
+# --- Character fire-mode geometry ---
+const CHAR_DOUBLE_OFFSET: float = 18.0
+const CHAR_FAN3_ANGLE: float = 25.0
+const CHAR_FAN5_ANGLE: float = 20.0
+
 const BACKGROUND_PALETTE: Array = [
 	Color(0.18, 0.55, 0.08),  # pradera terrestre (mundo 1 — amigable)
 	Color(0.02, 0.18, 0.03),  # jungla nocturna (mundo 2)
@@ -118,33 +124,89 @@ const LASER_DAMAGE_PER_TICK: int = 5
 const LASER_TICK_INTERVAL: float = 0.3
 
 # --- Characters ---
+# Fields: id, name, desc, hp_bonus, fire_rate_mult, damage_mult, cost,
+#         fire_mode (&"normal"|&"double"|&"fan3"|&"fan5"|&"heavy"),
+#         sprite_tint, bullet_tint, bullet_scale
 const CHARACTERS: Array = [
 	{
 		"id": &"guac",
 		"name": "Guacamole",
 		"desc": "Equilibrado. Estadísticas base.",
-		"hp_bonus": 0,
-		"fire_rate_mult": 1.0,
-		"damage_mult": 1.0,
-		"cost": 0,
+		"hp_bonus": 0, "fire_rate_mult": 1.0, "damage_mult": 1.0, "cost": 0,
+		"fire_mode": &"normal",
+		"sprite_tint": Color(1.0, 1.0, 1.0),
+		"bullet_tint": Color(0.55, 1.0, 0.25),
+		"bullet_scale": 1.0,
 	},
 	{
 		"id": &"habanero",
 		"name": "Habanero",
-		"desc": "Disparo +25% más rápido. -1 corazón.",
-		"hp_bonus": -1,
-		"fire_rate_mult": 1.25,
-		"damage_mult": 1.0,
-		"cost": 200,
+		"desc": "Cadencia +25%. -1 corazón.",
+		"hp_bonus": -1, "fire_rate_mult": 1.25, "damage_mult": 1.0, "cost": 200,
+		"fire_mode": &"normal",
+		"sprite_tint": Color(1.0, 0.55, 0.15),
+		"bullet_tint": Color(1.0, 0.5, 0.1),
+		"bullet_scale": 1.0,
 	},
 	{
 		"id": &"serrano",
 		"name": "Serrano",
-		"desc": "Daño +15%. +1 corazón. Disparo -20%.",
-		"hp_bonus": 1,
-		"fire_rate_mult": 0.8,
-		"damage_mult": 1.15,
-		"cost": 300,
+		"desc": "Daño +15%. +1 corazón. Cadencia -20%.",
+		"hp_bonus": 1, "fire_rate_mult": 0.8, "damage_mult": 1.15, "cost": 300,
+		"fire_mode": &"normal",
+		"sprite_tint": Color(0.65, 1.0, 0.15),
+		"bullet_tint": Color(0.65, 1.0, 0.2),
+		"bullet_scale": 1.1,
+	},
+	{
+		"id": &"doble_guac",
+		"name": "Doble Guac",
+		"desc": "2 balas simultáneas en paralelo.",
+		"hp_bonus": 0, "fire_rate_mult": 1.0, "damage_mult": 1.0, "cost": 450,
+		"fire_mode": &"double",
+		"sprite_tint": Color(0.2, 0.85, 1.0),
+		"bullet_tint": Color(0.25, 0.9, 1.0),
+		"bullet_scale": 1.0,
+	},
+	{
+		"id": &"veloz",
+		"name": "Jalapeño Veloz",
+		"desc": "Cadencia ×1.7. Daño -25%. Balas pequeñas.",
+		"hp_bonus": 0, "fire_rate_mult": 1.7, "damage_mult": 0.75, "cost": 600,
+		"fire_mode": &"normal",
+		"sprite_tint": Color(1.0, 1.0, 0.15),
+		"bullet_tint": Color(1.0, 1.0, 0.2),
+		"bullet_scale": 0.75,
+	},
+	{
+		"id": &"tornado",
+		"name": "Tornado Verde",
+		"desc": "3 balas en abanico (±25°). Cadencia -25%.",
+		"hp_bonus": 0, "fire_rate_mult": 0.75, "damage_mult": 1.0, "cost": 750,
+		"fire_mode": &"fan3",
+		"sprite_tint": Color(0.55, 0.25, 1.0),
+		"bullet_tint": Color(0.6, 0.35, 1.0),
+		"bullet_scale": 1.0,
+	},
+	{
+		"id": &"aplastador",
+		"name": "Mole Aplastador",
+		"desc": "Daño ×2, balas grandes. +1 corazón. Cadencia -40%.",
+		"hp_bonus": 1, "fire_rate_mult": 0.6, "damage_mult": 2.0, "cost": 1000,
+		"fire_mode": &"heavy",
+		"sprite_tint": Color(0.65, 0.3, 0.08),
+		"bullet_tint": Color(0.75, 0.25, 0.05),
+		"bullet_scale": 1.7,
+	},
+	{
+		"id": &"gran_abanico",
+		"name": "Gran Abanico",
+		"desc": "5 balas en abanico (±40°). Cadencia -50%.",
+		"hp_bonus": 0, "fire_rate_mult": 0.5, "damage_mult": 1.0, "cost": 1400,
+		"fire_mode": &"fan5",
+		"sprite_tint": Color(1.0, 0.2, 0.65),
+		"bullet_tint": Color(1.0, 0.3, 0.7),
+		"bullet_scale": 1.0,
 	},
 ]
 

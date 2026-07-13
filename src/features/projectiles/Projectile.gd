@@ -55,6 +55,12 @@ func _bounce_at_width(vp_width: float) -> void:
 		_direction.x = -absf(_direction.x)
 		position.x = vp_width
 
+func setup_visuals(tint: Color, scale_mult: float) -> void:
+	scale = Vector2(scale_mult, scale_mult)
+	var spr := get_node_or_null(^"Sprite2D") as Node2D
+	if spr != null:
+		spr.modulate = tint
+
 func get_damage() -> float:
 	return _damage
 

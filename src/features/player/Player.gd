@@ -151,6 +151,10 @@ func _on_game_started() -> void:
 	var shield_level: int = SaveManager.get_upgrade_level(&"starter_shield")
 	_update_shield(shield_level * Constants.META_STARTER_SHIELD_PER_LEVEL)
 	_nacho_wall_stacks = 0
+	var sprite_tint: Color = char_data.get("sprite_tint", Color.WHITE) as Color
+	var spr := get_node_or_null(^"Sprite2D") as Node2D
+	if spr != null:
+		spr.modulate = sprite_tint
 	EventBus.player_health_changed.emit(_health, _max_health)
 
 func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
@@ -165,6 +169,9 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 		&"nacho_wall":
 			if count > _nacho_wall_stacks:
 				_update_shield(_shield_hits + Constants.NACHO_WALL_HITS)
+			elif count < _nacho_wall_stacks:
+				var removed: int = (_nacho_wall_stacks - count) * Constants.NACHO_WALL_HITS
+				_update_shield(maxi(0, _shield_hits - removed))
 			_nacho_wall_stacks = count
 
 func _on_heart_collected() -> void:

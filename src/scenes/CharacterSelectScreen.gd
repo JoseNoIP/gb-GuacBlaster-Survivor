@@ -92,9 +92,15 @@ func _build_ui() -> void:
 	margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(margin)
 
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	margin.add_child(scroll)
+
 	var list: VBoxContainer = VBoxContainer.new()
 	list.add_theme_constant_override(&"separation", 14)
-	margin.add_child(list)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
 
 	for def in Constants.CHARACTERS:
 		_build_card(list, def as Dictionary, gold_lbl)
@@ -147,6 +153,12 @@ func _build_card(
 	var hbox: HBoxContainer = HBoxContainer.new()
 	hbox.add_theme_constant_override(&"separation", 12)
 	card.add_child(hbox)
+
+	var swatch: ColorRect = ColorRect.new()
+	swatch.custom_minimum_size = Vector2(6.0, 0.0)
+	swatch.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	swatch.color = def.get("sprite_tint", Color.WHITE) as Color
+	hbox.add_child(swatch)
 
 	var info: VBoxContainer = VBoxContainer.new()
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
