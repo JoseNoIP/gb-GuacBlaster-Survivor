@@ -32,11 +32,12 @@ const SPAWNER_ELITE_CHANCE: float = 0.08
 
 const BOSS_SPAWN_INTERVAL: float = 180.0
 const BACKGROUND_PALETTE: Array = [
-	Color(0.02, 0.18, 0.03),  # jungla oscura (default)
-	Color(0.05, 0.02, 0.28),  # crepúsculo / índigo
-	Color(0.26, 0.04, 0.01),  # volcánico / brasa
-	Color(0.01, 0.07, 0.26),  # abismo / océano profundo
-	Color(0.22, 0.02, 0.08),  # luna sangre / desierto nocturno
+	Color(0.18, 0.55, 0.08),  # pradera terrestre (mundo 1 — amigable)
+	Color(0.02, 0.18, 0.03),  # jungla nocturna (mundo 2)
+	Color(0.05, 0.02, 0.28),  # crepúsculo índigo (mundo 3)
+	Color(0.26, 0.04, 0.01),  # volcánico / brasa (mundo 4)
+	Color(0.01, 0.07, 0.26),  # abismo oceánico (mundo 5)
+	Color(0.22, 0.02, 0.08),  # luna sangre / desierto final (mundo 6)
 ]
 const BOSS_TIMER_SHOW_REMAINING: float = 90.0
 const BOSS_HP_BASE: int = 400

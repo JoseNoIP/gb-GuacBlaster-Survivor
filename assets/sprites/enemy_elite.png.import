@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://e194j1o5gu3wv5"
-path="res://.godot/imported/enemy_elite.png-e194j1o5gu3wv5.ctex"
+uid="uid://1gldmfp26gnq"
+path="res://.godot/imported/enemy_elite.png-d687906732a3aa2c8a228fd2b6ae8806.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/enemy_elite.png"
-dest_files=["res://.godot/imported/enemy_elite.png-e194j1o5gu3wv5.ctex"]
+dest_files=["res://.godot/imported/enemy_elite.png-d687906732a3aa2c8a228fd2b6ae8806.ctex"]
 
 [params]
 

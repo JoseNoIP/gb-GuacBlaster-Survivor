@@ -73,38 +73,44 @@ def chroma_key(img: Image.Image, bg_color=(255,255,255), tolerance=30) -> Image.
 # ---------------------------------------------------------------------------
 
 BIOME_PROMPTS = [
-    # Biome 0: Dark jungle
+    # Biome 0: Sunny Earth meadow (friendly start)
+    "sunny green meadow landscape game background portrait, "
+    "bright blue sky fluffy white clouds, rolling green hills flowers, "
+    "cheerful happy daytime, vibrant colors, mobile game art",
+
+    # Biome 1: Dark jungle night
     "dark tropical jungle night game background portrait 390x844 pixels, "
     "dense dark green foliage palm trees, glowing fireflies, crescent moon, "
     "atmospheric moody, dark green tones, mobile game art",
 
-    # Biome 1: Twilight indigo
+    # Biome 2: Twilight indigo city
     "twilight indigo purple night sky cityscape game background portrait, "
     "mystical stars nebula glowing, urban silhouette, deep purple tones, "
     "atmospheric moody mobile game art",
 
-    # Biome 2: Volcanic ember
+    # Biome 3: Volcanic ember
     "volcanic lava landscape game background portrait, glowing lava rivers, "
     "molten rock dark red orange embers, volcano peak, dark inferno tones, "
     "atmospheric dramatic mobile game art",
 
-    # Biome 3: Deep ocean abyss
+    # Biome 4: Deep ocean abyss
     "deep ocean abyss underwater game background portrait, bioluminescent "
     "jellyfish creatures, dark blue tones, abyssal depth, glowing particles, "
     "atmospheric mobile game art",
 
-    # Biome 4: Blood moon desert
+    # Biome 5: Blood moon desert (final world)
     "blood moon red night desert game background portrait, dramatic crimson sky, "
     "dark sand dunes silhouette, dead trees, gothic dark red tones, "
     "atmospheric moody mobile game art",
 ]
 
 VARIANT_SEEDS = [
-    [7, 44, 81],      # biome 0
-    [107, 144, 181],  # biome 1
-    [207, 244, 281],  # biome 2
-    [307, 344, 381],  # biome 3
-    [407, 444, 481],  # biome 4
+    [500, 501, 502],  # biome 0 — sunny Earth
+    [7, 44, 81],      # biome 1 — dark jungle
+    [107, 144, 181],  # biome 2 — twilight city
+    [207, 244, 281],  # biome 3 — volcanic
+    [307, 344, 381],  # biome 4 — ocean abyss
+    [407, 444, 481],  # biome 5 — blood moon
 ]
 
 # ---------------------------------------------------------------------------

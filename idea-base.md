@@ -210,14 +210,15 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Antes: ×1.25 de cadencia por stack.
 - Ahora: ×2.0 por stack (apilable: 2 stacks = ×4, 3 stacks = ×8, mínimo 0.05s).
 
-## Backgrounds generados — 5 biomas × 3 variantes ✅
-- **15 imágenes** `bg_{bioma}_{variante}.png` (390×844 px) generadas por `tools/gen_assets.py` con Python stdlib.
-- Selector en `Game.gd`: `biome = victories % 5`, `variant = (victories / 5) % 3`, `gen = victories / 15`.
-- **Tint por generación** (`_get_gen_tint()`): gen 0 sin cambio, gen 1 frío/azulado, gen 2 cálido/rojizo, gen 3+ violáceo.
-- Efecto: el jugador ve 15 fondos visualmente distintos antes de repetir exactamente el mismo, con variación de tono indefinida.
-- Biomas: 0=Jungla nocturna, 1=Crepúsculo urbano, 2=Volcánico, 3=Abismo oceánico, 4=Luna de Sangre.
-- Cada variante escala dramátismo: v0 normal, v1 más intensa (tormenta, más volcanes, más profundidad), v2 extrema (eclipse, erupción total, noche total).
+## Backgrounds generados — 6 biomas × 3 variantes ✅
+- **18 imágenes** `bg_{bioma}_{variante}.png` (390×844 px) AI-generadas con Pollinations.ai (Flux, gratis).
+- Selector en `Game.gd`: `biome = victories % palette.size()`, `variant = (victories / palette.size()) % 3`, `gen = victories / (palette.size() * 3)`.
+- **Tint por generación** (`_get_gen_tint()`): gen 0 neutro, gen 1 frío/azulado, gen 2 cálido/rojizo, gen 3+ violáceo.
+- Efecto: el jugador ve 18 fondos distintos antes de repetir, con variación de tono indefinida por generación.
+- Biomas (de más amigable a más oscuro): 0=Pradera Guacamole (tierra soleada), 1=Jungla Nocturna, 2=Crepúsculo Índigo, 3=Caldera Volcánica, 4=Abismo Oceánico, 5=Desierto de Luna Sangre.
+- Diseño intencional: primer mundo brillante/feliz para onboarding; oscuridad crece con dificultad.
 - La textura se carga como `TextureRect` hijo del `$Background` ColorRect; si no existe PNG usa el color de `BACKGROUND_PALETTE` como fallback.
+- Pipeline de regeneración: `tools/fetch_ai_assets.py` (secuencial, 1 req a la vez, venv Pillow).
 
 ## Escalado 2× de todos los elementos de gameplay ✅
 - Sprites generados nativamente al doble de resolución en `gen_assets.py` (sin escalar en Godot — `scale = Vector2(1,1)` en todos los Sprite2D).
@@ -334,9 +335,9 @@ El workflow parchea automáticamente el path en CI con `sed`.
 
 ## Mapa de Biomas ✅
 - Nueva pantalla: `src/scenes/BiomeMapScreen.gd/.tscn`.
-- Muestra los 5 biomas con swatch de color, nombre, estado lock/unlock.
+- Muestra los 6 biomas con swatch de color, nombre, estado lock/unlock.
 - Bioma desbloqueado si `victories > idx` (bioma 0 siempre disponible).
-- Indica bioma actual (`victories % 5`).
+- Indica bioma actual (`victories % Constants.BACKGROUND_PALETTE.size()`).
 - Accesible desde MainMenu → botón MAPA.
 
 ## Toast de Personaje Seleccionado ✅
@@ -401,8 +402,9 @@ El workflow parchea automáticamente el path en CI con `sed`.
 # Assets con IA ✅
 
 ## Fondos de bioma — AI-generated (Pollinations.ai Flux)
-- 15 imágenes 390×844 px: `bg_{0-4}_{0-2}.png` (5 biomas × 3 variantes)
-- Generadas con prompts específicos por bioma: jungla oscura, crepúsculo índigo, volcánico, abismo oceánico, luna de sangre
+- 18 imágenes 390×844 px: `bg_{0-5}_{0-2}.png` (6 biomas × 3 variantes)
+- Diseño progresivo: bioma 0 tierra soleada/amigable → bioma 5 desierto luna de sangre/final
+- Biomas: 0=Pradera (seeds 500-502), 1=Jungla oscura (7-81), 2=Índigo (107-181), 3=Volcánico (207-281), 4=Oceánico (307-381), 5=Luna Sangre (407-481)
 - Herramienta: `tools/fetch_ai_assets.py` (requiere venv con Pillow)
 
 ## Sprites principales — AI-generated (Pollinations.ai Flux)

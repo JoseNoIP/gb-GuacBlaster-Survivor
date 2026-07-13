@@ -352,7 +352,7 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 ### Assets completados con IA
 | Asset | Ruta | Estado | Herramienta |
 |---|---|---|---|
-| 15 fondos de bioma (5 biomas × 3 variantes) | `assets/sprites/backgrounds/bg_N_V.png` | ✅ AI-generated | Pollinations.ai (Flux) 390×844 |
+| 18 fondos de bioma (6 biomas × 3 variantes) | `assets/sprites/backgrounds/bg_N_V.png` | ✅ AI-generated | Pollinations.ai (Flux) 390×844 |
 | Player | `assets/sprites/player.png` | ✅ AI-generated | Pollinations.ai (Flux) 64×64 |
 | 5 enemigos + boss | `assets/sprites/enemy_*.png` | ✅ AI-generated | Pollinations.ai (Flux) |
 | Proyectil, gema, corazón | `assets/sprites/{projectile,gem,heart}.png` | ✅ AI-generated | Pollinations.ai (Flux) |

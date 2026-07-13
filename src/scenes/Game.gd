@@ -11,9 +11,10 @@ var _shake_timer: float = 0.0
 
 func _ready() -> void:
 	var wins: int = SaveManager.get_victories()
-	var biome: int = wins % 5
-	var variant: int = (wins / 5) % 3
-	var gen: int = wins / 15
+	var world_count: int = Constants.BACKGROUND_PALETTE.size()
+	var biome: int = wins % world_count
+	var variant: int = (wins / world_count) % 3
+	var gen: int = wins / (world_count * 3)
 	_background.color = Constants.BACKGROUND_PALETTE[biome]
 	_load_bg_texture(biome, variant, gen)
 	GameManager.start_game()

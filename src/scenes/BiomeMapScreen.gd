@@ -5,7 +5,8 @@ extends Node2D
 const MAIN_MENU_SCENE: String = "res://src/scenes/MainMenu.tscn"
 
 const BIOME_NAMES: Array = [
-	"Jungla Guacamole",
+	"Pradera Guacamole",
+	"Jungla Nocturna",
 	"Crepúsculo Índigo",
 	"Caldera Volcánica",
 	"Abismo Oceánico",
