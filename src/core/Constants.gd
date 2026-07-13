@@ -106,7 +106,7 @@ const HEART_DROP_INTERVAL: float = 45.0
 const HEART_DROP_SPEED: float = 80.0
 
 # --- XP ---
-const XP_BASE_REQUIRED: int = 40
+const XP_BASE_REQUIRED: int = 80
 const XP_SCALE_FACTOR: float = 1.2
 
 # --- Combat ---
