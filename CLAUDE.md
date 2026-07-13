@@ -249,14 +249,15 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | Sensibilidad swipe | 1.0 (base) | Configurable en Settings (100%–200%). Guardado en SaveManager. |
 
 ### Enemigos
-| Tipo | HP | Comportamiento especial |
-|---|---|---|
-| Burbuja Básica | 1 | Línea recta descendente |
-| Burbuja Tanque | 5 | Split en 4 básicas al morir |
-| Mosca Nacho | 1 | Zigzag diagonal, rápida |
-| Jefe | 100+50×gen | Dispara proyectiles, aparece cada 3 min |
+| Tipo | HP | Disparos para matar (daño base=10) | Comportamiento especial |
+|---|---|---|---|
+| Burbuja Básica | 10 | 1 | Línea recta descendente |
+| Burbuja Tanque | 80 | 8 | Split en 4 básicas al morir |
+| Mosca Nacho | 50 | 5 | Zigzag diagonal, doble tamaño de básica |
+| Élite Dorada | 200 (10×20) | 20 | Drop power-up al morir |
+| Jefe | 400+80×gen | 40+ | Dispara proyectiles, aparece cada 3 min |
 
-### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales **30s**, stackables
+### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales **45s**, stackables
 **guac_storm**: streams distribuidos simétricamente. 1 stack=X2 (±20px), 2=X3 (-40/0/+40), …, 5=X6. Triple Shot aplica a todos los streams.
 
 
@@ -310,6 +311,7 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `/feature [nombre]` | Al implementar cualquier feature nueva — guía completa PLAN→IMPL→VALIDATE→SANITY→DOC |
 | `/doc` | Al cerrar cualquier tarea — sincroniza idea-base.md, CLAUDE.md y memorias |
 | `/new-game [gdd.md]` | Para construir un juego nuevo desde cero — autónomo hasta build funcional |
+| `/gen-ai-art` | Generar arte final de un juego con Pollinations.ai (Flux, gratis) — backgrounds, sprites con transparencia, íconos procedurales |
 
 Los skills viven en `.claude/skills/<nombre>/SKILL.md`.
 
@@ -347,10 +349,32 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 | Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
 | Export release iOS | Provisioning profile, Apple Dev account | |
 
-### Assets externos requeridos
-| Asset | Ruta esperada | Notas |
-|---|---|---|
-| 5 fondos de bioma | `assets/sprites/backgrounds/bg_0…4.png` | 390×844 px, pixel art |
-| 7 SFX | `assets/audio/*.ogg` | shoot, enemy_die, boss_die, player_hit, levelup, gem_collect, music_loop |
-| Sprites de personajes | `assets/sprites/` | player, 4 enemigos, proyectil, gema |
-| 9 íconos de power-up | `assets/sprites/powerup_icons/` | ts, sg, rf, mg, jl, sb, nw, sm, gs — 32×32 px |
+### Assets completados con IA
+| Asset | Ruta | Estado | Herramienta |
+|---|---|---|---|
+| 15 fondos de bioma (5 biomas × 3 variantes) | `assets/sprites/backgrounds/bg_N_V.png` | ✅ AI-generated | Pollinations.ai (Flux) 390×844 |
+| Player | `assets/sprites/player.png` | ✅ AI-generated | Pollinations.ai (Flux) 64×64 |
+| 5 enemigos + boss | `assets/sprites/enemy_*.png` | ✅ AI-generated | Pollinations.ai (Flux) |
+| Proyectil, gema, corazón | `assets/sprites/{projectile,gem,heart}.png` | ✅ AI-generated | Pollinations.ai (Flux) |
+| 9 íconos de power-up | `assets/sprites/powerup_icons/*.png` | ✅ Mejorados (procedural) | gen_assets.py rediseñado |
+| Boot splash + App icon | `assets/splash.png`, `assets/icon.png` | ✅ Procedural (GuacamoleBit logo) | gen_assets.py |
+| 7 SFX | `assets/audio/*.wav` | ✅ Sintéticos | gen_assets.py |
+
+**Pipeline de regeneración de assets:**
+```bash
+# Regenerar sprites + íconos procedurales (fallback si AI falla)
+python3 tools/gen_assets.py
+
+# Re-generar assets AI (backgrounds + sprites principales)
+/tmp/gb_venv/bin/python3 tools/fetch_ai_assets.py
+# (requiere: python3 -m venv /tmp/gb_venv && /tmp/gb_venv/bin/pip install Pillow)
+
+# Re-descargar solo biomas 0 y 1 (si fueron sobrescritos)
+/tmp/gb_venv/bin/python3 tools/redownload_missing_bgs.py
+```
+
+### Assets aún pendientes
+| Asset | Notas |
+|---|---|
+| 7 SFX en formato OGG | Actualmente WAV sintéticos; Godot puede importar WAV, no bloquea |
+| Audio de mejor calidad | Música loop y SFX mejorados requieren compositor o banco de sonidos libre |

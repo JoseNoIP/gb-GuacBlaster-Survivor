@@ -267,79 +267,93 @@ def make_app_icon(size=512):
 # ---------------------------------------------------------------------------
 
 def make_player(size=32):
-    """Green guacamole ship — triangle with rounded top and cockpit."""
+    """Green avocado-themed ship — tapered body, swept wings, glowing cockpit."""
     g = _grid(size, size)
-    cx, cy = size // 2, size // 2
-    MAIN = (68, 200, 40, 255)
-    HI = (120, 235, 80, 255)
-    SH = (35, 120, 18, 255)
-    COCKPIT = (40, 160, 220, 255)
+    cx = size // 2
+    MAIN  = (55, 185, 35, 255)
+    HI    = (110, 230, 70, 255)
+    SH    = (28, 110, 14, 255)
+    DARK  = (18, 70, 8, 255)
+    COCKPIT = (60, 180, 235, 255)
+    COCKHI  = (160, 230, 255, 255)
+    ENG   = (255, 170, 40, 255)
+    ENG2  = (255, 220, 90, 200)
 
-    # Body triangle (pointing up)
-    body = [
-        (cx, 4),
-        (cx + 12, size - 4),
-        (cx - 12, size - 4),
-    ]
+    half = size // 2
+    # Main body — tapered triangle
+    body = [(cx, 3), (cx + half - 2, size - 5), (cx - half + 2, size - 5)]
     _poly(g, body, MAIN)
+    # Shading — right side darker
+    shade = [(cx, 3), (cx + half - 2, size - 5), (cx, size - 5)]
+    _poly(g, shade, SH)
+    # Highlight stripe down center-left
+    _vline(g, cx - 2, 6, size - 8, HI)
 
-    # Wings
-    lwing = [(cx - 12, size - 4), (cx - 4, size - 12), (cx - 16, size - 10)]
-    rwing = [(cx + 12, size - 4), (cx + 4, size - 12), (cx + 16, size - 10)]
-    _poly(g, lwing, SH)
-    _poly(g, rwing, SH)
+    # Swept wings
+    lw = [(cx - half + 2, size - 5), (cx - 4, size - 12), (0, size - 8), (0, size - 3)]
+    rw = [(cx + half - 2, size - 5), (cx + 4, size - 12), (size - 1, size - 8), (size - 1, size - 3)]
+    _poly(g, lw, DARK)
+    _poly(g, rw, DARK)
+    # Wing highlight edges
+    _vline(g, 1, size - 9, size - 4, HI)
+    _vline(g, size - 2, size - 9, size - 4, HI)
 
-    # Cockpit circle
-    _circle(g, cx, cy - 2, 5, COCKPIT)
+    # Cockpit — glowing oval
+    _circle(g, cx, half - 4, half // 3, COCKPIT)
+    _circle(g, cx - 1, half - 5, half // 6, COCKHI)
 
-    # Highlight stripe
-    _vline(g, cx, 6, cy - 8, HI)
-
-    # Outline the whole thing
-    _outline_circle(g, cx, size - 6, 10, BLK)
+    # Dark outline
     for y in range(size):
         for x in range(size):
-            if tuple(g[y][x]) != T and (
-                x == 0 or y == 0 or x == size - 1 or y == size - 1
-                or tuple(g[y][x - 1]) == T or tuple(g[y][x + 1]) == T
-                or tuple(g[y - 1][x]) == T or tuple(g[y + 1][x]) == T
-            ):
-                pass  # skip border outline, handled per shape
+            if tuple(g[y][x]) != T:
+                for dx2, dy2 in [(-1,0),(1,0),(0,-1),(0,1)]:
+                    if 0 <= x+dx2 < size and 0 <= y+dy2 < size:
+                        if tuple(g[y+dy2][x+dx2]) == T:
+                            _set(g, x, y, DARK)
+                            break
 
-    # Engine glow at bottom
-    for dx in range(-3, 4):
-        _set(g, cx + dx, size - 4, (255, 160, 40, 200))
+    # Engine exhaust glow
+    for dx in range(-4, 5):
+        br = 255 - abs(dx) * 25
+        _set(g, cx + dx, size - 4, (ENG[0], br, 40, 210))
     for dx in range(-2, 3):
-        _set(g, cx + dx, size - 3, (255, 200, 80, 150))
+        _set(g, cx + dx, size - 3, ENG2)
 
     return _flat(g)
 
 
 def make_enemy_basic(size=28):
-    """Small red angry bubble."""
+    """Small red angry bubble with scowling face."""
     g = _grid(size, size)
     cx, cy = size // 2, size // 2
     R = size // 2 - 2
-    MAIN = (230, 50, 50, 255)
-    HI = (255, 110, 110, 255)
-    SH = (140, 15, 15, 255)
+    MAIN = (230, 45, 45, 255)
+    HI   = (255, 120, 120, 255)
+    SH   = (130, 10, 10, 255)
+    GLOSS = (255, 200, 200, 200)
 
     _circle(g, cx, cy, R, MAIN)
-    # Highlight top-left
-    _circle(g, cx - 3, cy - 3, R // 3, HI)
-    # Shadow bottom-right
-    _circle(g, cx + 2, cy + 2, R // 4, SH)
-    # Angry eyes
-    for ex, ey in [(cx - 4, cy - 2), (cx + 4, cy - 2)]:
-        _circle(g, ex, ey, 2, BLK)
-        _circle(g, ex - 1, ey - 1, 1, (255, 50, 50, 255))
+    # Shadow arc bottom-right
+    _circle(g, cx + R // 3, cy + R // 3, R // 2, SH)
+    # Highlight blob
+    _circle(g, cx - R // 3, cy - R // 3, max(2, R // 3), HI)
+    # Gloss specular
+    _circle(g, cx - R // 3 + 1, cy - R // 3 - 1, max(1, R // 6), GLOSS)
+    # Angry brow lines
+    _hline(g, cy - R // 2, cx - R // 2, cx - 1, BLK)
+    _hline(g, cy - R // 2, cx + 1, cx + R // 2, BLK)
+    _set(g, cx - 1, cy - R // 2 + 1, BLK)
+    _set(g, cx + 1, cy - R // 2 + 1, BLK)
+    # Eyes
+    for ex in [cx - R // 3, cx + R // 3]:
+        _circle(g, ex, cy - 1, max(1, R // 5), BLK)
+        _set(g, ex + 1, cy - 2, (255, 60, 60, 255))
     # Frown
-    for dx in range(-3, 4):
-        _set(g, cx + dx, cy + 5, BLK)
-    _set(g, cx - 3, cy + 4, BLK)
-    _set(g, cx + 3, cy + 4, BLK)
+    arc_y = cy + R // 2 - 1
+    for dx in range(-R // 3, R // 3 + 1):
+        drop = abs(dx) // 2
+        _set(g, cx + dx, arc_y + drop, BLK)
     _outline_circle(g, cx, cy, R, BLK)
-
     return _flat(g)
 
 
@@ -433,48 +447,76 @@ def make_enemy_zigzag(size=26):
 
 
 def make_enemy_boss(size=72):
-    """Large purple demon face."""
+    """Large purple demon boss — expressive face, imposing horns, glowing eyes."""
     g = _grid(size, size)
     cx, cy = size // 2, size // 2
-    R = size // 2 - 3
-    MAIN = (120, 30, 195, 255)
-    HI = (180, 80, 255, 255)
-    SH = (55, 8, 100, 255)
-    HORN = (80, 15, 140, 255)
-    EYE_GLOW = (255, 50, 50, 255)
-    MOUTH = (40, 5, 80, 255)
+    R = size // 2 - 4
+    MAIN     = (110, 25, 180, 255)
+    HI       = (175, 75, 255, 255)
+    SH       = (50, 5, 90, 255)
+    HORN_C   = (75, 10, 130, 255)
+    HORN_HI  = (120, 30, 200, 255)
+    EYE_OUT  = (20, 0, 40, 255)
+    EYE_GLOW = (255, 40, 40, 255)
+    EYE_CORE = (255, 210, 40, 255)
+    MOUTH_C  = (35, 0, 70, 255)
 
-    # Main head
+    # Head body
     _circle(g, cx, cy + 4, R, MAIN)
-    # Highlight top-left
-    _circle(g, cx - 10, cy - 6, R // 4, HI)
-    # Shadow bottom
-    _circle(g, cx + 5, cy + 12, R // 3, SH)
+    # Shading
+    _circle(g, cx + R // 3, cy + R // 2, int(R * 0.55), SH)
+    # Highlight
+    _circle(g, cx - R // 3, cy - R // 4, R // 4, HI)
+    _circle(g, cx - R // 3 + 2, cy - R // 4 - 2, R // 8, (210, 160, 255, 200))
 
-    # Horns
-    horn_l = [(cx - 16, cy - R + 8), (cx - 22, cy - R - 8), (cx - 10, cy - R + 2)]
-    horn_r = [(cx + 16, cy - R + 8), (cx + 22, cy - R - 8), (cx + 10, cy - R + 2)]
-    _poly(g, horn_l, HORN)
-    _poly(g, horn_r, HORN)
+    # Curved horns
+    for side in [-1, 1]:
+        bx = cx + side * (R - 6)
+        by = cy - R + 6
+        pts = [
+            (bx, by + 4),
+            (bx + side * 12, by - 18),
+            (bx + side * 18, by - 30),
+            (bx + side * 14, by - 20),
+            (bx + side * 5, by - 6),
+        ]
+        _poly(g, pts, HORN_C)
+        # Horn highlight
+        _vline(g, bx + side * 2, by - 14, by + 2, HORN_HI)
 
-    # Glowing red eyes
-    for ex in [cx - 12, cx + 12]:
-        _circle(g, ex, cy - 4, 7, BLK)
-        _circle(g, ex, cy - 4, 5, EYE_GLOW)
-        _circle(g, ex, cy - 4, 2, (255, 200, 50, 255))
+    # Eyes — glowing orbs
+    eye_y = cy - 4
+    for side in [-1, 1]:
+        ex = cx + side * (R // 3 + 4)
+        _circle(g, ex, eye_y, R // 6 + 2, EYE_OUT)
+        _circle(g, ex, eye_y, R // 6, EYE_GLOW)
+        _circle(g, ex, eye_y, R // 10, EYE_CORE)
+        # Pupil slit
+        _vline(g, ex, eye_y - R // 10, eye_y + R // 10, (80, 0, 0, 255))
+        # Eye glow halo
+        for r in range(R // 6 + 3, R // 6 + 7):
+            for angle in range(0, 360, 20):
+                a = math.radians(angle)
+                hx = int(ex + r * math.cos(a))
+                hy = int(eye_y + r * math.sin(a))
+                if 0 <= hx < size and 0 <= hy < size:
+                    old = g[hy][hx]
+                    g[hy][hx] = [min(255, old[0] + 25), old[1], old[2], 255]
 
-    # Mouth — wide frown with teeth
-    for dx in range(-12, 13):
-        _set(g, cx + dx, cy + 14, BLK)
-        _set(g, cx + dx, cy + 15, MOUTH)
-    for dx in range(-10, 11):
-        _set(g, cx + dx, cy + 16, MOUTH)
-    # Teeth
-    for tx in [cx - 8, cx - 3, cx + 3, cx + 8]:
-        _vline(g, tx, cy + 15, cy + 18, WHT)
+    # Mouth — curved with jagged teeth
+    mouth_y = cy + R // 2
+    for dx in range(-R // 2, R // 2 + 1):
+        sag = abs(dx) // 4
+        _set(g, cx + dx, mouth_y + sag, MOUTH_C)
+        _set(g, cx + dx, mouth_y + sag + 1, BLK)
+    # Upper teeth
+    for tx in [cx - R // 3, cx - R // 8, cx + R // 8, cx + R // 3]:
+        _vline(g, tx, mouth_y - 4, mouth_y - 1, WHT)
+    # Lower fangs (longer)
+    for tx in [cx - R // 4, cx + R // 4]:
+        _vline(g, tx, mouth_y + 1, mouth_y + 7, WHT)
 
     _outline_circle(g, cx, cy + 4, R, BLK)
-
     return _flat(g)
 
 
@@ -550,16 +592,18 @@ def make_heart(size=26):
 # ---------------------------------------------------------------------------
 
 _ICON_COLORS = {
-    "triple_shot":    (50, 140, 255, 255),
-    "super_guac":     (50, 210, 80, 255),
-    "rapid_fire":     (255, 130, 30, 255),
-    "mole_grenade":   (200, 80, 50, 255),
-    "jalapeno_laser": (255, 230, 40, 255),
-    "spicy_bounce":   (200, 60, 220, 255),
-    "nacho_wall":     (230, 195, 40, 255),
-    "salsa_magnet":   (40, 220, 220, 255),
-    "guac_storm":     (100, 235, 60, 255),
+    "triple_shot":    (40, 120, 255, 255),
+    "super_guac":     (40, 195, 70, 255),
+    "rapid_fire":     (255, 120, 20, 255),
+    "mole_grenade":   (190, 65, 40, 255),
+    "jalapeno_laser": (245, 220, 30, 255),
+    "spicy_bounce":   (190, 50, 210, 255),
+    "nacho_wall":     (220, 185, 30, 255),
+    "salsa_magnet":   (30, 210, 210, 255),
+    "guac_storm":     (90, 225, 50, 255),
 }
+
+DARK = (0, 0, 0, 200)
 
 
 def _rounded_rect(g, x1, y1, x2, y2, r, c):
@@ -571,119 +615,206 @@ def _rounded_rect(g, x1, y1, x2, y2, r, c):
     _circle(g, x2 - r, y2 - r, r, c)
 
 
-def _icon_base(name, size=32):
+def _icon_base(name: str, size: int = 64) -> list:
+    """Rounded square background with gradient-ish shading."""
     g = _grid(size, size)
     bg = _ICON_COLORS[name]
-    dark_bg = (max(0, bg[0] - 50), max(0, bg[1] - 50), max(0, bg[2] - 50), 255)
-    _rounded_rect(g, 1, 1, size - 2, size - 2, 4, bg)
-    _rounded_rect(g, 1, 1, size - 2, size - 2, 4, dark_bg)  # outline trick
-    _rounded_rect(g, 2, 2, size - 3, size - 3, 3, bg)
+    dark = (max(0, bg[0] - 70), max(0, bg[1] - 70), max(0, bg[2] - 70), 255)
+    light = (min(255, bg[0] + 40), min(255, bg[1] + 40), min(255, bg[2] + 40), 255)
+    r = size // 8
+    _rounded_rect(g, 0, 0, size - 1, size - 1, r, dark)
+    _rounded_rect(g, 2, 2, size - 3, size - 3, r - 1, bg)
+    _rounded_rect(g, 2, 2, size - 3, size // 2, r - 1, light)
     return g
 
 
-def _make_ts_icon(size=32):
-    """Triple shot — three upward arrows."""
+def _arrow_up(g: list, cx: int, tip_y: int, length: int, width: int, c: tuple) -> None:
+    """Draw a filled upward arrow."""
+    hw = width // 2
+    head = length // 3
+    # Shaft
+    _rect(g, cx - hw // 2, tip_y + head, cx + hw // 2, tip_y + length, c)
+    # Head
+    _poly(g, [(cx, tip_y), (cx + hw, tip_y + head), (cx - hw, tip_y + head)], c)
+
+
+def _make_ts_icon(size: int = 64) -> list:
+    """Triple shot — three upward arrows, center slightly larger."""
     g = _icon_base("triple_shot", size)
-    for ox in [-8, 0, 8]:
-        cx = size // 2 + ox
-        _vline(g, cx, 8, 22, WHT)
-        _set(g, cx, 7, WHT)
-        _set(g, cx - 1, 10, WHT)
-        _set(g, cx + 1, 10, WHT)
+    s = size // 64
+    for i, (ox, tip, ln, wd) in enumerate([(-16, 10, 44, 12),
+                                             (0,   6, 52, 16),
+                                             (16, 10, 44, 12)]):
+        shade = WHT if i == 1 else (200, 220, 255, 255)
+        _arrow_up(g, size // 2 + ox, tip, ln, wd, shade)
     return _flat(g)
 
 
-def _make_sg_icon(size=32):
-    """Super guac — star burst."""
+def _make_sg_icon(size: int = 64) -> list:
+    """Super guac — bullet piercing three circles (penetration)."""
     g = _icon_base("super_guac", size)
     cx, cy = size // 2, size // 2
+    # Three rings
+    for i, (ry, r) in enumerate([(16, 11), (32, 11), (48, 11)]):
+        _circle(g, cx, ry, r, WHT)
+        inner = (max(0, _ICON_COLORS["super_guac"][0] - 30),
+                 max(0, _ICON_COLORS["super_guac"][1] - 30),
+                 max(0, _ICON_COLORS["super_guac"][2] - 30), 255)
+        _circle(g, cx, ry, r - 3, inner)
+    # Projectile going through
+    _rect(g, cx - 3, 4, cx + 3, size - 5, (255, 255, 150, 255))
+    _poly(g, [(cx, 3), (cx - 5, 10), (cx + 5, 10)], (255, 255, 200, 255))
+    return _flat(g)
+
+
+def _make_rf_icon(size: int = 64) -> list:
+    """Rapid fire — big lightning bolt with motion lines."""
+    g = _icon_base("rapid_fire", size)
+    cx = size // 2
+    # Lightning bolt (wider)
+    bolt = [(cx + 8, 5), (cx - 6, 30), (cx + 4, 30), (cx - 8, 59),
+            (cx + 14, 28), (cx + 2, 28)]
+    _poly(g, bolt, WHT)
+    # Motion lines left
+    for i, y in enumerate([15, 24, 33]):
+        x2 = cx - 10
+        _hline(g, y, x2 - 8 + i * 2, x2 - 1, (255, 200, 100, 200))
+    return _flat(g)
+
+
+def _make_mg_icon(size: int = 64) -> list:
+    """Mole grenade — round bomb with fuse and explosion sparks."""
+    g = _icon_base("mole_grenade", size)
+    cx, cy = size // 2, size // 2 + 8
+    # Bomb body
+    _circle(g, cx, cy, 18, (40, 40, 40, 255))
+    _circle(g, cx - 6, cy - 6, 5, (70, 70, 70, 255))
+    # Fuse
+    for i in range(12):
+        fx = cx + int(4 * math.sin(i * 0.8))
+        fy = cy - 18 - i
+        _set(g, fx, fy, (200, 150, 50, 255))
+    _circle(g, cx + int(4 * math.sin(11 * 0.8)), cy - 30, 3, (255, 220, 50, 255))
+    # Explosion sparks
     for angle_deg in range(0, 360, 45):
         a = math.radians(angle_deg)
-        for r in range(2, 11):
-            _set(g, int(cx + r * math.cos(a)), int(cy + r * math.sin(a)), WHT)
-    _circle(g, cx, cy, 3, WHT)
+        for r in range(20, 28):
+            sx = cx + int(r * math.cos(a))
+            sy = cy + int(r * math.sin(a))
+            _set(g, sx, sy, (255, 180, 20, 255))
     return _flat(g)
 
 
-def _make_rf_icon(size=32):
-    """Rapid fire — lightning bolt."""
-    g = _icon_base("rapid_fire", size)
-    bolt = [(18, 6), (12, 16), (17, 16), (14, 26), (20, 14), (15, 14)]
-    _poly(g, bolt, WHT)
-    return _flat(g)
-
-
-def _make_mg_icon(size=32):
-    """Mole grenade — explosion."""
-    g = _icon_base("mole_grenade", size)
-    cx, cy = size // 2, size // 2
-    _circle(g, cx, cy, 6, WHT)
-    for angle_deg in range(0, 360, 40):
-        a = math.radians(angle_deg)
-        for r in range(7, 12):
-            _set(g, int(cx + r * math.cos(a)), int(cy + r * math.sin(a)), WHT)
-    return _flat(g)
-
-
-def _make_jl_icon(size=32):
-    """Jalapeno laser — vertical beam."""
+def _make_jl_icon(size: int = 64) -> list:
+    """Jalapeno laser — wide glowing vertical beam with corona."""
     g = _icon_base("jalapeno_laser", size)
     cx = size // 2
+    # Outer glow
+    for w in [7, 5, 3, 1]:
+        alpha = 80 + (7 - w) * 40
+        _rect(g, cx - w, 4, cx + w, size - 5,
+              (_ICON_COLORS["jalapeno_laser"][0],
+               _ICON_COLORS["jalapeno_laser"][1],
+               _ICON_COLORS["jalapeno_laser"][2], min(255, alpha)))
+    # Core
     _rect(g, cx - 2, 4, cx + 2, size - 5, WHT)
-    _circle(g, cx, 7, 4, WHT)
+    # Origin circle
+    _circle(g, cx, size - 10, 9, WHT)
+    _circle(g, cx, size - 10, 5, _ICON_COLORS["jalapeno_laser"])
     return _flat(g)
 
 
-def _make_sb_icon(size=32):
-    """Spicy bounce — bouncing arrow."""
+def _make_sb_icon(size: int = 64) -> list:
+    """Spicy bounce — projectile trajectory bouncing off left and right walls."""
     g = _icon_base("spicy_bounce", size)
-    # Diagonal arrow going down-right then reflecting up-right
-    pts1 = [(8, 8), (20, 20), (8, 20)]  # first segment
-    pts2 = [(20, 20), (24, 8), (28, 20)]  # reflected
-    _poly(g, pts1, WHT)
-    _poly(g, pts2, WHT)
-    _hline(g, 22, 6, 26, WHT)
+    # Left wall
+    _vline(g, 8, 10, size - 10, WHT)
+    # Right wall
+    _vline(g, size - 9, 10, size - 10, WHT)
+    # Bounce path: / then \\ then /
+    pts = [(9, 54), (32, 12), (55, 54), (55, 54)]
+    for i in range(len(pts) - 1):
+        x1, y1 = pts[i]
+        x2, y2 = pts[i + 1]
+        steps = max(abs(x2 - x1), abs(y2 - y1))
+        for s in range(steps + 1):
+            t = s / max(steps, 1)
+            bx = int(x1 + (x2 - x1) * t)
+            by = int(y1 + (y2 - y1) * t)
+            _circle(g, bx, by, 2, WHT)
+    # Ball at current position
+    _circle(g, 32, 12, 6, (255, 120, 255, 255))
+    _circle(g, 32, 12, 3, WHT)
     return _flat(g)
 
 
-def _make_nw_icon(size=32):
-    """Nacho wall — shield."""
+def _make_nw_icon(size: int = 64) -> list:
+    """Nacho wall — layered shield with chip pattern."""
     g = _icon_base("nacho_wall", size)
-    shield = [(size // 2, 6), (size - 7, 10), (size - 7, 20), (size // 2, 26), (7, 20), (7, 10)]
+    cx = size // 2
+    # Shield outline (filled)
+    shield = [(cx, 7), (cx + 22, 16), (cx + 22, 34),
+              (cx, 56), (cx - 22, 34), (cx - 22, 16)]
     _poly(g, shield, WHT)
-    # Cross on shield
-    _vline(g, size // 2, 10, 22, _ICON_COLORS["nacho_wall"])
-    _hline(g, 16, 10, size - 11, _ICON_COLORS["nacho_wall"])
+    # Inner shield
+    inner = [(cx, 14), (cx + 15, 20), (cx + 15, 34),
+              (cx, 49), (cx - 15, 34), (cx - 15, 20)]
+    _poly(g, inner, _ICON_COLORS["nacho_wall"])
+    # Chip crack lines
+    for dy in range(18, 45, 6):
+        _hline(g, dy, cx - 12, cx + 12, (255, 220, 80, 255))
+    _vline(g, cx, 14, 49, (255, 220, 80, 255))
     return _flat(g)
 
 
-def _make_sm_icon(size=32):
-    """Salsa magnet — horseshoe magnet."""
+def _make_sm_icon(size: int = 64) -> list:
+    """Salsa magnet — U-magnet with attraction particles."""
     g = _icon_base("salsa_magnet", size)
-    cx, cy = size // 2, size // 2
-    # Outer arch
-    for angle_deg in range(10, 171):
+    cx, cy = size // 2, size // 2 - 4
+    # Magnet arch
+    for angle_deg in range(0, 181):
         a = math.radians(angle_deg)
-        for r in [9, 10, 11]:
-            _set(g, int(cx + r * math.cos(a)), int(cy - r * math.sin(a) + 2), WHT)
-    # Two prongs
-    _rect(g, cx - 11, cy - 2, cx - 8, cy + 8, WHT)
-    _rect(g, cx + 8, cy - 2, cx + 11, cy + 8, WHT)
-    # Red tip left, blue tip right
-    _rect(g, cx - 11, cy + 6, cx - 8, cy + 10, (255, 80, 80, 255))
-    _rect(g, cx + 8, cy + 6, cx + 11, cy + 10, (80, 80, 255, 255))
+        for r in range(15, 20):
+            mx = int(cx + r * math.cos(a))
+            my = int(cy - r * math.sin(a))
+            _set(g, mx, my, WHT)
+    # Prongs
+    _rect(g, cx - 19, cy - 1, cx - 15, cy + 20, WHT)
+    _rect(g, cx + 15, cy - 1, cx + 19, cy + 20, WHT)
+    # N/S tips
+    _rect(g, cx - 19, cy + 16, cx - 15, cy + 22, (255, 80, 80, 255))
+    _rect(g, cx + 15, cy + 16, cx + 19, cy + 22, (80, 120, 255, 255))
+    # Attraction dots
+    for i, (dx, dy) in enumerate([(-8, 44), (0, 48), (8, 44)]):
+        _circle(g, cx + dx, cy + dy, 3, (255, 220, 80, 255))
     return _flat(g)
 
 
-def _make_gs_icon(size=32):
-    """Guac storm — multiple upward streams."""
+def _make_gs_icon(size: int = 64) -> list:
+    """Guac storm — tornado funnel with multiple upward streams."""
     g = _icon_base("guac_storm", size)
-    for ox in [-10, -5, 0, 5, 10]:
-        cx = size // 2 + ox
-        _vline(g, cx, 6, 24, WHT)
-        _set(g, cx - 1, 9, WHT)
-        _set(g, cx + 1, 9, WHT)
-        _set(g, cx, 6, WHT)
+    cx = size // 2
+    # 5 streams fanning out from base
+    offsets = [-20, -10, 0, 10, 20]
+    for ox in offsets:
+        x_top = cx + ox
+        x_bot = cx + ox // 3
+        steps = 40
+        for s in range(steps):
+            t = s / steps
+            x = int(x_bot + (x_top - x_bot) * t)
+            y = size - 8 - int(t * 48)
+            _set(g, x, y, WHT)
+            if s % 8 < 3:
+                _set(g, x - 1, y, (200, 255, 150, 200))
+    # Arrowheads at top
+    for ox in offsets:
+        tx = cx + ox
+        _set(g, tx, size - 56, WHT)
+        _set(g, tx - 1, size - 54, WHT)
+        _set(g, tx + 1, size - 54, WHT)
+    # Base bar
+    _hline(g, size - 8, cx - 22, cx + 22, WHT)
     return _flat(g)
 
 

@@ -398,17 +398,33 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - AudioManager carga los WAVs automáticamente, conecta todos los eventos del juego, reproduce música en loop.
 - Para sustituir por arte final: reemplazar los PNG/WAV en las mismas rutas y volver a importar con `godot --headless -e --quit`.
 
-# Assets Externos Pendientes (arte final)
+# Assets con IA ✅
 
-## Fondos de bioma (arte final)
-Backgrounds placeholder ya generados y funcionando. Para reemplazar por arte final:
-- Crear 15 imágenes 390×844 px: `bg_{0-4}_{0-2}.png` (bioma × variante)
-- Colocar en `assets/sprites/backgrounds/`
-- Ejecutar `godot --headless -e --quit` para reimportar
-- El sistema de tint por generación (`_get_gen_tint`) funciona sobre cualquier textura automáticamente.
+## Fondos de bioma — AI-generated (Pollinations.ai Flux)
+- 15 imágenes 390×844 px: `bg_{0-4}_{0-2}.png` (5 biomas × 3 variantes)
+- Generadas con prompts específicos por bioma: jungla oscura, crepúsculo índigo, volcánico, abismo oceánico, luna de sangre
+- Herramienta: `tools/fetch_ai_assets.py` (requiere venv con Pillow)
 
-## SFX / Sprites (arte final)
-Los placeholders en `assets/` ya funcionan en juego. Para arte final:
-- Reemplazar PNG en `assets/sprites/` (mismas rutas y dimensiones aproximadas)
-- Reemplazar WAV en `assets/audio/` con archivos OGG de calidad
-- Ejecutar `godot --headless -e --quit` después de reemplazar para reimportar
+## Sprites principales — AI-generated (Pollinations.ai Flux)
+- player.png (64×64), enemy_basic.png (56×56), enemy_tank.png (84×84), enemy_zigzag.png (112×112)
+- enemy_elite.png (56×56), enemy_boss.png (144×144), projectile.png (28×28), gem.png (36×36), heart.png (52×52)
+- Descargados con prompts de "pixel art ... white background isolated", chroma key para transparencia
+- enemy_elite.tscn corregida para usar enemy_elite.png (antes usaba enemy_basic.png por error)
+
+## Íconos de power-up — mejorados (procedural)
+- 9 íconos 64×64 en `assets/sprites/powerup_icons/`
+- Rediseñados en gen_assets.py con más detalle: flechas propias, relámpago, bomba con fusible, láser con corona, etc.
+
+## Pipeline
+```bash
+# Regenerar assets AI (backgrounds + sprites, ~25 min, Pollinations.ai free)
+/tmp/gb_venv/bin/python3 tools/fetch_ai_assets.py
+# Solo biomas 0-1 si fueron sobrescritos
+/tmp/gb_venv/bin/python3 tools/redownload_missing_bgs.py
+# Regenerar procedurales (íconos, splash, audio)
+python3 tools/gen_assets.py
+```
+
+## Audio (pendiente de mejora)
+- 7 WAVs sintéticos en `assets/audio/` — funcional pero básico
+- Para mejor calidad: reemplazar con OGG de banco libre (freesound.org, kenney.nl)
