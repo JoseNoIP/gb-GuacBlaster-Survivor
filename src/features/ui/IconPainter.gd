@@ -3,7 +3,7 @@ extends Control
 ## Draws named menu icons procedurally via Godot's CanvasItem draw API.
 ## Set icon_id before adding to the scene tree; the Control auto-sizes to
 ## custom_minimum_size. Recognized ids: play, character, upgrades, missions,
-## achievements, map, challenge, settings.
+## achievements, map, challenge, settings, back.
 
 const _GOLD: Color = Color(1.0, 0.83, 0.12)
 const _RED: Color = Color(0.9, 0.22, 0.18)
@@ -25,6 +25,7 @@ func _draw() -> void:
 		&"map":           _draw_map(c, r)
 		&"challenge":     _draw_challenge(c, r)
 		&"settings":      _draw_settings(c, r)
+		&"back":          _draw_back(c, r)
 
 # ── helpers ────────────────────────────────────────────────────────────────
 
@@ -208,6 +209,18 @@ func _draw_challenge(c: Vector2, r: float) -> void:
 
 # ── settings — 6-tooth gear ────────────────────────────────────────────────
 
+func _draw_back(c: Vector2, r: float) -> void:
+	_poly(PackedVector2Array([
+		c + Vector2(-r, 0.0),
+		c + Vector2(0.0, -r * 0.8),
+		c + Vector2(0.0, -r * 0.32),
+		c + Vector2(r * 0.72, -r * 0.32),
+		c + Vector2(r * 0.72, r * 0.32),
+		c + Vector2(0.0, r * 0.32),
+		c + Vector2(0.0, r * 0.8),
+	]), icon_color)
+
+# ── settings — 6-tooth gear ────────────────────────────────────────────────
 func _draw_settings(c: Vector2, r: float) -> void:
 	var inner_r: float = r * 0.62
 	var tooth_w: float = r * 0.3
