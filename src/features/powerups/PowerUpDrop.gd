@@ -48,7 +48,6 @@ func _build_visual() -> void:
 	if ResourceLoader.exists(icon_path):
 		var sprite := Sprite2D.new()
 		sprite.texture = load(icon_path) as Texture2D
-		sprite.scale = Vector2(2.0, 2.0)
 		add_child(sprite)
 	else:
 		var bg := ColorRect.new()

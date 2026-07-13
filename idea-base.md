@@ -220,23 +220,33 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - La textura se carga como `TextureRect` hijo del `$Background` ColorRect; si no existe PNG usa el color de `BACKGROUND_PALETTE` como fallback.
 
 ## Escalado 2× de todos los elementos de gameplay ✅
-- Todos los sprites renderizados al doble de tamaño vía `scale = Vector2(2, 2)` en Sprite2D (sin regenerar PNG).
-- Formas de colisión también duplicadas para mantener la proporción hitbox/visual.
+- Sprites generados nativamente al doble de resolución en `gen_assets.py` (sin escalar en Godot — `scale = Vector2(1,1)` en todos los Sprite2D).
+- Formas de colisión duplicadas para mantener la proporción hitbox/visual.
 - **Elementos escalados:**
-  | Elemento | Colisión antes | Colisión después |
+  | Elemento | PNG actual | Colisión |
   |---|---|---|
-  | Player | Cápsula r=15, h=30 | Cápsula r=30, h=60 |
-  | EnemyBasic | Círculo r=12 | Círculo r=24 |
-  | EnemyTank | Círculo r=24 | Círculo r=48 |
-  | EnemyZigzag | Cápsula r=8, h=20 | Cápsula r=16, h=40 |
-  | EnemyBoss | Círculo r=40 | Círculo r=80 |
-  | Projectile | Círculo r=6 | Círculo r=12 |
-  | XPGem | Círculo r=10 | Círculo r=20 |
-  | HeartDrop | Círculo r=14 | Círculo r=28 |
-  | PowerUpDrop | Rect 32×32 | Rect 64×64 |
-- `Player.HALF_WIDTH` actualizado 20→35 para que el jugador no salga de pantalla al moverse.
-- Shield ring (Nacho Wall): radio visual 28→56. Punto de spawn de proyectil: y=-28→-56.
-- Sprites de código (XPGem, HeartDrop, PowerUpDrop): `sprite.scale = Vector2(2, 2)` en `_ready()`.
+  | Player | 64×64 | Cápsula r=30, h=60 |
+  | EnemyBasic | 56×56 | Círculo r=24 |
+  | EnemyTank | 84×84 | Círculo r=48 |
+  | EnemyZigzag | 52×52 | Cápsula r=16, h=40 |
+  | EnemyBoss | 144×144 | Círculo r=80 |
+  | Projectile | 28×28 | Círculo r=12 |
+  | XPGem | 36×36 | Círculo r=20 |
+  | HeartDrop | 52×52 | Círculo r=28 |
+  | PowerUpDrop | 64×64 | Rect 64×64 |
+  | PowerUpIcons | 64×64 | — |
+- `Player.HALF_WIDTH = 35` previene salida de pantalla.
+- Shield ring (Nacho Wall): radio 56. ProjectileSpawnPoint: y=-56.
+
+## PowerUpDropper — fix multi-batch ✅
+- **Bug corregido:** al levelear dos veces antes de recoger un power-up, el segundo batch borraba las referencias del primero. Al recoger uno del batch viejo, los drops del nuevo batch se eliminaban pero los restantes del batch viejo quedaban en pantalla.
+- **Fix:** `_current_batch` → `_all_drops` (acumula todos los drops sin limpiar al nuevo batch). Al recoger cualquier drop, se liberan TODOS los pendientes.
+
+## Boss HP escalado por victorias ✅
+- **Bug corregido:** `_boss_generation` en EnemySpawner se reseteaba a 0 en cada sesión → el jefe siempre tenía HP base (100).
+- **Fix:** `boss.set(&"_generation", SaveManager.get_victories())` — el HP del jefe escala con el progreso real del jugador.
+- Fórmula: `HP = BOSS_HP_BASE + victories × BOSS_HP_PER_GENERATION` = 100 + victorias×50.
+- Victoria 0: 100 HP | Victoria 3: 250 HP | Victoria 10: 600 HP.
 
 ---
 
@@ -264,8 +274,8 @@ El workflow parchea automáticamente el path en CI con `sed`.
 
 ## Sprites y SFX placeholder ✅
 - **`tools/gen_assets.py`** — script Python stdlib que genera todos los assets sin dependencias externas.
-- **8 sprites PNG**: player (32×32), enemy_basic (28×28), enemy_tank (42×42), enemy_zigzag (26×26), enemy_boss (72×72), projectile (14×14), gem (18×18), heart (26×26).
-- **9 íconos de power-up** (32×32) en `assets/sprites/powerup_icons/` — uno por ID, con diseño único por tipo.
+- **8 sprites PNG**: player (64×64), enemy_basic (56×56), enemy_tank (84×84), enemy_zigzag (52×52), enemy_boss (144×144), projectile (28×28), gem (36×36), heart (52×52).
+- **9 íconos de power-up** (64×64) en `assets/sprites/powerup_icons/` — uno por ID, con diseño único por tipo.
 - **7 archivos WAV** en `assets/audio/`: shoot, enemy_die, player_hit, gem_collect, levelup, boss_die, music_loop.
 - Escenas .tscn actualizadas: Sprite2D reemplaza Polygon2D en Player, EnemyBasic, EnemyTank, EnemyZigzag, EnemyBoss, Projectile.
 - XPGem.gd, HeartDrop.gd y PowerUpDrop.gd cargan sprite si existe, con fallback a forma geométrica.

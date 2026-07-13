@@ -22,7 +22,6 @@ func _build_visual() -> void:
 	if ResourceLoader.exists(HEART_TEX):
 		var sprite := Sprite2D.new()
 		sprite.texture = load(HEART_TEX) as Texture2D
-		sprite.scale = Vector2(2.0, 2.0)
 		add_child(sprite)
 	else:
 		var lbl := Label.new()

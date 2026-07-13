@@ -22,7 +22,6 @@ func _ready() -> void:
 	if ResourceLoader.exists(GEM_TEX):
 		var sprite := Sprite2D.new()
 		sprite.texture = load(GEM_TEX) as Texture2D
-		sprite.scale = Vector2(2.0, 2.0)
 		visual = sprite
 	else:
 		var diamond := Polygon2D.new()

@@ -1003,21 +1003,21 @@ def sfx_music_loop():
 def main():
     print("\n=== Generating sprites ===")
     sprites = {
-        "assets/sprites/player.png":       (32, 32, make_player(32)),
-        "assets/sprites/enemy_basic.png":  (28, 28, make_enemy_basic(28)),
-        "assets/sprites/enemy_tank.png":   (42, 42, make_enemy_tank(42)),
-        "assets/sprites/enemy_zigzag.png": (26, 26, make_enemy_zigzag(26)),
-        "assets/sprites/enemy_boss.png":   (72, 72, make_enemy_boss(72)),
-        "assets/sprites/projectile.png":   (14, 14, make_projectile(14)),
-        "assets/sprites/gem.png":          (18, 18, make_gem(18)),
-        "assets/sprites/heart.png":        (26, 26, make_heart(26)),
+        "assets/sprites/player.png":       (64,  64,  make_player(64)),
+        "assets/sprites/enemy_basic.png":  (56,  56,  make_enemy_basic(56)),
+        "assets/sprites/enemy_tank.png":   (84,  84,  make_enemy_tank(84)),
+        "assets/sprites/enemy_zigzag.png": (52,  52,  make_enemy_zigzag(52)),
+        "assets/sprites/enemy_boss.png":   (144, 144, make_enemy_boss(144)),
+        "assets/sprites/projectile.png":   (28,  28,  make_projectile(28)),
+        "assets/sprites/gem.png":          (36,  36,  make_gem(36)),
+        "assets/sprites/heart.png":        (52,  52,  make_heart(52)),
     }
     for path, (w, h, pixels) in sprites.items():
         save_png(path, w, h, pixels)
 
     print("\n=== Generating power-up icons ===")
     for name, maker in _ICON_MAKERS.items():
-        save_png(f"assets/sprites/powerup_icons/{name}.png", 32, 32, maker(32))
+        save_png(f"assets/sprites/powerup_icons/{name}.png", 64, 64, maker(64))
 
     print("\n=== Generating audio ===")
     sfx = {

@@ -46,6 +46,20 @@ Revisar el balance y la experiencia de juego del proyecto indicado, reportando p
 - [ ] ¿Los upgrades tienen impacto perceptible en el gameplay?
 - [ ] ¿El "starter_shield" justifica su costo?
 
+### Progresión de jefes
+- [ ] ¿El jefe en la victoria 5 es notablemente más difícil que en la victoria 1? (HP = 100 + victorias×50)
+- [ ] ¿El intervalo de disparo del jefe varía con la generación?
+
+### Retención (benchmark competitivo)
+Los juegos top del género (Vampire Survivors mobile, Brotato, Survivor.io) tienen en común:
+- Daily missions con recompensa en moneda
+- Personajes/armas desbloqueables con mecánica distinta (no solo stats)
+- Curva de dificultad por mundo, no solo por tiempo de sesión
+- Checklist:
+- [ ] ¿Hay algún sistema que motive volver mañana? (daily missions, desafío semanal)
+- [ ] ¿Todos los runs se sienten iguales o hay variedad de build posible?
+- [ ] ¿El primer bioma es suficientemente fácil para que un nuevo jugador llegue al jefe?
+
 ### Feedback / Jugo
 - [ ] ¿Hay screen shake o feedback visual al recibir daño?
 - [ ] ¿Las muertes de enemigos tienen partículas o efecto?

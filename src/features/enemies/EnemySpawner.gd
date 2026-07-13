@@ -75,7 +75,7 @@ func _spawn_boss() -> void:
 	if boss_scene == null:
 		return
 	var boss: Node2D = boss_scene.instantiate()
-	boss.set(&"_generation", _boss_generation)
+	boss.set(&"_generation", SaveManager.get_victories())
 	var vp_width: float = get_viewport_rect().size.x
 	boss.position = Vector2(vp_width * 0.5, 60.0)
 	get_parent().add_child(boss)
