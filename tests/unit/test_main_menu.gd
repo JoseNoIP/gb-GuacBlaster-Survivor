@@ -16,4 +16,4 @@ func test_play_button_exists() -> void:
 	assert_not_null(_menu.get_play_button())
 
 func test_best_label_shows_saved_value() -> void:
-	assert_eq(_menu.get_best_label().text, "Mejor: %d" % SaveManager.get_best_score())
+	assert_eq(_menu.get_best_label().text, "Mejor puntuación: %d" % SaveManager.get_best_score())

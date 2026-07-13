@@ -15,4 +15,3 @@ func _move(delta: float) -> void:
 		* Constants.ENEMY_ZIGZAG_AMPLITUDE
 	)
 	velocity = Vector2(h_vel, Constants.ENEMY_ZIGZAG_SPEED)
-	move_and_slide()

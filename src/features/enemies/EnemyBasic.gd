@@ -8,4 +8,3 @@ func _initialize() -> void:
 
 func _move(_delta: float) -> void:
 	velocity = Vector2(0.0, Constants.ENEMY_BASIC_SPEED)
-	move_and_slide()

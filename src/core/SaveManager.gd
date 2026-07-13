@@ -82,10 +82,12 @@ func _add_high_score(score: int, won: bool) -> void:
 	if not _data.has("high_scores"):
 		_data["high_scores"] = []
 	var scores: Array = _data["high_scores"] as Array
+	var d: Dictionary = Time.get_date_dict_from_system()
 	scores.append({
 		"score": score,
 		"char": str(get_selected_character()),
 		"won": won,
+		"date": "%d/%02d/%02d" % [d.get("year", 0), d.get("month", 0), d.get("day", 0)],
 	})
 	scores.sort_custom(func(a: Variant, b: Variant) -> bool:
 		return (a as Dictionary).get("score", 0) > (b as Dictionary).get("score", 0)

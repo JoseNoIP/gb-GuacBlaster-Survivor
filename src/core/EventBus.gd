@@ -34,6 +34,9 @@ signal powerup_stack_changed(powerup_id: StringName, count: int)
 signal powerup_expired(powerup_id: StringName)
 signal player_shield_changed(hits_remaining: int)
 
+# --- Combo ---
+signal combo_changed(count: int, multiplier: float)
+
 # --- Game State ---
 signal game_started()
 signal game_paused(is_paused: bool)

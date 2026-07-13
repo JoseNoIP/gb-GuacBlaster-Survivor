@@ -11,6 +11,7 @@ extends CharacterBody2D
 var _health: int = 1
 var _xp_value: int = 5
 var _hit_tween: Tween = null
+var _speed_mult: float = 1.0
 
 func _ready() -> void:
 	add_to_group(&"enemies")
@@ -21,6 +22,8 @@ func _initialize() -> void:
 
 func _physics_process(delta: float) -> void:
 	_move(delta)
+	velocity *= _speed_mult
+	move_and_slide()
 
 func _move(_delta: float) -> void:
 	pass

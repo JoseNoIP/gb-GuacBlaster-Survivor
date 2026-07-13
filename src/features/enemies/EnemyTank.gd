@@ -8,7 +8,6 @@ func _initialize() -> void:
 
 func _move(_delta: float) -> void:
 	velocity = Vector2(0.0, Constants.ENEMY_TANK_SPEED)
-	move_and_slide()
 
 func _die() -> void:
 	EventBus.enemy_split_requested.emit(global_position, Constants.ENEMY_TANK_SPLIT_COUNT)

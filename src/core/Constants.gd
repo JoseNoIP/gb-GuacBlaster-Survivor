@@ -37,6 +37,14 @@ const CHAR_DOUBLE_OFFSET: float = 18.0
 const CHAR_FAN3_ANGLE: float = 25.0
 const CHAR_FAN5_ANGLE: float = 20.0
 
+# --- Biome Modifiers (6 biomes, index matches BACKGROUND_PALETTE) ---
+# spawn_mult < 1.0 = faster spawns; speed_mult > 1.0 = enemies faster
+const BIOME_SPAWN_MULT: Array = [1.0, 0.85, 1.0, 1.2, 0.75, 1.3]
+const BIOME_ELITE_MULT: Array = [1.0, 1.0, 2.5, 1.0, 1.5, 3.0]
+const BIOME_BOSS_HP_MULT: Array = [1.0, 1.0, 1.0, 1.5, 1.0, 2.0]
+const BIOME_SPEED_MULT: Array = [1.0, 1.2, 1.0, 1.0, 1.3, 1.5]
+const BIOME_GOLD_MULT: Array = [1.0, 1.0, 1.5, 1.0, 2.0, 2.5]
+
 const BACKGROUND_PALETTE: Array = [
 	Color(0.18, 0.55, 0.08),  # pradera terrestre (mundo 1 — amigable)
 	Color(0.02, 0.18, 0.03),  # jungla nocturna (mundo 2)

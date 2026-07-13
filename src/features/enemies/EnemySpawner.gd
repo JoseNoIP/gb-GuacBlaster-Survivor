@@ -15,6 +15,7 @@ extends Node2D
 var _active: bool = false
 var _spawn_timer: float = 0.0
 var _spawn_interval: float = Constants.SPAWNER_INITIAL_INTERVAL
+var _wave_size: int = 1
 var _elapsed: float = 0.0
 var _boss_timer: float = Constants.BOSS_SPAWN_INTERVAL
 var _boss_alive: bool = false
@@ -22,6 +23,9 @@ var _boss_generation: int = 0
 var _boss_warning_emitted: bool = false
 var _challenge_spawn_mult: float = 1.0
 var _challenge_elite_mult: float = 1.0
+var _biome_spawn_mult: float = 1.0
+var _biome_elite_mult: float = 1.0
+var _biome_speed_mult: float = 1.0
 
 func _ready() -> void:
 	EventBus.game_started.connect(_on_game_started)
@@ -53,18 +57,27 @@ func _on_game_started() -> void:
 	_elapsed = 0.0
 	_spawn_timer = 0.0
 	_spawn_interval = Constants.SPAWNER_INITIAL_INTERVAL
+	_wave_size = 1
 	_boss_timer = Constants.BOSS_SPAWN_INTERVAL
 	_boss_alive = false
 	_boss_warning_emitted = false
 	_challenge_spawn_mult = WeeklyChallengeManager.get_spawn_rate_mult()
 	_challenge_elite_mult = WeeklyChallengeManager.get_elite_chance_mult()
+	var biome: int = GameManager.get_current_biome()
+	_biome_spawn_mult = Constants.BIOME_SPAWN_MULT[biome]
+	_biome_elite_mult = Constants.BIOME_ELITE_MULT[biome]
+	_biome_speed_mult = Constants.BIOME_SPEED_MULT[biome]
 
 func _spawn_wave() -> void:
-	_instantiate_at_random_x(_pick_scene())
+	for _i: int in _wave_size:
+		_instantiate_at_random_x(_pick_scene())
 
 func _pick_scene() -> PackedScene:
 	var elite_ready: bool = elite_scene != null and _elapsed >= Constants.SPAWNER_ELITE_UNLOCK_TIME
-	if elite_ready and randf() < minf(1.0, Constants.SPAWNER_ELITE_CHANCE * _challenge_elite_mult):
+	var elite_chance: float = (
+		Constants.SPAWNER_ELITE_CHANCE * _challenge_elite_mult * _biome_elite_mult
+	)
+	if elite_ready and randf() < minf(1.0, elite_chance):
 		return elite_scene
 	if _elapsed >= Constants.SPAWNER_TANK_UNLOCK_TIME and randf() < Constants.SPAWNER_TANK_CHANCE:
 		return tank_scene
@@ -79,6 +92,7 @@ func _instantiate_at_random_x(scene: PackedScene) -> void:
 	var enemy: Node2D = scene.instantiate()
 	var vp_width: float = get_viewport_rect().size.x
 	enemy.position = Vector2(randf_range(30.0, vp_width - 30.0), -30.0)
+	enemy.set(&"_speed_mult", _biome_speed_mult)
 	get_parent().add_child(enemy)
 
 func _update_difficulty() -> void:
@@ -86,7 +100,8 @@ func _update_difficulty() -> void:
 	_spawn_interval = maxf(
 		Constants.SPAWNER_MIN_INTERVAL,
 		Constants.SPAWNER_INITIAL_INTERVAL - minutes * Constants.SPAWNER_INTERVAL_DECREASE_PER_MIN
-	) * _challenge_spawn_mult
+	) * _challenge_spawn_mult * _biome_spawn_mult
+	_wave_size = mini(1 + int(_elapsed / 60.0), 3)
 
 func _spawn_boss() -> void:
 	if boss_scene == null:

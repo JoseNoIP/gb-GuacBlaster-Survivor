@@ -146,6 +146,8 @@ func _on_game_over(score: int, _duration: float) -> void:
 	_score_label.text = "Score: 0"
 	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
 	_gold_label.text = "+%d oro" % _gold_this_run
+	if GameManager.get_endless_mode() and GameManager.get_waves_cleared() > 0:
+		_gold_label.text += "  ·  %d olas" % GameManager.get_waves_cleared()
 	_record_label.visible = is_new_record
 	_bg.visible = true
 	_panel.modulate.a = 0.0

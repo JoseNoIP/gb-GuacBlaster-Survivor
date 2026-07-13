@@ -13,7 +13,8 @@ var _phase: int = 1
 
 func _initialize() -> void:
 	_health = int((Constants.BOSS_HP_BASE + _generation * Constants.BOSS_HP_PER_GENERATION)
-			* WeeklyChallengeManager.get_boss_hp_mult())
+			* WeeklyChallengeManager.get_boss_hp_mult()
+			* GameManager.get_biome_boss_hp_mult())
 	_max_health = _health
 	_xp_value = Constants.BOSS_XP
 	_phase = 1
@@ -22,13 +23,17 @@ func _initialize() -> void:
 		Constants.BOSS_FIRE_INTERVAL - _generation * Constants.BOSS_FIRE_INTERVAL_DECREASE
 	)
 
-func _move(delta: float) -> void:
+func _move(_delta: float) -> void:
 	var speed: float = Constants.BOSS_SPEED
 	if _phase == 2:
 		speed *= Constants.BOSS_PHASE2_SPEED_MULT
-	var vp_width: float = get_viewport_rect().size.x
 	velocity = Vector2(_direction * speed, 0.0)
+
+func _physics_process(delta: float) -> void:
+	_move(delta)
+	velocity *= _speed_mult
 	move_and_slide()
+	var vp_width: float = get_viewport_rect().size.x
 	if position.x <= 40.0:
 		_direction = 1.0
 	elif position.x >= vp_width - 40.0:

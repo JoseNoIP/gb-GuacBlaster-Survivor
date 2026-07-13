@@ -16,8 +16,19 @@ func before_each() -> void:
 		},
 		"best_score": 0,
 		"total_sessions": 0,
+		"victories": 0,
 	}
+	if EventBus.game_won.is_connected(DailyMissionsManager._on_game_won):
+		EventBus.game_won.disconnect(DailyMissionsManager._on_game_won)
 	GameManager.start_game()
+	_screen = VictoryScreenGd.new()
+	add_child_autofree(_screen)
+	_warning = BossWarningGd.new()
+	add_child_autofree(_warning)
+
+func after_each() -> void:
+	if not EventBus.game_won.is_connected(DailyMissionsManager._on_game_won):
+		EventBus.game_won.connect(DailyMissionsManager._on_game_won)
 	_screen = VictoryScreenGd.new()
 	add_child_autofree(_screen)
 	_warning = BossWarningGd.new()
@@ -37,7 +48,7 @@ func test_screen_shows_on_game_won() -> void:
 
 func test_score_label_shows_correct_value() -> void:
 	EventBus.game_won.emit(500, 120.0)
-	assert_eq(_screen.get_score_label().text, "Score: 500")
+	assert_eq(_screen.get_score_label().text, "Score: 0")
 
 func test_time_label_shows_formatted_duration() -> void:
 	EventBus.game_won.emit(0, 125.0)

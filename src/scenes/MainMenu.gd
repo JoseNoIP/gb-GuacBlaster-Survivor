@@ -9,6 +9,7 @@ const DAILY_MISSIONS_SCENE: String = "res://src/scenes/DailyMissionsScreen.tscn"
 const CHARACTER_SELECT_SCENE: String = "res://src/scenes/CharacterSelectScreen.tscn"
 const BIOME_MAP_SCENE: String = "res://src/scenes/BiomeMapScreen.tscn"
 const WEEKLY_CHALLENGE_SCENE: String = "res://src/scenes/WeeklyChallengeScreen.tscn"
+const HIGH_SCORES_SCENE: String = "res://src/scenes/HighScoresScreen.tscn"
 
 const BG_COLOR: Color = Color(0.05, 0.08, 0.05)
 const TITLE_COLOR: Color = Color(0.3, 0.85, 0.2)
@@ -26,10 +27,12 @@ const MUTED_COLOR: Color = Color(0.45, 0.45, 0.45)
 var _title_label: Label
 var _best_label: Label
 var _play_btn: Button
+var _entrance_targets: Array = []
 
 func _ready() -> void:
 	_build_animated_bg()
 	_build_ui()
+	_run_entrance_animation()
 
 func _build_animated_bg() -> void:
 	var vp: Vector2 = get_viewport_rect().size
@@ -88,6 +91,7 @@ func _build_ui() -> void:
 	_title_label.add_theme_color_override(&"font_color", TITLE_COLOR)
 	_title_label.pivot_offset = Vector2(vp.x * 0.5, 30.0)
 	root.add_child(_title_label)
+	_entrance_targets.append(_title_label)
 
 	var subtitle: Label = Label.new()
 	subtitle.text = "S U R V I V O R"
@@ -95,6 +99,7 @@ func _build_ui() -> void:
 	subtitle.add_theme_font_size_override(&"font_size", 20)
 	subtitle.add_theme_color_override(&"font_color", SUBTITLE_COLOR)
 	root.add_child(subtitle)
+	_entrance_targets.append(subtitle)
 
 	_animate_title()
 
@@ -126,9 +131,32 @@ func _build_ui() -> void:
 	vic_lbl.add_theme_font_size_override(&"font_size", 16)
 	stats_row.add_child(vic_lbl)
 
+	# --- Endless toggle ---
+	var endless_pad: Control = Control.new()
+	endless_pad.custom_minimum_size = Vector2(0.0, 14.0)
+	root.add_child(endless_pad)
+
+	var endless_row: HBoxContainer = HBoxContainer.new()
+	endless_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	endless_row.add_theme_constant_override(&"separation", 8)
+	root.add_child(endless_row)
+	_entrance_targets.append(endless_row)
+
+	var endless_check: CheckButton = CheckButton.new()
+	endless_check.button_pressed = GameManager.get_endless_mode()
+	endless_check.toggled.connect(func(v: bool) -> void: GameManager.enable_endless_mode(v))
+	endless_row.add_child(endless_check)
+
+	var endless_lbl: Label = Label.new()
+	endless_lbl.text = "MODO ENDLESS"
+	endless_lbl.add_theme_font_size_override(&"font_size", 14)
+	endless_lbl.add_theme_color_override(&"font_color", MUTED_COLOR)
+	endless_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	endless_row.add_child(endless_lbl)
+
 	# --- Play button ---
 	var play_pad: Control = Control.new()
-	play_pad.custom_minimum_size = Vector2(0.0, 22.0)
+	play_pad.custom_minimum_size = Vector2(0.0, 12.0)
 	root.add_child(play_pad)
 
 	var play_margin: MarginContainer = MarginContainer.new()
@@ -145,6 +173,7 @@ func _build_ui() -> void:
 	_play_btn.add_theme_stylebox_override(&"pressed", _make_sb(BTN_PLAY_HOVER, Color.TRANSPARENT, 14))
 	_play_btn.pressed.connect(_on_play_pressed)
 	play_margin.add_child(_play_btn)
+	_entrance_targets.append(play_margin)
 
 	var play_inner: HBoxContainer = HBoxContainer.new()
 	play_inner.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -182,31 +211,58 @@ func _build_ui() -> void:
 	grid.add_theme_constant_override(&"v_separation", 10)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid_margin.add_child(grid)
+	_entrance_targets.append(grid_margin)
 
-	_add_grid_btn(grid, &"character", "PERSONAJE", _on_characters_pressed)
-	_add_grid_btn(grid, &"upgrades", "MEJORAS", _on_upgrades_pressed)
-	_add_grid_btn(grid, &"missions", "MISIONES", _on_missions_pressed)
-	_add_grid_btn(grid, &"achievements", "LOGROS", _on_achievements_pressed)
-	_add_grid_btn(grid, &"map", "MAPA", _on_biome_map_pressed)
-	_add_grid_btn(grid, &"challenge", "DESAFÍO", _on_weekly_challenge_pressed)
+	var has_mission_progress: bool = false
+	for m in DailyMissionsManager.get_missions():
+		var mission: Dictionary = m as Dictionary
+		if not (mission.get("completed", false) as bool) and (mission.get("current", 0) as int) > 0:
+			has_mission_progress = true
+			break
+	var challenge_pending: bool = not WeeklyChallengeManager.is_current_week_completed()
 
-	# --- Settings (bottom, subtle) ---
+	_add_grid_btn(grid, &"character", "PERSONAJE", _on_characters_pressed, false)
+	_add_grid_btn(grid, &"upgrades", "MEJORAS", _on_upgrades_pressed, false)
+	_add_grid_btn(grid, &"missions", "MISIONES", _on_missions_pressed, has_mission_progress)
+	_add_grid_btn(grid, &"achievements", "LOGROS", _on_achievements_pressed, false)
+	_add_grid_btn(grid, &"map", "MAPA", _on_biome_map_pressed, false)
+	_add_grid_btn(grid, &"challenge", "DESAFÍO", _on_weekly_challenge_pressed, challenge_pending)
+
+	# --- Bottom row: settings + records ---
 	var cfg_pad: Control = Control.new()
 	cfg_pad.custom_minimum_size = Vector2(0.0, 12.0)
 	root.add_child(cfg_pad)
 
+	var bottom_row: HBoxContainer = HBoxContainer.new()
+	bottom_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	bottom_row.add_theme_constant_override(&"separation", 12)
+	root.add_child(bottom_row)
+
+	var rec_btn: Button = Button.new()
+	rec_btn.text = "🏆 RÉCORDS"
+	rec_btn.custom_minimum_size = Vector2(140.0, 38.0)
+	rec_btn.add_theme_font_size_override(&"font_size", 14)
+	rec_btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_CFG_COLOR, MUTED_COLOR, 8, 1))
+	var rec_hover: Color = Color(0.16, 0.18, 0.16)
+	rec_btn.add_theme_stylebox_override(&"hover", _make_sb(rec_hover, MUTED_COLOR, 8, 1))
+	rec_btn.add_theme_stylebox_override(&"pressed", _make_sb(rec_hover, MUTED_COLOR, 8, 1))
+	rec_btn.add_theme_color_override(&"font_color", GOLD_COLOR)
+	rec_btn.pressed.connect(func() -> void:
+		get_tree().change_scene_to_file.call_deferred(HIGH_SCORES_SCENE)
+	)
+	bottom_row.add_child(rec_btn)
+
 	var cfg_btn: Button = Button.new()
 	cfg_btn.text = "⚙  CONFIGURACIÓN"
-	cfg_btn.custom_minimum_size = Vector2(180.0, 38.0)
+	cfg_btn.custom_minimum_size = Vector2(160.0, 38.0)
 	cfg_btn.add_theme_font_size_override(&"font_size", 14)
-	cfg_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var cfg_hover_color: Color = Color(0.16, 0.18, 0.16)
 	cfg_btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_CFG_COLOR, MUTED_COLOR, 8, 1))
 	cfg_btn.add_theme_stylebox_override(&"hover", _make_sb(cfg_hover_color, MUTED_COLOR, 8, 1))
 	cfg_btn.add_theme_stylebox_override(&"pressed", _make_sb(cfg_hover_color, MUTED_COLOR, 8, 1))
 	cfg_btn.add_theme_color_override(&"font_color", MUTED_COLOR)
 	cfg_btn.pressed.connect(_on_settings_pressed)
-	root.add_child(cfg_btn)
+	bottom_row.add_child(cfg_btn)
 
 	# --- Best score ---
 	var score_pad: Control = Control.new()
@@ -224,13 +280,26 @@ func _build_ui() -> void:
 	bottom_pad.custom_minimum_size = Vector2(0.0, 18.0)
 	root.add_child(bottom_pad)
 
+func _run_entrance_animation() -> void:
+	var tween: Tween = create_tween()
+	var delay: float = 0.0
+	for target: Control in _entrance_targets:
+		target.modulate.a = 0.0
+		var captured: Control = target
+		tween.tween_callback(func() -> void:
+			create_tween().tween_property(captured, ^"modulate:a", 1.0, 0.25)
+		).set_delay(delay)
+		delay += 0.08
+	_entrance_targets.clear()
+
 func _animate_title() -> void:
 	var tween: Tween = create_tween().set_loops()
 	tween.tween_property(_title_label, "scale", Vector2(1.04, 1.04), 1.4)
 	tween.tween_property(_title_label, "scale", Vector2(1.0, 1.0), 1.4)
 
 func _add_grid_btn(
-		parent: Control, icon_id: StringName, label: String, cb: Callable
+		parent: Control, icon_id: StringName, label: String, cb: Callable,
+		show_badge: bool = false
 ) -> void:
 	var btn: Button = Button.new()
 	btn.text = ""
@@ -263,6 +332,19 @@ func _add_grid_btn(
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(lbl)
+
+	if show_badge:
+		var badge: Label = Label.new()
+		badge.text = "●"
+		badge.add_theme_font_size_override(&"font_size", 14)
+		badge.add_theme_color_override(&"font_color", Color(1.0, 0.25, 0.2))
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badge.anchor_right = 1.0
+		badge.anchor_top = 0.0
+		badge.offset_right = -6.0
+		badge.offset_top = 4.0
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		btn.add_child(badge)
 
 func _make_sb(
 	bg: Color,

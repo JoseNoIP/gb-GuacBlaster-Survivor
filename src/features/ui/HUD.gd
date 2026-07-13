@@ -51,6 +51,9 @@ var _toast_label: Label
 var _toast_tween: Tween
 var _toast_queue: Array = []
 var _toast_busy: bool = false
+var _combo_label: Label
+var _combo_tween: Tween
+var _wave_label: Label
 
 func _ready() -> void:
 	layer = 10
@@ -68,6 +71,8 @@ func _ready() -> void:
 	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
 	EventBus.mission_completed.connect(_on_mission_completed)
 	EventBus.weekly_challenge_completed.connect(_on_weekly_challenge_completed)
+	EventBus.combo_changed.connect(_on_combo_changed)
+	EventBus.wave_started.connect(_on_wave_started)
 
 func _build_ui() -> void:
 	_build_hearts()
@@ -79,6 +84,8 @@ func _build_ui() -> void:
 	_build_pause_button()
 	_build_world_label()
 	_build_phase2_label()
+	_build_wave_label()
+	_build_combo_label()
 	_build_toast()
 
 func _build_hearts() -> void:
@@ -203,6 +210,58 @@ func _build_phase2_label() -> void:
 	_phase2_label.add_theme_color_override(&"font_color", Color(1.0, 0.2, 0.1))
 	_phase2_label.hide()
 	add_child(_phase2_label)
+
+func _build_wave_label() -> void:
+	_wave_label = Label.new()
+	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_wave_label.anchor_left = 0.0
+	_wave_label.anchor_top = 0.0
+	_wave_label.offset_left = 10.0
+	_wave_label.offset_top = 60.0
+	_wave_label.offset_right = 150.0
+	_wave_label.offset_bottom = 84.0
+	_wave_label.add_theme_font_size_override(&"font_size", 14)
+	_wave_label.add_theme_color_override(&"font_color", Color(0.5, 0.9, 0.5))
+	_wave_label.hide()
+	add_child(_wave_label)
+
+func _on_wave_started(wave_number: int) -> void:
+	_wave_label.text = "OLA %d" % wave_number
+	_wave_label.show()
+	_wave_label.modulate.a = 1.0
+	var t: Tween = create_tween()
+	t.tween_interval(2.0)
+	t.tween_property(_wave_label, ^"modulate:a", 0.3, 0.5)
+
+func _build_combo_label() -> void:
+	_combo_label = Label.new()
+	_combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_combo_label.anchor_left = 0.5
+	_combo_label.anchor_right = 0.5
+	_combo_label.anchor_top = 0.0
+	_combo_label.anchor_bottom = 0.0
+	_combo_label.offset_left = -60.0
+	_combo_label.offset_right = 60.0
+	_combo_label.offset_top = 44.0
+	_combo_label.offset_bottom = 68.0
+	_combo_label.add_theme_font_size_override(&"font_size", 18)
+	_combo_label.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.2))
+	_combo_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	add_child(_combo_label)
+
+func _on_combo_changed(count: int, multiplier: float) -> void:
+	if count < 5:
+		if _combo_tween:
+			_combo_tween.kill()
+		_combo_label.modulate.a = 0.0
+		return
+	_combo_label.text = "×%.1f (%d)" % [multiplier, count]
+	_combo_label.modulate.a = 1.0
+	if _combo_tween:
+		_combo_tween.kill()
+	_combo_tween = create_tween()
+	_combo_tween.tween_interval(1.5)
+	_combo_tween.tween_property(_combo_label, ^"modulate:a", 0.0, 0.4)
 
 func _build_toast() -> void:
 	_toast_label = Label.new()
@@ -355,8 +414,12 @@ func _on_game_started() -> void:
 	for pill: Label in _strip_pills.values():
 		pill.queue_free()
 	_strip_pills.clear()
+	_combo_label.modulate.a = 0.0
+	_wave_label.hide()
 	_show_world_banner()
 	_show_character_toast()
+	if GameManager.get_endless_mode():
+		_queue_toast("MODO ENDLESS — ¡sobrevive!", Color(0.5, 0.9, 0.5))
 
 func _show_character_toast() -> void:
 	var selected_id: StringName = SaveManager.get_selected_character()
