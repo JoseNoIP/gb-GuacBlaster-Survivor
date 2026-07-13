@@ -45,6 +45,8 @@ var _powerup_strip: VBoxContainer
 var _strip_pills: Dictionary = {}
 var _displayed_score: int = 0
 var _boss_spawned: bool = false
+var _phase2_label: Label
+var _phase2_tween: Tween
 
 func _ready() -> void:
 	layer = 10
@@ -58,6 +60,7 @@ func _ready() -> void:
 	EventBus.boss_spawned.connect(func(_id: int): _boss_spawned = true)
 	EventBus.boss_health_changed.connect(_on_boss_health_changed)
 	EventBus.boss_defeated.connect(func(_id: int): _boss_hp_bar.hide())
+	EventBus.boss_phase_changed.connect(_on_boss_phase_changed)
 
 func _build_ui() -> void:
 	_build_hearts()
@@ -68,6 +71,7 @@ func _build_ui() -> void:
 	_build_powerup_strip()
 	_build_pause_button()
 	_build_world_label()
+	_build_phase2_label()
 
 func _build_hearts() -> void:
 	var container := HBoxContainer.new()
@@ -175,6 +179,23 @@ func _build_world_label() -> void:
 	_world_label.hide()
 	add_child(_world_label)
 
+func _build_phase2_label() -> void:
+	_phase2_label = Label.new()
+	_phase2_label.text = "¡FASE 2!"
+	_phase2_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_phase2_label.anchor_left = 0.5
+	_phase2_label.anchor_right = 0.5
+	_phase2_label.anchor_top = 0.5
+	_phase2_label.anchor_bottom = 0.5
+	_phase2_label.offset_left = -80.0
+	_phase2_label.offset_right = 80.0
+	_phase2_label.offset_top = -60.0
+	_phase2_label.offset_bottom = -10.0
+	_phase2_label.add_theme_font_size_override(&"font_size", 38)
+	_phase2_label.add_theme_color_override(&"font_color", Color(1.0, 0.2, 0.1))
+	_phase2_label.hide()
+	add_child(_phase2_label)
+
 func _build_powerup_strip() -> void:
 	_powerup_strip = VBoxContainer.new()
 	_powerup_strip.add_theme_constant_override("separation", 6)
@@ -266,6 +287,17 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 		if _strip_pills.has(powerup_id):
 			(_strip_pills[powerup_id] as Label).queue_free()
 			_strip_pills.erase(powerup_id)
+
+func _on_boss_phase_changed(phase: int) -> void:
+	if phase != 2:
+		return
+	_phase2_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	_phase2_label.show()
+	if _phase2_tween:
+		_phase2_tween.kill()
+	_phase2_tween = create_tween()
+	_phase2_tween.tween_interval(1.2)
+	_phase2_tween.tween_property(_phase2_label, "modulate:a", 0.0, 0.6)
 
 func _on_boss_health_changed(current: int, maximum: int) -> void:
 	_boss_hp_bar.max_value = float(maximum)

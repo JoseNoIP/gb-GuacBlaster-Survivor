@@ -115,3 +115,62 @@ const GRENADE_RADIUS: float = 80.0
 const GRENADE_DAMAGE: int = 30
 const LASER_DAMAGE_PER_TICK: int = 5
 const LASER_TICK_INTERVAL: float = 0.3
+
+# --- Characters ---
+const CHARACTERS: Array = [
+	{
+		"id": &"guac",
+		"name": "Guacamole",
+		"desc": "Equilibrado. Estadísticas base.",
+		"hp_bonus": 0,
+		"fire_rate_mult": 1.0,
+		"damage_mult": 1.0,
+		"cost": 0,
+	},
+	{
+		"id": &"habanero",
+		"name": "Habanero",
+		"desc": "Disparo +25% más rápido. -1 corazón.",
+		"hp_bonus": -1,
+		"fire_rate_mult": 1.25,
+		"damage_mult": 1.0,
+		"cost": 200,
+	},
+	{
+		"id": &"serrano",
+		"name": "Serrano",
+		"desc": "Daño +15%. +1 corazón. Disparo -20%.",
+		"hp_bonus": 1,
+		"fire_rate_mult": 0.8,
+		"damage_mult": 1.15,
+		"cost": 300,
+	},
+]
+
+# --- Achievements ---
+const ACHIEVEMENTS: Array = [
+	{"id": &"first_victory",  "name": "Primera Victoria",   "desc": "Gana tu primera partida"},
+	{"id": &"five_victories", "name": "Campeón",            "desc": "Gana 5 partidas"},
+	{"id": &"boss_slayer",    "name": "Cazajefes",          "desc": "Derrota a un jefe"},
+	{"id": &"level_10",       "name": "Experto",            "desc": "Alcanza nivel 10 en una partida"},
+	{"id": &"gold_500",       "name": "Rico Rico",          "desc": "Acumula 500 oro disponible"},
+	{"id": &"power_hoarder",  "name": "Coleccionista",      "desc": "Recoge 50 power-ups en total"},
+	{"id": &"veteran",        "name": "Veterano",           "desc": "Completa 25 sesiones"},
+	{"id": &"massacre",      "name": "Masacre",        "desc": "Elimina 100 enemigos en partida"},
+	{"id": &"survivor_90",  "name": "Superviviente",  "desc": "Sobrevive 90 segundos"},
+	{"id": &"max_upgrade",  "name": "Perfeccionista", "desc": "Maximiza cualquier mejora"},
+]
+
+# --- Daily Missions ---
+const DAILY_MISSION_POOL: Array = [
+	{"id": &"kill_20",     "desc": "Elimina 20 enemigos",          "target": 20,  "reward": 30},
+	{"id": &"kill_50",     "desc": "Elimina 50 enemigos",          "target": 50,  "reward": 60},
+	{"id": &"powerups_5",  "desc": "Recoge 5 power-ups",           "target": 5,   "reward": 40},
+	{"id": &"powerups_10", "desc": "Recoge 10 power-ups",          "target": 10,  "reward": 80},
+	{"id": &"win_game",    "desc": "Gana una partida",             "target": 1,   "reward": 100},
+	{"id": &"play_3",      "desc": "Juega 3 partidas",             "target": 3,   "reward": 50},
+	{"id": &"boss_kill",   "desc": "Derrota al jefe",              "target": 1,   "reward": 120},
+	{"id": &"level_5",     "desc": "Alcanza nivel 5 en partida",   "target": 5,   "reward": 35},
+	{"id": &"kill_100",    "desc": "Elimina 100 enemigos en total","target": 100, "reward": 75},
+]
+const DAILY_MISSIONS_COUNT: int = 3

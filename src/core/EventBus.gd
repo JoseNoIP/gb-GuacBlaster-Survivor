@@ -49,3 +49,6 @@ signal heart_collected()
 # --- Meta ---
 signal gold_earned(amount: int)
 signal upgrade_purchased(upgrade_id: StringName, new_level: int)
+signal achievement_unlocked(achievement_id: StringName)
+signal mission_completed(mission_id: StringName, reward: int)
+signal mission_progress(mission_id: StringName, current: int, target: int)

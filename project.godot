@@ -24,6 +24,9 @@ EventBus="*res://src/core/EventBus.gd"
 GameManager="*res://src/core/GameManager.gd"
 SaveManager="*res://src/core/SaveManager.gd"
 AudioManager="*res://src/features/audio/AudioManager.gd"
+HapticManager="*res://src/features/audio/HapticManager.gd"
+AchievementManager="*res://src/features/meta/AchievementManager.gd"
+DailyMissionsManager="*res://src/features/meta/DailyMissionsManager.gd"
 
 [display]
 

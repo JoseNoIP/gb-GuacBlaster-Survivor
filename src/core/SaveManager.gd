@@ -20,6 +20,11 @@ var _data: Dictionary = {
 	"swipe_sensitivity": 1.0,
 	"sound_enabled": true,
 	"vibration_enabled": true,
+	"achievements": {},
+	"total_powerups_collected": 0,
+	"selected_character": "guac",
+	"unlocked_characters": {},
+	"daily_missions": {},
 }
 
 func _ready() -> void:
@@ -85,6 +90,60 @@ func get_vibration_enabled() -> bool:
 func set_vibration_enabled(value: bool) -> void:
 	_data["vibration_enabled"] = value
 	_save()
+
+func get_achievements() -> Dictionary:
+	return _data.get("achievements", {}) as Dictionary
+
+func has_achievement(achievement_id: StringName) -> bool:
+	return get_achievements().get(str(achievement_id), false) as bool
+
+func unlock_achievement(achievement_id: StringName) -> void:
+	if not _data.has("achievements"):
+		_data["achievements"] = {}
+	(_data["achievements"] as Dictionary)[str(achievement_id)] = true
+	_save()
+
+func get_selected_character() -> StringName:
+	return _data.get("selected_character", "guac") as StringName
+
+func set_selected_character(char_id: StringName) -> void:
+	_data["selected_character"] = str(char_id)
+	_save()
+
+func is_character_unlocked(char_id: StringName) -> bool:
+	if char_id == &"guac":
+		return true
+	var unlocked: Dictionary = _data.get("unlocked_characters", {}) as Dictionary
+	return unlocked.get(str(char_id), false) as bool
+
+func unlock_character(char_id: StringName, cost: int) -> bool:
+	if char_id == &"guac":
+		return true
+	if is_character_unlocked(char_id):
+		return true
+	if get_gold() < cost:
+		return false
+	_data["gold"] = get_gold() - cost
+	if not _data.has("unlocked_characters"):
+		_data["unlocked_characters"] = {}
+	(_data["unlocked_characters"] as Dictionary)[str(char_id)] = true
+	_save()
+	return true
+
+func get_daily_missions() -> Dictionary:
+	return _data.get("daily_missions", {}) as Dictionary
+
+func save_daily_missions(data: Dictionary) -> void:
+	_data["daily_missions"] = data
+	_save()
+
+func add_lifetime_stat(key: StringName, amount: int) -> void:
+	var current: int = _data.get(str(key), 0) as int
+	_data[str(key)] = current + amount
+	_save()
+
+func get_lifetime_stat(key: StringName) -> int:
+	return _data.get(str(key), 0) as int
 
 func purchase_upgrade(upgrade_id: StringName) -> bool:
 	var current_level: int = get_upgrade_level(upgrade_id)

@@ -139,6 +139,15 @@ func _on_game_started() -> void:
 	_rapid_fire_stacks = 0
 	_autofire_timer.wait_time = _current_autofire_interval
 	_autofire_timer.start()
+	var char_data: Dictionary = _get_character_data()
+	_max_health = maxi(1, _max_health + (char_data.get("hp_bonus", 0) as int))
+	_health = _max_health
+	_current_damage *= (char_data.get("damage_mult", 1.0) as float)
+	var fire_mult: float = char_data.get("fire_rate_mult", 1.0) as float
+	if fire_mult > 0.0:
+		_base_autofire_interval /= fire_mult
+	_current_autofire_interval = _base_autofire_interval
+	_autofire_timer.wait_time = _current_autofire_interval
 	var shield_level: int = SaveManager.get_upgrade_level(&"starter_shield")
 	_update_shield(shield_level * Constants.META_STARTER_SHIELD_PER_LEVEL)
 	_nacho_wall_stacks = 0
@@ -172,6 +181,13 @@ func get_max_health() -> int:
 
 func set_damage(new_damage: float) -> void:
 	_current_damage = new_damage
+
+func _get_character_data() -> Dictionary:
+	var selected: StringName = SaveManager.get_selected_character()
+	for char_def in Constants.CHARACTERS:
+		if (char_def as Dictionary).get("id", &"") as StringName == selected:
+			return char_def as Dictionary
+	return {}
 
 func _on_game_won_fired(_score: int, _duration: float) -> void:
 	set_process(false)

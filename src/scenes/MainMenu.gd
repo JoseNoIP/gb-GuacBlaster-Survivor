@@ -4,6 +4,10 @@ extends Node2D
 
 const GAME_SCENE: String = "res://src/scenes/Game.tscn"
 const SETTINGS_SCENE: String = "res://src/scenes/SettingsScreen.tscn"
+const ACHIEVEMENTS_SCENE: String = "res://src/scenes/AchievementsScreen.tscn"
+const DAILY_MISSIONS_SCENE: String = "res://src/scenes/DailyMissionsScreen.tscn"
+const CHARACTER_SELECT_SCENE: String = "res://src/scenes/CharacterSelectScreen.tscn"
+const BIOME_MAP_SCENE: String = "res://src/scenes/BiomeMapScreen.tscn"
 
 const BG_COLOR: Color = Color(0.08, 0.1, 0.08)
 const TITLE_COLOR: Color = Color(0.3, 0.85, 0.2)
@@ -97,6 +101,50 @@ func _build_ui() -> void:
 	settings_btn.pressed.connect(_on_settings_pressed)
 	root.add_child(settings_btn)
 
+	var missions_spacer: Control = Control.new()
+	missions_spacer.custom_minimum_size = Vector2(0.0, 8.0)
+	root.add_child(missions_spacer)
+
+	var missions_btn: Button = Button.new()
+	missions_btn.text = "MISIONES DIARIAS"
+	missions_btn.custom_minimum_size = Vector2(160.0, 44.0)
+	missions_btn.add_theme_font_size_override(&"font_size", 18)
+	missions_btn.pressed.connect(_on_missions_pressed)
+	root.add_child(missions_btn)
+
+	var achievements_spacer: Control = Control.new()
+	achievements_spacer.custom_minimum_size = Vector2(0.0, 8.0)
+	root.add_child(achievements_spacer)
+
+	var achievements_btn: Button = Button.new()
+	achievements_btn.text = "LOGROS"
+	achievements_btn.custom_minimum_size = Vector2(160.0, 44.0)
+	achievements_btn.add_theme_font_size_override(&"font_size", 18)
+	achievements_btn.pressed.connect(_on_achievements_pressed)
+	root.add_child(achievements_btn)
+
+	var chars_spacer: Control = Control.new()
+	chars_spacer.custom_minimum_size = Vector2(0.0, 8.0)
+	root.add_child(chars_spacer)
+
+	var chars_btn: Button = Button.new()
+	chars_btn.text = "PERSONAJE"
+	chars_btn.custom_minimum_size = Vector2(160.0, 44.0)
+	chars_btn.add_theme_font_size_override(&"font_size", 18)
+	chars_btn.pressed.connect(_on_characters_pressed)
+	root.add_child(chars_btn)
+
+	var biome_spacer: Control = Control.new()
+	biome_spacer.custom_minimum_size = Vector2(0.0, 8.0)
+	root.add_child(biome_spacer)
+
+	var biome_btn: Button = Button.new()
+	biome_btn.text = "MAPA"
+	biome_btn.custom_minimum_size = Vector2(160.0, 44.0)
+	biome_btn.add_theme_font_size_override(&"font_size", 18)
+	biome_btn.pressed.connect(_on_biome_map_pressed)
+	root.add_child(biome_btn)
+
 	var btn_spacer: Control = Control.new()
 	btn_spacer.custom_minimum_size = Vector2(0.0, 24.0)
 	root.add_child(btn_spacer)
@@ -120,6 +168,18 @@ func _on_upgrades_pressed() -> void:
 
 func _on_settings_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(SETTINGS_SCENE)
+
+func _on_missions_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred(DAILY_MISSIONS_SCENE)
+
+func _on_achievements_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred(ACHIEVEMENTS_SCENE)
+
+func _on_characters_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred(CHARACTER_SELECT_SCENE)
+
+func _on_biome_map_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred(BIOME_MAP_SCENE)
 
 func get_title_label() -> Label:
 	return _title_label

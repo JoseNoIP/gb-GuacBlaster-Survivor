@@ -225,9 +225,12 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `player_shield_changed(hits)` | Player | HUD |
 | `powerup_selection_requested(opts)` | GameManager | PowerUpDropper |
 | `boss_health_changed(current, maximum)` | EnemyBoss | HUD |
-| `boss_phase_changed(phase)` | EnemyBoss | (informativa — HUD puede escuchar) |
+| `boss_phase_changed(phase)` | EnemyBoss | HUD (flash "¡FASE 2!"), HapticManager |
 | `elite_powerup_dropped(position, powerup_id)` | EnemyElite | PowerUpDropper |
-| `heart_collected` | HeartDrop | Player |
+| `heart_collected` | HeartDrop | Player, HapticManager |
+| `achievement_unlocked(id)` | AchievementManager | (informativa — UI puede escuchar) |
+| `mission_completed(id, reward)` | DailyMissionsManager | (informativa — UI puede escuchar) |
+| `mission_progress(id, current, target)` | DailyMissionsManager | (informativa) |
 
 ---
 
@@ -270,6 +273,9 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 - **Moneda:** Oro — score × 0.1 + corazones × 25 (al ganar) / score × 0.1 (al perder)
 - **Upgrades permanentes (6):** Daño, Velocidad, Vida, Suerte, Bono de Oro, Escudo Inicial
 - **Costo:** `50 × 1.8^nivel` — cap nivel 5
+- **Personajes (3):** guac (base/gratis), habanero (200 oro), serrano (300 oro). Modificadores de HP, fire_rate_mult y damage_mult aplicados en `Player._on_game_started()`.
+- **Logros (10):** persistidos en SaveManager. Pantalla en AchievementsScreen.tscn.
+- **Misiones diarias (3/día):** generadas por hash de fecha. Progreso persiste en SaveManager. Recompensa en oro.
 
 ---
 
@@ -283,7 +289,10 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `EventBus` | `src/core/EventBus.gd` | Bus de señales global |
 | `GameManager` | `src/core/GameManager.gd` | Estado de partida |
 | `SaveManager` | `src/core/SaveManager.gd` | Persistencia |
-| `AudioManager` | `src/features/audio/AudioManager.gd` | SFX + Hápticos |
+| `AudioManager` | `src/features/audio/AudioManager.gd` | SFX + Hápticos (disparo, boss) |
+| `HapticManager` | `src/features/audio/HapticManager.gd` | Hápticos orientados a eventos |
+| `AchievementManager` | `src/features/meta/AchievementManager.gd` | Logros persistentes |
+| `DailyMissionsManager` | `src/features/meta/DailyMissionsManager.gd` | Misiones diarias |
 
 ---
 
@@ -323,8 +332,12 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 | Feature | Archivo(s) a crear/modificar | Notas |
 |---|---|---|
 | ~~Settings screen~~ | ✅ Completado | Sensibilidad + sonido on/off + vibración on/off |
+| ~~HapticManager~~ | ✅ Completado | Eventos: damaged, powerup, boss_phase, heart |
+| ~~Logros persistentes~~ | ✅ Completado | 10 logros, AchievementManager autoload + AchievementsScreen |
+| ~~Misiones diarias~~ | ✅ Completado | DailyMissionsManager autoload + DailyMissionsScreen |
+| ~~Personajes alternativos~~ | ✅ Completado | 3 personajes, CharacterSelectScreen, Player aplica modificadores |
+| ~~Mapa de biomas~~ | ✅ Completado | BiomeMapScreen, lock/unlock por victorias |
 | Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
-| Misiones diarias | Sistema de tracking + UI | Oro extra por objetivos |
 | Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
 | Export release iOS | Provisioning profile, Apple Dev account | |
 

@@ -271,21 +271,95 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - `BossProjectile` actualizado: `_velocity: Vector2` reemplaza el movimiento hardcodeado; soporte de off-screen en los 4 bordes.
 - La fase 2 NO se activa si el golpe letal lleva al boss directo a 0 HP.
 
+## Boss Fase 2 HUD Feedback ✅
+- `HUD.gd` conecta `boss_phase_changed` y muestra label "¡FASE 2!" centrado en pantalla.
+- Label aparece en rojo (38px) con tween de 1.2s pausa + 0.6s fade-out.
+- Se construye en `_build_phase2_label()` durante `_build_ui()`.
+
+## HapticManager — Hápticos orientados a eventos ✅
+- Nuevo autoload: `src/features/audio/HapticManager.gd`.
+- Conecta eventos faltantes: `player_damaged` (80ms), `powerup_selected` (20ms), `boss_phase_changed` (120ms), `heart_collected` (20ms).
+- `AudioManager` mantiene hápticos de disparo (`trigger_haptic_light`) y jefe derrotado (`trigger_haptic_heavy`).
+- Toda vibración respeta `SaveManager.get_vibration_enabled()`.
+
+## Logros Persistentes ✅
+- Nuevo autoload: `src/features/meta/AchievementManager.gd`.
+- 10 logros definidos en `Constants.ACHIEVEMENTS` (Array de Dicts con id, name, desc).
+- Persistencia en `SaveManager._data["achievements"]` — dict `{id: true}`.
+- Métodos: `SaveManager.has_achievement(id)`, `unlock_achievement(id)`.
+- Señal: `EventBus.achievement_unlocked(achievement_id)`.
+- Nueva pantalla: `src/scenes/AchievementsScreen.gd/.tscn` — muestra ★/☆ con estado.
+- Accesible desde MainMenu → botón LOGROS.
+- Tests: `tests/unit/test_achievement_manager.gd` (12 pruebas).
+
+| ID | Condición |
+|---|---|
+| first_victory | 1 victoria |
+| five_victories | 5 victorias |
+| boss_slayer | Derrota al jefe |
+| level_10 | Nivel 10 en partida |
+| gold_500 | 500 oro disponible |
+| power_hoarder | 50 power-ups lifetime |
+| veteran | 25 sesiones |
+| massacre | 100 kills en partida |
+| survivor_90 | 90s sobrevivido |
+| max_upgrade | Mejora permanente al máximo |
+
+## Misiones Diarias ✅
+- Nuevo autoload: `src/features/meta/DailyMissionsManager.gd`.
+- 3 misiones diarias generadas deterministamente desde la fecha local (hash del string "YYYY-MM-DD").
+- Pool de 9 tipos de misión en `Constants.DAILY_MISSION_POOL`; sin repetidos en el mismo día.
+- Progreso acumulativo durante el día; resetea automáticamente al cambiar de fecha.
+- Persistencia en `SaveManager._data["daily_missions"]`.
+- Señales: `EventBus.mission_completed(id, reward)`, `mission_progress(id, current, target)`.
+- Recompensa: oro emitido vía `EventBus.gold_earned(reward)` al completar.
+- Nueva pantalla: `src/scenes/DailyMissionsScreen.gd/.tscn` — cards con barra de progreso.
+- Accesible desde MainMenu → botón MISIONES DIARIAS.
+- Tests: `tests/unit/test_daily_missions.gd` (11 pruebas).
+
+## Sistema de Personajes ✅
+- 3 personajes definidos en `Constants.CHARACTERS` (Array de Dicts con id, name, desc, hp_bonus, fire_rate_mult, damage_mult, cost).
+- Selección persistida en `SaveManager._data["selected_character"]` (default: "guac").
+- Desbloqueo en `SaveManager._data["unlocked_characters"]` (guac siempre disponible).
+- Métodos: `SaveManager.get_selected_character()`, `set_selected_character(id)`, `is_character_unlocked(id)`, `unlock_character(id, cost)`.
+- Player aplica modificadores en `_on_game_started()` después de los upgrades de meta.
+- Nueva pantalla: `src/scenes/CharacterSelectScreen.gd/.tscn` — cards con stats y botones ELEGIR/desbloquear.
+- Accesible desde MainMenu → botón PERSONAJE.
+
+| ID | Nombre | Costo | Efecto |
+|---|---|---|---|
+| guac | Guacamole | Gratis | Base (sin modificadores) |
+| habanero | Habanero | 200 oro | Fire rate ×1.25, -1 corazón |
+| serrano | Serrano | 300 oro | Daño ×1.15, +1 corazón, fire rate ×0.8 |
+
+## Mapa de Biomas ✅
+- Nueva pantalla: `src/scenes/BiomeMapScreen.gd/.tscn`.
+- Muestra los 5 biomas con swatch de color, nombre, estado lock/unlock.
+- Bioma desbloqueado si `victories > idx` (bioma 0 siempre disponible).
+- Indica bioma actual (`victories % 5`).
+- Accesible desde MainMenu → botón MAPA.
+
 ---
 
 # Pendientes — Solo Código
 
 ## Settings Screen ✅ (completado)
 
+## Misiones Diarias ✅ (completado)
+
+## Logros ✅ (completado)
+
+## Sistema de Personajes ✅ (completado)
+
+## Mapa de Biomas ✅ (completado)
+
+## HapticManager ✅ (completado)
+
 ## Cuentas de usuario
 - Login con Facebook / Google / cuenta propia de Guacamole Bit.
 - Requiere SDK externo: GodotFacebook, GodotGameServices, o backend REST propio.
 - No implementable sin integración de plataforma externa.
 - Impacto esperado: sync de progreso entre dispositivos, rankings, misiones sociales.
-
-## Misiones diarias
-- Objetivos por sesión que otorgan oro extra (ej. "Mata 20 básicas", "Sobrevive 60 segundos").
-- Requiere: sistema de tracking de eventos, persistencia de estado de misiones en `SaveManager`, UI de misiones.
 
 ## Export Release (Android y iOS)
 - Build actual es **debug**. Para publicar en tiendas se necesita:
