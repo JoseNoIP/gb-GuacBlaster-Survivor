@@ -71,21 +71,27 @@ func _build_confirm_panel() -> void:
 	add_child(_confirm_panel)
 
 	var dim := ColorRect.new()
-	dim.color = Color(0.0, 0.0, 0.0, 0.5)
+	dim.color = Color(0.0, 0.0, 0.0, 0.72)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_confirm_panel.add_child(dim)
 
+	var card := ColorRect.new()
+	card.color = Color(0.08, 0.08, 0.12, 1.0)
+	card.anchor_left = 0.5
+	card.anchor_right = 0.5
+	card.anchor_top = 0.5
+	card.anchor_bottom = 0.5
+	card.offset_left = -145.0
+	card.offset_right = 145.0
+	card.offset_top = -95.0
+	card.offset_bottom = 95.0
+	_confirm_panel.add_child(card)
+
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
-	box.anchor_left = 0.5
-	box.anchor_right = 0.5
-	box.anchor_top = 0.5
-	box.anchor_bottom = 0.5
-	box.offset_left = -130.0
-	box.offset_right = 130.0
-	box.offset_top = -80.0
-	box.offset_bottom = 80.0
-	_confirm_panel.add_child(box)
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(box)
 
 	var warning := Label.new()
 	warning.text = "Si sales ahora\nperderás el avance\nde la partida."

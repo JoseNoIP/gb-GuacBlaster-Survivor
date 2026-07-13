@@ -10,6 +10,7 @@ extends CharacterBody2D
 
 var _health: int = 1
 var _xp_value: int = 5
+var _hit_tween: Tween = null
 
 func _ready() -> void:
 	add_to_group(&"enemies")
@@ -28,6 +29,23 @@ func take_damage(amount: int) -> void:
 	_health = maxi(_health - amount, 0)
 	if _health == 0:
 		_die()
+	else:
+		_play_hit_flash()
+
+func _play_hit_flash() -> void:
+	var sprite := get_node_or_null(^"Sprite2D") as Node2D
+	if sprite == null:
+		return
+	if _hit_tween != null and _hit_tween.is_valid():
+		_hit_tween.kill()
+		sprite.position = Vector2.ZERO
+		sprite.modulate = Color.WHITE
+	sprite.modulate = Color(2.0, 0.5, 0.5)
+	_hit_tween = create_tween()
+	_hit_tween.tween_property(sprite, "position", Vector2(5.0, 0.0), 0.04)
+	_hit_tween.tween_property(sprite, "position", Vector2(-4.0, 0.0), 0.04)
+	_hit_tween.tween_property(sprite, "position", Vector2.ZERO, 0.04)
+	_hit_tween.tween_property(sprite, "modulate", Color.WHITE, 0.06)
 
 func get_health() -> int:
 	return _health

@@ -21,6 +21,7 @@ signal boss_phase_changed(phase: int)
 # --- Projectiles ---
 signal player_fired(spawn_position: Vector2, direction: Vector2, damage: float)
 signal projectile_hit_enemy(enemy_id: int, damage: float)
+signal enemy_hit(position: Vector2)
 
 # --- Experience / Level ---
 signal xp_collected(amount: int, total: int, required: int)

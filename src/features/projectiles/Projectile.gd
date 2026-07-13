@@ -30,6 +30,7 @@ func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group(&"enemies"):
 		return
 	EventBus.projectile_hit_enemy.emit(body.get_instance_id(), _damage)
+	EventBus.enemy_hit.emit(global_position)
 	if body.has_method(&"take_damage"):
 		body.call(&"take_damage", int(_damage))
 	_consume_pierce()
