@@ -233,6 +233,7 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `achievement_unlocked(id)` | AchievementManager | (informativa — UI puede escuchar) |
 | `mission_completed(id, reward)` | DailyMissionsManager | (informativa — UI puede escuchar) |
 | `mission_progress(id, current, target)` | DailyMissionsManager | (informativa) |
+| `weekly_challenge_completed(id)` | WeeklyChallengeManager | HUD (toast morado) |
 
 ---
 
@@ -295,6 +296,7 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `HapticManager` | `src/features/audio/HapticManager.gd` | Hápticos orientados a eventos |
 | `AchievementManager` | `src/features/meta/AchievementManager.gd` | Logros persistentes |
 | `DailyMissionsManager` | `src/features/meta/DailyMissionsManager.gd` | Misiones diarias |
+| `WeeklyChallengeManager` | `src/features/meta/WeeklyChallengeManager.gd` | Desafío semanal |
 
 ---
 
@@ -339,6 +341,8 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 | ~~Misiones diarias~~ | ✅ Completado | DailyMissionsManager autoload + DailyMissionsScreen |
 | ~~Personajes alternativos~~ | ✅ Completado | 3 personajes, CharacterSelectScreen, Player aplica modificadores |
 | ~~Mapa de biomas~~ | ✅ Completado | BiomeMapScreen, lock/unlock por victorias |
+| ~~Desafío semanal~~ | ✅ Completado | WeeklyChallengeManager autoload + WeeklyChallengeScreen + 3 desafíos |
+| ~~Toast personaje~~ | ✅ Completado | CharacterSelectScreen + HUD muestran nombre al seleccionar/iniciar |
 | Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
 | Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
 | Export release iOS | Provisioning profile, Apple Dev account | |

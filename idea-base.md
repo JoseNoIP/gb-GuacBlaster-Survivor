@@ -339,6 +339,25 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Indica bioma actual (`victories % 5`).
 - Accesible desde MainMenu → botón MAPA.
 
+## Toast de Personaje Seleccionado ✅
+- `CharacterSelectScreen`: capa `_toast_layer: CanvasLayer` (layer=20) persiste a través de `_rebuild()`.
+- Muestra "✓ [Name] seleccionado" (verde) o "✓ [Name] desbloqueado" (dorado) al interactuar.
+- `HUD._on_game_started()` llama `_show_character_toast()` que encola "Jugando como: [name]" en el sistema de toasts del HUD.
+
+## Desafío Semanal ✅
+- **`WeeklyChallengeManager.gd`** — nuevo autoload que expone getters de multiplicadores:
+  - `get_spawn_rate_mult()`, `get_elite_chance_mult()`, `get_boss_hp_mult()`, `get_gold_mult()`, `is_heart_drops_disabled()`
+  - Retorna valores neutros (1.0 / false) cuando no hay desafío activo → los sistemas de juego multiplican sin if/else.
+  - `activate_challenge()` lee el desafío de la semana actual (`week_number % 3`).
+  - Al ganar con desafío activo: emite `weekly_challenge_completed`, marca la semana en SaveManager, resetea estado.
+  - `game_over` y `menu_requested` también resetean `_is_active`.
+- **`WeeklyChallengeScreen.gd/.tscn`** — pantalla con nombre, descripción, multiplicador de oro y estado "✓ COMPLETADO ESTA SEMANA".
+- **Integración de juego**: `GameManager._calc_gold()` multiplica por `get_gold_mult()`; `EnemySpawner._update_difficulty()` aplica `spawn_rate_mult`; `_pick_scene()` aplica `elite_chance_mult`; `EnemyBoss._initialize()` aplica `boss_hp_mult`; `HeartDropper._on_game_started()` respeta `is_heart_drops_disabled()`.
+- **`EnemySpawner._on_game_started()`** — convertido de lambda a método; ahora también resetea `_elapsed`, timers y carga multiplicadores de desafío.
+- Pool de 3 desafíos en `Constants.WEEKLY_CHALLENGE_POOL`: Horda Masiva (×2 oro), Lluvia Élite (×2.5 oro), Supervivencia Pura (×1.5 oro).
+- **HUD** conectado a `weekly_challenge_completed` → toast morado "★ DESAFÍO SEMANAL COMPLETADO".
+- 17 tests en `test_weekly_challenge.gd`.
+
 ---
 
 # Pendientes — Solo Código

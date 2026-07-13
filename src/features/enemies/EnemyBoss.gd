@@ -12,7 +12,8 @@ var _max_health: int = 0
 var _phase: int = 1
 
 func _initialize() -> void:
-	_health = Constants.BOSS_HP_BASE + _generation * Constants.BOSS_HP_PER_GENERATION
+	_health = int((Constants.BOSS_HP_BASE + _generation * Constants.BOSS_HP_PER_GENERATION)
+			* WeeklyChallengeManager.get_boss_hp_mult())
 	_max_health = _health
 	_xp_value = Constants.BOSS_XP
 	_phase = 1

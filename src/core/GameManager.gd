@@ -63,6 +63,7 @@ func get_current_level() -> int:
 func _calc_gold() -> int:
 	var gold_level: int = SaveManager.get_upgrade_level(&"gold_bonus")
 	var gold_mult: float = 1.0 + float(gold_level) * Constants.META_GOLD_BONUS_PER_LEVEL
+	gold_mult *= WeeklyChallengeManager.get_gold_mult()
 	return int(float(_score) * Constants.GOLD_PER_SCORE_POINT * gold_mult)
 
 func _on_player_died() -> void:

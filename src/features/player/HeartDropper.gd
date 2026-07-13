@@ -29,7 +29,7 @@ func _spawn_heart() -> void:
 	get_parent().add_child(drop)
 
 func _on_game_started() -> void:
-	_active = true
+	_active = not WeeklyChallengeManager.is_heart_drops_disabled()
 	_timer = Constants.HEART_DROP_INTERVAL
 
 func _on_session_ended(_score: int, _duration: float) -> void:

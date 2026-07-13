@@ -20,9 +20,11 @@ var _boss_timer: float = Constants.BOSS_SPAWN_INTERVAL
 var _boss_alive: bool = false
 var _boss_generation: int = 0
 var _boss_warning_emitted: bool = false
+var _challenge_spawn_mult: float = 1.0
+var _challenge_elite_mult: float = 1.0
 
 func _ready() -> void:
-	EventBus.game_started.connect(func(): _active = true)
+	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(func(_s: int, _d: float): _active = false)
 	EventBus.game_won.connect(func(_s: int, _d: float): _active = false)
 	EventBus.enemy_split_requested.connect(_on_enemy_split_requested)
@@ -46,12 +48,23 @@ func _process(delta: float) -> void:
 		_boss_warning_emitted = false
 		_spawn_boss()
 
+func _on_game_started() -> void:
+	_active = true
+	_elapsed = 0.0
+	_spawn_timer = 0.0
+	_spawn_interval = Constants.SPAWNER_INITIAL_INTERVAL
+	_boss_timer = Constants.BOSS_SPAWN_INTERVAL
+	_boss_alive = false
+	_boss_warning_emitted = false
+	_challenge_spawn_mult = WeeklyChallengeManager.get_spawn_rate_mult()
+	_challenge_elite_mult = WeeklyChallengeManager.get_elite_chance_mult()
+
 func _spawn_wave() -> void:
 	_instantiate_at_random_x(_pick_scene())
 
 func _pick_scene() -> PackedScene:
 	var elite_ready: bool = elite_scene != null and _elapsed >= Constants.SPAWNER_ELITE_UNLOCK_TIME
-	if elite_ready and randf() < Constants.SPAWNER_ELITE_CHANCE:
+	if elite_ready and randf() < minf(1.0, Constants.SPAWNER_ELITE_CHANCE * _challenge_elite_mult):
 		return elite_scene
 	if _elapsed >= Constants.SPAWNER_TANK_UNLOCK_TIME and randf() < Constants.SPAWNER_TANK_CHANCE:
 		return tank_scene
@@ -73,7 +86,7 @@ func _update_difficulty() -> void:
 	_spawn_interval = maxf(
 		Constants.SPAWNER_MIN_INTERVAL,
 		Constants.SPAWNER_INITIAL_INTERVAL - minutes * Constants.SPAWNER_INTERVAL_DECREASE_PER_MIN
-	)
+	) * _challenge_spawn_mult
 
 func _spawn_boss() -> void:
 	if boss_scene == null:

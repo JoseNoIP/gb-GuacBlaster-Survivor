@@ -11,9 +11,41 @@ const LOCKED_BORDER: Color = Color(0.3, 0.3, 0.3)
 const GOLD_COLOR: Color = Color(1.0, 0.85, 0.2)
 
 var _cards: Dictionary = {}
+var _toast_layer: CanvasLayer
+var _toast_label: Label
+var _toast_tween: Tween
 
 func _ready() -> void:
+	_build_toast_layer()
 	_build_ui()
+
+func _build_toast_layer() -> void:
+	_toast_layer = CanvasLayer.new()
+	_toast_layer.layer = 20
+	add_child(_toast_layer)
+	_toast_label = Label.new()
+	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast_label.anchor_left = 0.5
+	_toast_label.anchor_right = 0.5
+	_toast_label.anchor_top = 0.0
+	_toast_label.anchor_bottom = 0.0
+	_toast_label.offset_left = -140.0
+	_toast_label.offset_right = 140.0
+	_toast_label.offset_top = 60.0
+	_toast_label.offset_bottom = 90.0
+	_toast_label.add_theme_font_size_override(&"font_size", 15)
+	_toast_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_toast_layer.add_child(_toast_label)
+
+func _show_toast(text: String, color: Color) -> void:
+	_toast_label.text = text
+	_toast_label.add_theme_color_override(&"font_color", color)
+	if _toast_tween:
+		_toast_tween.kill()
+	_toast_tween = create_tween()
+	_toast_tween.tween_property(_toast_label, "modulate:a", 1.0, 0.15)
+	_toast_tween.tween_interval(1.8)
+	_toast_tween.tween_property(_toast_label, "modulate:a", 0.0, 0.35)
 
 func _build_ui() -> void:
 	var vp: Vector2 = get_viewport_rect().size
@@ -150,15 +182,27 @@ func _build_card(
 
 func _on_select_pressed(char_id: StringName) -> void:
 	SaveManager.set_selected_character(char_id)
+	var char_name: String = _get_char_name(char_id)
 	_rebuild()
+	_show_toast("✓ %s seleccionado" % char_name, SELECTED_BORDER)
 
 func _on_unlock_pressed(char_id: StringName, cost: int, _gold_lbl: Label) -> void:
 	if SaveManager.unlock_character(char_id, cost):
 		SaveManager.set_selected_character(char_id)
+		var char_name: String = _get_char_name(char_id)
 		_rebuild()
+		_show_toast("✓ %s desbloqueado" % char_name, GOLD_COLOR)
+
+func _get_char_name(char_id: StringName) -> String:
+	for def in Constants.CHARACTERS:
+		if (def as Dictionary).get("id", &"") as StringName == char_id:
+			return (def as Dictionary).get("name", "") as String
+	return str(char_id)
 
 func _rebuild() -> void:
 	for child in get_children():
+		if child == _toast_layer:
+			continue
 		child.queue_free()
 	await get_tree().process_frame
 	_build_ui()

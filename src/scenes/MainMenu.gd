@@ -8,6 +8,7 @@ const ACHIEVEMENTS_SCENE: String = "res://src/scenes/AchievementsScreen.tscn"
 const DAILY_MISSIONS_SCENE: String = "res://src/scenes/DailyMissionsScreen.tscn"
 const CHARACTER_SELECT_SCENE: String = "res://src/scenes/CharacterSelectScreen.tscn"
 const BIOME_MAP_SCENE: String = "res://src/scenes/BiomeMapScreen.tscn"
+const WEEKLY_CHALLENGE_SCENE: String = "res://src/scenes/WeeklyChallengeScreen.tscn"
 
 const BG_COLOR: Color = Color(0.08, 0.1, 0.08)
 const TITLE_COLOR: Color = Color(0.3, 0.85, 0.2)
@@ -145,6 +146,17 @@ func _build_ui() -> void:
 	biome_btn.pressed.connect(_on_biome_map_pressed)
 	root.add_child(biome_btn)
 
+	var weekly_spacer: Control = Control.new()
+	weekly_spacer.custom_minimum_size = Vector2(0.0, 8.0)
+	root.add_child(weekly_spacer)
+
+	var weekly_btn: Button = Button.new()
+	weekly_btn.text = "DESAFÍO SEMANAL"
+	weekly_btn.custom_minimum_size = Vector2(160.0, 44.0)
+	weekly_btn.add_theme_font_size_override(&"font_size", 18)
+	weekly_btn.pressed.connect(_on_weekly_challenge_pressed)
+	root.add_child(weekly_btn)
+
 	var btn_spacer: Control = Control.new()
 	btn_spacer.custom_minimum_size = Vector2(0.0, 24.0)
 	root.add_child(btn_spacer)
@@ -180,6 +192,9 @@ func _on_characters_pressed() -> void:
 
 func _on_biome_map_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(BIOME_MAP_SCENE)
+
+func _on_weekly_challenge_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred(WEEKLY_CHALLENGE_SCENE)
 
 func get_title_label() -> Label:
 	return _title_label

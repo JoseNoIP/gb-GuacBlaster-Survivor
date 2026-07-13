@@ -25,6 +25,7 @@ var _data: Dictionary = {
 	"selected_character": "guac",
 	"unlocked_characters": {},
 	"daily_missions": {},
+	"weekly_challenges": {},
 }
 
 func _ready() -> void:
@@ -144,6 +145,16 @@ func add_lifetime_stat(key: StringName, amount: int) -> void:
 
 func get_lifetime_stat(key: StringName) -> int:
 	return _data.get(str(key), 0) as int
+
+func is_weekly_challenge_completed(week: int) -> bool:
+	var challenges: Dictionary = _data.get("weekly_challenges", {}) as Dictionary
+	return challenges.get(str(week), false) as bool
+
+func mark_weekly_challenge_completed(week: int) -> void:
+	if not _data.has("weekly_challenges"):
+		_data["weekly_challenges"] = {}
+	(_data["weekly_challenges"] as Dictionary)[str(week)] = true
+	_save()
 
 func purchase_upgrade(upgrade_id: StringName) -> bool:
 	var current_level: int = get_upgrade_level(upgrade_id)

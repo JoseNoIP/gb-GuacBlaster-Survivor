@@ -67,6 +67,7 @@ func _ready() -> void:
 	EventBus.boss_phase_changed.connect(_on_boss_phase_changed)
 	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
 	EventBus.mission_completed.connect(_on_mission_completed)
+	EventBus.weekly_challenge_completed.connect(_on_weekly_challenge_completed)
 
 func _build_ui() -> void:
 	_build_hearts()
@@ -355,6 +356,17 @@ func _on_game_started() -> void:
 		pill.queue_free()
 	_strip_pills.clear()
 	_show_world_banner()
+	_show_character_toast()
+
+func _show_character_toast() -> void:
+	var selected_id: StringName = SaveManager.get_selected_character()
+	var char_name: String = ""
+	for def in Constants.CHARACTERS:
+		if (def as Dictionary).get("id", &"") as StringName == selected_id:
+			char_name = (def as Dictionary).get("name", "") as String
+			break
+	if not char_name.is_empty():
+		_queue_toast("Jugando como: %s" % char_name, Color(0.3, 0.85, 0.2))
 
 func _on_game_over(_score: int, _duration: float) -> void:
 	_pause_btn.disabled = true
@@ -367,6 +379,9 @@ func _on_achievement_unlocked(achievement_id: StringName) -> void:
 			name_str = (def as Dictionary).get("name", "") as String
 			break
 	_queue_toast("★ %s" % name_str, Color(1.0, 0.85, 0.2))
+
+func _on_weekly_challenge_completed(_challenge_id: StringName) -> void:
+	_queue_toast("★ DESAFÍO SEMANAL COMPLETADO", Color(0.8, 0.5, 1.0))
 
 func _on_mission_completed(mission_id: StringName, reward: int) -> void:
 	var desc_str: String = str(mission_id)

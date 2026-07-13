@@ -174,3 +174,37 @@ const DAILY_MISSION_POOL: Array = [
 	{"id": &"kill_100",    "desc": "Elimina 100 enemigos en total","target": 100, "reward": 75},
 ]
 const DAILY_MISSIONS_COUNT: int = 3
+
+# --- Weekly Challenge ---
+const WEEKLY_CHALLENGE_POOL: Array = [
+	{
+		"id": &"horda_masiva",
+		"name": "Horda Masiva",
+		"desc": "Los enemigos aparecen 40% más rápido. Sin corazones caídos.",
+		"spawn_rate_mult": 0.6,
+		"elite_chance_mult": 1.0,
+		"boss_hp_mult": 1.0,
+		"gold_mult": 2.0,
+		"no_heart_drops": true,
+	},
+	{
+		"id": &"lluvia_elite",
+		"name": "Lluvia Élite",
+		"desc": "Élites ×4 de frecuencia. El jefe tiene +50% HP.",
+		"spawn_rate_mult": 1.0,
+		"elite_chance_mult": 4.0,
+		"boss_hp_mult": 1.5,
+		"gold_mult": 2.5,
+		"no_heart_drops": false,
+	},
+	{
+		"id": &"supervivencia_pura",
+		"name": "Supervivencia Pura",
+		"desc": "Sin corazones caídos. Spawn 25% más rápido.",
+		"spawn_rate_mult": 0.75,
+		"elite_chance_mult": 1.0,
+		"boss_hp_mult": 1.0,
+		"gold_mult": 1.5,
+		"no_heart_drops": true,
+	},
+]
