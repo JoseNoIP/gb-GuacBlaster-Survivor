@@ -19,17 +19,23 @@ Sigue cada paso en orden. No saltar ninguno. No marcar "done" hasta que VALIDATE
 
 Antes de escribir una línea de código:
 
-1. **Leer** todos los archivos que serán modificados (`Read` tool).
-2. **Listar** exactamente:
+1. **Referencia competitiva** — para cualquier feature de gameplay, buscar cómo juegos del mismo género resuelven el mismo problema:
+   - Leer `CLAUDE.md` o `idea-base.md` para identificar el género y plataforma del proyecto actual.
+   - WebSearch: `"[mecánica a implementar] [género del juego] game"` + `"top [género] games [mecánica] best practices"`
+   - Anotar: ¿qué valores usan? ¿qué patrones son estándar en el género? ¿qué podríamos hacer distinto?
+   - Si la feature es puramente técnica (arquitectura, bug fix, UI interna), omitir este sub-paso.
+
+2. **Leer** todos los archivos que serán modificados (`Read` tool).
+3. **Listar** exactamente:
    - Archivos a crear
    - Archivos a modificar (con qué función/sección)
    - Señales nuevas en EventBus (si aplica)
    - Tests a agregar
-3. **Verificar** que la feature:
+4. **Verificar** que la feature:
    - Usa EventBus para comunicación cross-feature (NUNCA `get_parent()` ni rutas hardcodeadas)
    - Tiene una sola responsabilidad por script
    - No duplica lógica que ya existe en otro archivo
-4. **Confirmar** que no hay conflictos con autoloads existentes:
+5. **Confirmar** que no hay conflictos con autoloads existentes:
    - `ls addons/` antes de importar cualquier addon
    - Verificar que no se crea `class_name X` si ya existe autoload `X`
 

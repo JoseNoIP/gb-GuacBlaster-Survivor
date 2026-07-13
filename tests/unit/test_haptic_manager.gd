@@ -35,12 +35,11 @@ func test_connects_to_heart_collected() -> void:
 
 func test_vibrate_skips_when_disabled() -> void:
 	SaveManager.set_vibration_enabled(false)
-	# Should not crash — Input.vibrate_handheld is a no-op in headless
 	_manager._vibrate(80)
-	pass_test()
+	assert_true(true, "vibrate with disabled flag must not crash")
 	SaveManager.set_vibration_enabled(true)
 
 func test_vibrate_runs_when_enabled() -> void:
 	SaveManager.set_vibration_enabled(true)
 	_manager._vibrate(20)
-	pass_test()
+	assert_true(true, "vibrate with enabled flag must not crash")

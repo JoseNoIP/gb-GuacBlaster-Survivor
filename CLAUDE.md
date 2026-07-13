@@ -180,11 +180,13 @@ func _exit_tree() -> void:
 ### 🎮 Game Designer / Polish Agent
 **Cuándo activa:** Features de gameplay, power-ups, enemigos, feedback.  
 **Checklist:**
+- [ ] **Referencia competitiva**: ¿Se buscó cómo resuelven esta mecánica los juegos top del género actual? (WebSearch con género + mecánica antes de decidir valores o diseño — no asumir genre, leer CLAUDE.md primero)
 - [ ] ¿Los valores vienen de `Constants.gd`?
 - [ ] ¿El comportamiento respeta exactamente el GDD §3 (power-ups) y §4 (enemigos)?
 - [ ] ¿Hay feedback visual (partículas/tween) Y auditivo (SFX) en cada interacción?
 - [ ] ¿El feedback háptico está implementado para disparo y eventos críticos?
 - [ ] ¿La sesión puede completarse en 2–5 minutos?
+- [ ] ¿La feature se alinea con patrones probados del género o introduce diferenciación justificada?
 
 ---
 

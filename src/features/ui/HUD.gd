@@ -47,6 +47,10 @@ var _displayed_score: int = 0
 var _boss_spawned: bool = false
 var _phase2_label: Label
 var _phase2_tween: Tween
+var _toast_label: Label
+var _toast_tween: Tween
+var _toast_queue: Array = []
+var _toast_busy: bool = false
 
 func _ready() -> void:
 	layer = 10
@@ -61,6 +65,8 @@ func _ready() -> void:
 	EventBus.boss_health_changed.connect(_on_boss_health_changed)
 	EventBus.boss_defeated.connect(func(_id: int): _boss_hp_bar.hide())
 	EventBus.boss_phase_changed.connect(_on_boss_phase_changed)
+	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
+	EventBus.mission_completed.connect(_on_mission_completed)
 
 func _build_ui() -> void:
 	_build_hearts()
@@ -72,6 +78,7 @@ func _build_ui() -> void:
 	_build_pause_button()
 	_build_world_label()
 	_build_phase2_label()
+	_build_toast()
 
 func _build_hearts() -> void:
 	var container := HBoxContainer.new()
@@ -195,6 +202,23 @@ func _build_phase2_label() -> void:
 	_phase2_label.add_theme_color_override(&"font_color", Color(1.0, 0.2, 0.1))
 	_phase2_label.hide()
 	add_child(_phase2_label)
+
+func _build_toast() -> void:
+	_toast_label = Label.new()
+	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast_label.anchor_left = 0.5
+	_toast_label.anchor_right = 0.5
+	_toast_label.anchor_top = 0.0
+	_toast_label.anchor_bottom = 0.0
+	_toast_label.offset_left = -140.0
+	_toast_label.offset_right = 140.0
+	_toast_label.offset_top = 80.0
+	_toast_label.offset_bottom = 120.0
+	_toast_label.add_theme_font_size_override(&"font_size", 14)
+	_toast_label.add_theme_color_override(&"font_color", Color(1.0, 1.0, 1.0))
+	_toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_toast_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	add_child(_toast_label)
 
 func _build_powerup_strip() -> void:
 	_powerup_strip = VBoxContainer.new()
@@ -335,3 +359,40 @@ func _on_game_started() -> void:
 func _on_game_over(_score: int, _duration: float) -> void:
 	_pause_btn.disabled = true
 	_boss_hp_bar.hide()
+
+func _on_achievement_unlocked(achievement_id: StringName) -> void:
+	var name_str: String = ""
+	for def in Constants.ACHIEVEMENTS:
+		if (def as Dictionary).get("id", &"") as StringName == achievement_id:
+			name_str = (def as Dictionary).get("name", "") as String
+			break
+	_queue_toast("★ %s" % name_str, Color(1.0, 0.85, 0.2))
+
+func _on_mission_completed(mission_id: StringName, reward: int) -> void:
+	var desc_str: String = str(mission_id)
+	for def in Constants.DAILY_MISSION_POOL:
+		if (def as Dictionary).get("id", &"") as StringName == mission_id:
+			desc_str = (def as Dictionary).get("desc", str(mission_id)) as String
+			break
+	_queue_toast("✓ %s  +%d oro" % [desc_str, reward], Color(0.3, 0.95, 0.3))
+
+func _queue_toast(text: String, color: Color) -> void:
+	_toast_queue.append({"text": text, "color": color})
+	if not _toast_busy:
+		_show_next_toast()
+
+func _show_next_toast() -> void:
+	if _toast_queue.is_empty():
+		_toast_busy = false
+		return
+	_toast_busy = true
+	var entry: Dictionary = _toast_queue.pop_front() as Dictionary
+	_toast_label.text = entry.get("text", "") as String
+	_toast_label.add_theme_color_override(&"font_color", entry.get("color", Color.WHITE) as Color)
+	if _toast_tween:
+		_toast_tween.kill()
+	_toast_tween = create_tween()
+	_toast_tween.tween_property(_toast_label, "modulate:a", 1.0, 0.2)
+	_toast_tween.tween_interval(2.4)
+	_toast_tween.tween_property(_toast_label, "modulate:a", 0.0, 0.4)
+	_toast_tween.tween_callback(_show_next_toast)
