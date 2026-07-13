@@ -114,9 +114,7 @@ func _build_ui() -> void:
 	var back_btn: Button = Button.new()
 	back_btn.custom_minimum_size = Vector2(160.0, 44.0)
 	back_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	back_btn.pressed.connect(func() -> void:
-		get_tree().change_scene_to_file.call_deferred("res://src/scenes/MainMenu.tscn")
-	)
+	back_btn.pressed.connect(_on_back_pressed)
 	var back_hbox: HBoxContainer = HBoxContainer.new()
 	back_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	back_hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -138,6 +136,13 @@ func _build_ui() -> void:
 	var bot_pad: Control = Control.new()
 	bot_pad.custom_minimum_size = Vector2(0.0, 20.0)
 	root.add_child(bot_pad)
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://src/scenes/MainMenu.tscn")
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
 
 func _make_row(
 		rank: String, score: String, char_name: String,

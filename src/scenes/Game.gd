@@ -39,6 +39,9 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		if GameManager.get_state() == GameManager.GameState.PLAYING:
 			GameManager.pause_game()
+	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if GameManager.get_state() == GameManager.GameState.PLAYING:
+			GameManager.pause_game()
 
 func _on_player_damaged() -> void:
 	_shake_timer = SHAKE_DURATION

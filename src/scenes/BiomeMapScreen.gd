@@ -149,5 +149,9 @@ func _build_biome_row(
 	status_lbl.add_theme_color_override(&"font_color", Color(0.55, 0.55, 0.55))
 	vbox.add_child(status_lbl)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
+
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_SCENE)

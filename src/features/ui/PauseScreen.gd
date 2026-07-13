@@ -140,6 +140,13 @@ func _on_confirm_exit_pressed() -> void:
 	GameManager.resume_game()
 	EventBus.menu_requested.emit()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and visible:
+		if _confirm_panel.visible:
+			_confirm_panel.hide()
+		else:
+			_on_resume_pressed()
+
 func get_panel() -> Control:
 	return _panel
 

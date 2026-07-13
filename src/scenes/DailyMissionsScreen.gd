@@ -156,5 +156,9 @@ func _build_card(parent: Control, mission: Dictionary) -> void:
 	reward_lbl.add_theme_color_override(&"font_color", GOLD_COLOR)
 	vbox.add_child(reward_lbl)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
+
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_SCENE)

@@ -243,5 +243,9 @@ func _rebuild() -> void:
 	await get_tree().process_frame
 	_build_ui()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
+
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_SCENE)

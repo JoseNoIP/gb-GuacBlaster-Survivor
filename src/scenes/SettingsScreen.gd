@@ -165,6 +165,10 @@ func _on_sound_toggled(pressed: bool) -> void:
 func _on_vibration_toggled(pressed: bool) -> void:
 	SaveManager.set_vibration_enabled(pressed)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
+
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_SCENE)
 

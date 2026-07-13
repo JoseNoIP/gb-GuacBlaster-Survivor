@@ -28,11 +28,74 @@ var _title_label: Label
 var _best_label: Label
 var _play_btn: Button
 var _entrance_targets: Array = []
+var _exit_confirm: CanvasLayer
 
 func _ready() -> void:
 	_build_animated_bg()
 	_build_ui()
 	_run_entrance_animation()
+	_build_exit_confirm()
+
+func _build_exit_confirm() -> void:
+	_exit_confirm = CanvasLayer.new()
+	_exit_confirm.layer = 50
+	add_child(_exit_confirm)
+
+	var overlay: ColorRect = ColorRect.new()
+	overlay.color = Color(0.0, 0.0, 0.0, 0.72)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_exit_confirm.add_child(overlay)
+
+	var card: ColorRect = ColorRect.new()
+	card.color = Color(0.07, 0.09, 0.07, 1.0)
+	card.anchor_left = 0.5
+	card.anchor_right = 0.5
+	card.anchor_top = 0.5
+	card.anchor_bottom = 0.5
+	card.offset_left = -145.0
+	card.offset_right = 145.0
+	card.offset_top = -90.0
+	card.offset_bottom = 90.0
+	_exit_confirm.add_child(card)
+
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 20)
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(box)
+
+	var lbl: Label = Label.new()
+	lbl.text = "¿Salir del juego?"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override(&"font_size", 22)
+	lbl.add_theme_color_override(&"font_color", Color(1.0, 0.9, 0.4))
+	box.add_child(lbl)
+
+	var btns: HBoxContainer = HBoxContainer.new()
+	btns.add_theme_constant_override(&"separation", 14)
+	btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_child(btns)
+
+	var cancel_btn: Button = Button.new()
+	cancel_btn.text = "CANCELAR"
+	cancel_btn.custom_minimum_size = Vector2(110.0, 42.0)
+	cancel_btn.pressed.connect(func() -> void: _exit_confirm.hide())
+	btns.add_child(cancel_btn)
+
+	var exit_btn: Button = Button.new()
+	exit_btn.text = "SALIR"
+	exit_btn.custom_minimum_size = Vector2(90.0, 42.0)
+	exit_btn.pressed.connect(func() -> void: get_tree().quit())
+	btns.add_child(exit_btn)
+
+	_exit_confirm.hide()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if _exit_confirm.visible:
+			_exit_confirm.hide()
+		else:
+			_exit_confirm.show()
 
 func _build_animated_bg() -> void:
 	var vp: Vector2 = get_viewport_rect().size

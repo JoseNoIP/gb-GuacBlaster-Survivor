@@ -125,5 +125,9 @@ func _build_row(parent: Control, def: Dictionary) -> void:
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(desc_lbl)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
+
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_SCENE)
