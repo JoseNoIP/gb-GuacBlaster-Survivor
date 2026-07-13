@@ -238,15 +238,38 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - `Player.HALF_WIDTH = 35` previene salida de pantalla.
 - Shield ring (Nacho Wall): radio 56. ProjectileSpawnPoint: y=-56.
 
-## PowerUpDropper — fix multi-batch ✅
-- **Bug corregido:** al levelear dos veces antes de recoger un power-up, el segundo batch borraba las referencias del primero. Al recoger uno del batch viejo, los drops del nuevo batch se eliminaban pero los restantes del batch viejo quedaban en pantalla.
-- **Fix:** `_current_batch` → `_all_drops` (acumula todos los drops sin limpiar al nuevo batch). Al recoger cualquier drop, se liberan TODOS los pendientes.
+## PowerUpDropper — batches independientes ✅
+- Cada triada de power-ups es un **batch independiente** con `batch_id: int` único.
+- Al recoger un drop, solo se eliminan los otros dos de **su misma triada** (vía señal `powerup_batch_cleared(batch_id)`).
+- Múltiples triadas pueden coexistir en pantalla: cada una se resuelve por separado.
+- Drops de élite tienen `batch_id = -1` → se recogen individualmente sin limpiar nada más.
+- `PowerUpDropper._batches: Dictionary` mapea `batch_id → Array[Area2D]`.
+- Señal nueva en EventBus: `powerup_batch_cleared(batch_id: int)`.
 
 ## Boss HP escalado por victorias ✅
 - **Bug corregido:** `_boss_generation` en EnemySpawner se reseteaba a 0 en cada sesión → el jefe siempre tenía HP base (100).
 - **Fix:** `boss.set(&"_generation", SaveManager.get_victories())` — el HP del jefe escala con el progreso real del jugador.
 - Fórmula: `HP = BOSS_HP_BASE + victories × BOSS_HP_PER_GENERATION` = 100 + victorias×50.
 - Victoria 0: 100 HP | Victoria 3: 250 HP | Victoria 10: 600 HP.
+
+## Enemigo Élite ✅
+- Variante dorada del EnemyBasic. Aparece a partir de los 45s con 8% de probabilidad.
+- **HP:** 3× básico (3 HP). **XP:** 5× básico (40 XP).
+- **Visual:** modulate = Color(1.0, 0.85, 0.15) — tinte dorado. Sprite propio: `enemy_elite.png` (56×56).
+- **Al morir:** emite `elite_powerup_dropped(position, powerup_id)` con un ID aleatorio de `Constants.POWERUP_POOL`.
+- `PowerUpDropper` escucha la señal y spawnea un `PowerUpDrop` en la posición de muerte → el jugador lo recoge tocándolo.
+- Archivos: `EnemyElite.gd`, `EnemyElite.tscn`. Wired en `Game.tscn → EnemySpawner.elite_scene`.
+- Constantes: `ENEMY_ELITE_HP_MULTIPLIER=3`, `ENEMY_ELITE_XP_MULTIPLIER=5`, `SPAWNER_ELITE_UNLOCK_TIME=45s`, `SPAWNER_ELITE_CHANCE=0.08`.
+
+## Boss Fase 2 ✅
+- Al llegar al 50% de HP, el jefe entra en **Fase 2**:
+  - `modulate = Color(1.0, 0.3, 0.3)` — tinte rojo.
+  - Velocidad ×1.8 (`BOSS_PHASE2_SPEED_MULT`).
+  - Intervalo de disparo ×0.5 (el doble de rápido).
+  - Disparo en abanico: 3 proyectiles a ±20° apuntando al jugador (`BOSS_PHASE2_SPREAD_COUNT=3`, `BOSS_PHASE2_SPREAD_ANGLE=20°`).
+- Emite `boss_phase_changed(2)` en EventBus al transicionar.
+- `BossProjectile` actualizado: `_velocity: Vector2` reemplaza el movimiento hardcodeado; soporte de off-screen en los 4 bordes.
+- La fase 2 NO se activa si el golpe letal lleva al boss directo a 0 HP.
 
 ---
 

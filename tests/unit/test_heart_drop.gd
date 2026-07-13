@@ -4,6 +4,7 @@ extends GutTest
 # ── HeartDrop ──
 
 var _drop: Area2D
+var _player: Player
 
 func before_each() -> void:
 	var scene := load("res://src/features/player/HeartDrop.tscn") as PackedScene
@@ -36,8 +37,6 @@ func test_body_entered_by_non_player_does_not_emit() -> void:
 	assert_signal_not_emitted(EventBus, "heart_collected")
 
 # ── Player healing ──
-
-var _player: Player
 
 func _make_player() -> Player:
 	var p := Player.new()

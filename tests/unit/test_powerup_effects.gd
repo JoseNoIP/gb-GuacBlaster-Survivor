@@ -55,7 +55,8 @@ func test_rapid_fire_stacks_divide_further() -> void:
 	var initial: float = _player._current_autofire_interval
 	EventBus.powerup_stack_changed.emit(&"rapid_fire", 2)
 	var expected: float = initial / pow(Constants.RAPID_FIRE_MULTIPLIER, 2.0)
-	assert_almost_eq(_player._current_autofire_interval, maxf(Constants.PLAYER_AUTOFIRE_MIN, expected), 0.0001)
+	var clamped: float = maxf(Constants.PLAYER_AUTOFIRE_MIN, expected)
+	assert_almost_eq(_player._current_autofire_interval, clamped, 0.0001)
 
 func test_rapid_fire_zero_stacks_restores_interval() -> void:
 	var initial: float = _player._current_autofire_interval

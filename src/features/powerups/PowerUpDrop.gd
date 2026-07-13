@@ -29,6 +29,7 @@ const POWERUP_ABBREV: Dictionary = {
 }
 
 var powerup_id: StringName = &""
+var batch_id: int = -1
 
 func _ready() -> void:
 	collision_layer = 8
@@ -72,5 +73,7 @@ func _process(delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group(&"player"):
+		if batch_id >= 0:
+			EventBus.powerup_batch_cleared.emit(batch_id)
 		EventBus.powerup_selected.emit.call_deferred(powerup_id)
 		queue_free()

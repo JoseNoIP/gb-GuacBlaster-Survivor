@@ -25,6 +25,11 @@ const ENEMY_ZIGZAG_XP: int = 15
 const ENEMY_ZIGZAG_AMPLITUDE: float = 100.0
 const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
 
+const ENEMY_ELITE_HP_MULTIPLIER: int = 3
+const ENEMY_ELITE_XP_MULTIPLIER: int = 5
+const SPAWNER_ELITE_UNLOCK_TIME: float = 45.0
+const SPAWNER_ELITE_CHANCE: float = 0.08
+
 const BOSS_SPAWN_INTERVAL: float = 180.0
 const BACKGROUND_PALETTE: Array = [
 	Color(0.02, 0.18, 0.03),  # jungla oscura (default)
@@ -43,6 +48,11 @@ const BOSS_FIRE_INTERVAL_DECREASE: float = 0.2
 const BOSS_FIRE_INTERVAL_MIN: float = 0.8
 const BOSS_PROJECTILE_SPEED: float = 120.0
 const BOSS_PROJECTILE_DAMAGE: int = 1
+const BOSS_PHASE2_THRESHOLD: float = 0.5
+const BOSS_PHASE2_SPEED_MULT: float = 1.8
+const BOSS_PHASE2_FIRE_MULT: float = 0.5
+const BOSS_PHASE2_SPREAD_COUNT: int = 3
+const BOSS_PHASE2_SPREAD_ANGLE: float = 20.0
 
 # --- Spawner ---
 const SPAWNER_INITIAL_INTERVAL: float = 0.8

@@ -208,6 +208,39 @@ def make_enemy_basic(size=28):
     return _flat(g)
 
 
+def make_enemy_elite(size=56):
+    """Gold elite bubble — 3x HP. Crown spikes on top mark elite status."""
+    import math as _math
+    g = _grid(size, size)
+    cx, cy = size // 2, size // 2
+    R = size // 2 - 3
+    GOLD = (220, 170, 15, 255)
+    HI = (255, 235, 90, 255)
+    SH = (150, 90, 0, 255)
+
+    _circle(g, cx, cy, R, GOLD)
+    _circle(g, cx - 4, cy - 4, max(2, R // 3), HI)
+    _circle(g, cx + 3, cy + 3, max(2, R // 5), SH)
+    # Angry eyes (same as basic but gold-tinted whites)
+    for ex, ey in [(cx - 5, cy - 3), (cx + 5, cy - 3)]:
+        _circle(g, ex, ey, 2, BLK)
+        _set(g, ex - 1, ey - 1, (255, 255, 180, 255))
+    # Frown
+    for dx in range(-3, 4):
+        _set(g, cx + dx, cy + 6, BLK)
+    _set(g, cx - 3, cy + 5, BLK)
+    _set(g, cx + 3, cy + 5, BLK)
+    # Crown: 3 spikes above the bubble
+    crown_base = cy - R + 1
+    for bump_x in [cx - R // 3, cx, cx + R // 3]:
+        for h in range(4):
+            py = crown_base - h
+            if 0 <= py < size and 0 <= bump_x < size:
+                _set(g, bump_x, py, (255, 240, 60, 255))
+    _outline_circle(g, cx, cy, R, BLK)
+    return _flat(g)
+
+
 def make_enemy_tank(size=42):
     """Large dark-red armored brute."""
     g = _grid(size, size)
@@ -1005,6 +1038,7 @@ def main():
     sprites = {
         "assets/sprites/player.png":       (64,  64,  make_player(64)),
         "assets/sprites/enemy_basic.png":  (56,  56,  make_enemy_basic(56)),
+        "assets/sprites/enemy_elite.png":  (56,  56,  make_enemy_elite(56)),
         "assets/sprites/enemy_tank.png":   (84,  84,  make_enemy_tank(84)),
         "assets/sprites/enemy_zigzag.png": (52,  52,  make_enemy_zigzag(52)),
         "assets/sprites/enemy_boss.png":   (144, 144, make_enemy_boss(144)),

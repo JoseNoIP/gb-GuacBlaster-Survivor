@@ -10,6 +10,7 @@ extends Node2D
 @export var tank_scene: PackedScene
 @export var zigzag_scene: PackedScene
 @export var boss_scene: PackedScene
+@export var elite_scene: PackedScene
 
 var _active: bool = false
 var _spawn_timer: float = 0.0
@@ -49,6 +50,9 @@ func _spawn_wave() -> void:
 	_instantiate_at_random_x(_pick_scene())
 
 func _pick_scene() -> PackedScene:
+	var elite_ready: bool = elite_scene != null and _elapsed >= Constants.SPAWNER_ELITE_UNLOCK_TIME
+	if elite_ready and randf() < Constants.SPAWNER_ELITE_CHANCE:
+		return elite_scene
 	if _elapsed >= Constants.SPAWNER_TANK_UNLOCK_TIME and randf() < Constants.SPAWNER_TANK_CHANCE:
 		return tank_scene
 	if _elapsed >= Constants.SPAWNER_ZIGZAG_UNLOCK_TIME and randf() < Constants.SPAWNER_ZIGZAG_CHANCE:

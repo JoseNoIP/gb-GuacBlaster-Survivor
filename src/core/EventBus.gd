@@ -11,9 +11,12 @@ signal player_level_up(new_level: int)
 # --- Enemies ---
 signal enemy_destroyed(enemy_id: int, position: Vector2, xp_value: int)
 signal enemy_split_requested(spawn_position: Vector2, count: int)
+signal elite_powerup_dropped(position: Vector2, powerup_id: StringName)
+signal powerup_batch_cleared(batch_id: int)
 signal boss_spawned(boss_id: int)
 signal boss_defeated(boss_id: int)
 signal boss_health_changed(current: int, maximum: int)
+signal boss_phase_changed(phase: int)
 
 # --- Projectiles ---
 signal player_fired(spawn_position: Vector2, direction: Vector2, damage: float)

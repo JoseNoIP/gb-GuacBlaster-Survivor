@@ -225,6 +225,8 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `player_shield_changed(hits)` | Player | HUD |
 | `powerup_selection_requested(opts)` | GameManager | PowerUpDropper |
 | `boss_health_changed(current, maximum)` | EnemyBoss | HUD |
+| `boss_phase_changed(phase)` | EnemyBoss | (informativa — HUD puede escuchar) |
+| `elite_powerup_dropped(position, powerup_id)` | EnemyElite | PowerUpDropper |
 | `heart_collected` | HeartDrop | Player |
 
 ---
