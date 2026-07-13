@@ -15,16 +15,16 @@ func test_elite_in_enemies_group() -> void:
 func test_elite_hp_is_triple_basic() -> void:
 	assert_eq(_elite.get_health(), Constants.ENEMY_BASIC_HP * Constants.ENEMY_ELITE_HP_MULTIPLIER)
 
-func test_elite_hp_is_three() -> void:
-	assert_eq(_elite.get_health(), 3)
+func test_elite_hp_matches_constant_product() -> void:
+	assert_eq(_elite.get_health(), Constants.ENEMY_BASIC_HP * Constants.ENEMY_ELITE_HP_MULTIPLIER)
 
 func test_elite_take_one_damage_survives() -> void:
 	_elite.take_damage(1)
-	assert_eq(_elite.get_health(), 2)
+	assert_eq(_elite.get_health(), Constants.ENEMY_BASIC_HP * Constants.ENEMY_ELITE_HP_MULTIPLIER - 1)
 
 func test_elite_take_damage_reduces_health() -> void:
 	_elite.take_damage(2)
-	assert_eq(_elite.get_health(), 1)
+	assert_eq(_elite.get_health(), Constants.ENEMY_BASIC_HP * Constants.ENEMY_ELITE_HP_MULTIPLIER - 2)
 
 func test_elite_death_emits_elite_powerup_dropped() -> void:
 	watch_signals(EventBus)

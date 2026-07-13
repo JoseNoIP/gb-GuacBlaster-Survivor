@@ -128,6 +128,141 @@ def _shine(g, x, y):
 
 
 # ---------------------------------------------------------------------------
+# Pixel font (5×7) — uppercase A-Z subset used in studio logo
+# ---------------------------------------------------------------------------
+
+_PIXEL_FONT = {
+    'A': ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+    'B': ["11110", "10001", "10001", "11110", "10001", "10001", "11110"],
+    'C': ["01110", "10001", "10000", "10000", "10000", "10001", "01110"],
+    'E': ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+    'G': ["01110", "10000", "10000", "10011", "10001", "10001", "01110"],
+    'I': ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
+    'L': ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+    'M': ["10001", "11011", "10101", "10001", "10001", "10001", "10001"],
+    'O': ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+    'T': ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+    'U': ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+    ' ': ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
+}
+
+
+def _text_width(text, scale):
+    """Pixel width of rendered text at given scale."""
+    if not text:
+        return 0
+    return scale * (6 * len(text) - 1)  # 5 px char + 1 px gap, no trailing gap
+
+
+def _draw_text(g, text, x, y, scale, color, shadow=None):
+    """Render text using 5×7 pixel font. Unknown chars are treated as space."""
+    cursor = x
+    for ch in text.upper():
+        glyph = _PIXEL_FONT.get(ch, _PIXEL_FONT[' '])
+        for ri, row in enumerate(glyph):
+            for ci, px in enumerate(row):
+                if px == '1':
+                    rx, ry = cursor + ci * scale, y + ri * scale
+                    if shadow:
+                        _rect(g, rx + 1, ry + 1, rx + scale, ry + scale, shadow)
+                    _rect(g, rx, ry, rx + scale - 1, ry + scale - 1, color)
+        cursor += 6 * scale
+
+
+# ---------------------------------------------------------------------------
+# Studio logo helpers
+# ---------------------------------------------------------------------------
+
+def _draw_avocado(g, cx, cy, r):
+    """Pixel-art avocado: dark shell, yellow-green flesh, brown seed."""
+    SHELL    = (28,  78,  18, 255)
+    SHELL_HI = (50, 118,  30, 255)
+    FLESH    = (178, 215, 74, 255)
+    FLESH_LO = (142, 172, 52, 255)
+    SEED     = (112,  52,  10, 255)
+    SEED_HI  = (155,  85,  28, 255)
+    SHINE    = (222, 248, 132, 255)
+
+    _circle(g, cx, cy, r, SHELL)
+    _circle(g, cx, cy - r // 6, int(r * 0.82), SHELL)
+
+    _circle(g, cx - int(r * 0.35), cy - int(r * 0.38), int(r * 0.14), SHELL_HI)
+
+    fy = cy - int(r * 0.08)
+    _circle(g, cx, fy, int(r * 0.68), FLESH)
+    _circle(g, cx, fy + int(r * 0.18), int(r * 0.54), FLESH_LO)
+    _circle(g, cx - int(r * 0.22), fy - int(r * 0.32), int(r * 0.14), SHINE)
+
+    sy = cy + int(r * 0.12)
+    _circle(g, cx, sy, int(r * 0.24), SEED)
+    _circle(g, cx - int(r * 0.09), sy - int(r * 0.09), int(r * 0.11), SEED_HI)
+
+
+def make_splash(w=512, h=512):
+    """Guacamole Bit studio boot splash. Dark green field + avocado logo + pixel text."""
+    BG      = (8,  13,  8, 255)
+    BG_GRID = (11, 18, 11, 255)
+    GREEN   = (68, 200, 40, 255)
+    BRIGHT  = (120, 235, 80, 255)
+    SHADOW  = (4,   8,  4, 255)
+    DOT     = (55, 140, 30, 255)
+
+    g = _grid(w, h, BG)
+
+    for y in range(0, h, 32):
+        for x in range(w):
+            _set(g, x, y, BG_GRID)
+    for x in range(0, w, 32):
+        for y in range(h):
+            if tuple(g[y][x]) == BG:
+                _set(g, x, y, BG_GRID)
+
+    # "GUACAMOLE" — scale 6
+    s1 = 6
+    t1 = "GUACAMOLE"
+    tx1 = (w - _text_width(t1, s1)) // 2
+    _draw_text(g, t1, tx1, 62, s1, GREEN, SHADOW)
+
+    # Decorative dots above avocado
+    for i in range(5):
+        _circle(g, w // 2 - 32 + i * 16, 142, 3, DOT)
+
+    # Avocado — centered
+    _draw_avocado(g, w // 2, 248, 90)
+
+    # Decorative dots below avocado
+    for i in range(5):
+        _circle(g, w // 2 - 32 + i * 16, 355, 3, DOT)
+
+    # "BIT" — scale 9
+    s2 = 9
+    t2 = "BIT"
+    tx2 = (w - _text_width(t2, s2)) // 2
+    _draw_text(g, t2, tx2, 382, s2, BRIGHT, SHADOW)
+
+    return _flat(g)
+
+
+def make_app_icon(size=512):
+    """Guacamole Bit app icon — avocado centered on dark green background."""
+    BG = (14, 32, 10, 255)
+    g = _grid(size, size, BG)
+
+    cx, cy = size // 2, size // 2
+    _draw_avocado(g, cx, cy - size // 24, int(size * 0.40))
+
+    # "GB" monogram below avocado — small scale
+    sc = size // 64
+    if sc > 0:
+        t = "GB"
+        tx = (size - _text_width(t, sc)) // 2
+        ty = cy + int(size * 0.38)
+        _draw_text(g, t, tx, ty, sc, (100, 210, 55, 255))
+
+    return _flat(g)
+
+
+# ---------------------------------------------------------------------------
 # Character sprites
 # ---------------------------------------------------------------------------
 
@@ -1040,7 +1175,7 @@ def main():
         "assets/sprites/enemy_basic.png":  (56,  56,  make_enemy_basic(56)),
         "assets/sprites/enemy_elite.png":  (56,  56,  make_enemy_elite(56)),
         "assets/sprites/enemy_tank.png":   (84,  84,  make_enemy_tank(84)),
-        "assets/sprites/enemy_zigzag.png": (52,  52,  make_enemy_zigzag(52)),
+        "assets/sprites/enemy_zigzag.png": (112, 112, make_enemy_zigzag(112)),
         "assets/sprites/enemy_boss.png":   (144, 144, make_enemy_boss(144)),
         "assets/sprites/projectile.png":   (28,  28,  make_projectile(28)),
         "assets/sprites/gem.png":          (36,  36,  make_gem(36)),
@@ -1074,6 +1209,10 @@ def main():
                 f"assets/sprites/backgrounds/bg_{biome_idx}_{variant}.png",
                 _W, _H, maker(variant)
             )
+
+    print("\n=== Generating studio branding ===")
+    save_png("assets/splash.png", 512, 512, make_splash(512, 512))
+    save_png("assets/icon.png",   512, 512, make_app_icon(512))
 
     print("\nDone. Run 'godot --headless -e --quit' to reimport assets.")
 

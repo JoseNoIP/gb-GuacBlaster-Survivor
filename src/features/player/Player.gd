@@ -195,7 +195,6 @@ func _on_game_won_fired(_score: int, _duration: float) -> void:
 	_autofire_timer.stop()
 
 func _die() -> void:
-	AudioManager.play_sfx(&"player_die")
 	EventBus.player_died.emit()
 	set_process(false)
 	set_process_input(false)

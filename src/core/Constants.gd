@@ -10,22 +10,22 @@ const PLAYER_BASE_DAMAGE: float = 10.0
 const PLAYER_AUTOFIRE_INTERVAL: float = 0.4
 
 # --- Enemies ---
-const ENEMY_BASIC_HP: int = 1
+const ENEMY_BASIC_HP: int = 10
 const ENEMY_BASIC_SPEED: float = 80.0
 const ENEMY_BASIC_XP: int = 8
 
-const ENEMY_TANK_HP: int = 5
+const ENEMY_TANK_HP: int = 80
 const ENEMY_TANK_SPEED: float = 50.0
 const ENEMY_TANK_XP: int = 35
 const ENEMY_TANK_SPLIT_COUNT: int = 4
 
-const ENEMY_ZIGZAG_HP: int = 1
+const ENEMY_ZIGZAG_HP: int = 50
 const ENEMY_ZIGZAG_SPEED: float = 130.0
 const ENEMY_ZIGZAG_XP: int = 15
 const ENEMY_ZIGZAG_AMPLITUDE: float = 100.0
 const ENEMY_ZIGZAG_FREQUENCY: float = 1.5
 
-const ENEMY_ELITE_HP_MULTIPLIER: int = 3
+const ENEMY_ELITE_HP_MULTIPLIER: int = 20
 const ENEMY_ELITE_XP_MULTIPLIER: int = 5
 const SPAWNER_ELITE_UNLOCK_TIME: float = 45.0
 const SPAWNER_ELITE_CHANCE: float = 0.08
@@ -39,8 +39,8 @@ const BACKGROUND_PALETTE: Array = [
 	Color(0.22, 0.02, 0.08),  # luna sangre / desierto nocturno
 ]
 const BOSS_TIMER_SHOW_REMAINING: float = 90.0
-const BOSS_HP_BASE: int = 100
-const BOSS_HP_PER_GENERATION: int = 50
+const BOSS_HP_BASE: int = 400
+const BOSS_HP_PER_GENERATION: int = 80
 const BOSS_SPEED: float = 60.0
 const BOSS_XP: int = 100
 const BOSS_FIRE_INTERVAL: float = 2.0

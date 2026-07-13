@@ -4,8 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://bbbbv6kywkspe" path="res://assets/sprites/enemy_zigzag.png" id="2"]
 
 [sub_resource type="CapsuleShape2D" id="1"]
-radius = 16.0
-height = 40.0
+radius = 34.0
+height = 86.0
 
 [node name="EnemyZigzag" type="CharacterBody2D"]
 collision_layer = 2
