@@ -60,7 +60,7 @@ func _fire_mode_burst(pos: Vector2, dir: Vector2, damage: float) -> void:
 			for step: int in 5:
 				var angle: float = (float(step) - 2.0) * Constants.CHAR_FAN5_ANGLE
 				_spawn(pos, dir.rotated(deg_to_rad(angle)), damage)
-		_:
+		&"heavy", _:
 			_spawn(pos, dir, damage)
 	if _triple_shot:
 		_spawn(pos, dir.rotated(deg_to_rad(20.0)), damage)

@@ -154,11 +154,21 @@ func _build_card(
 	hbox.add_theme_constant_override(&"separation", 12)
 	card.add_child(hbox)
 
-	var swatch: ColorRect = ColorRect.new()
-	swatch.custom_minimum_size = Vector2(6.0, 0.0)
-	swatch.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	swatch.color = def.get("sprite_tint", Color.WHITE) as Color
-	hbox.add_child(swatch)
+	var sprite_path: String = "res://assets/sprites/characters/player_" + str(char_id) + ".png"
+	if ResourceLoader.exists(sprite_path):
+		var preview: TextureRect = TextureRect.new()
+		preview.custom_minimum_size = Vector2(56.0, 56.0)
+		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		preview.texture = load(sprite_path) as Texture2D
+		if not unlocked:
+			preview.modulate = Color(0.4, 0.4, 0.4, 0.7)
+		hbox.add_child(preview)
+	else:
+		var swatch: ColorRect = ColorRect.new()
+		swatch.custom_minimum_size = Vector2(6.0, 0.0)
+		swatch.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		swatch.color = def.get("sprite_tint", Color.WHITE) as Color
+		hbox.add_child(swatch)
 
 	var info: VBoxContainer = VBoxContainer.new()
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -5,6 +5,8 @@ const SHAKE_DURATION: float = 0.3
 const SHAKE_STRENGTH: float = 5.0
 
 var _shake_timer: float = 0.0
+var _tutorial_root: Control = null
+var _tutorial_dismissed: bool = false
 
 @onready var _camera: Camera2D = $Camera2D
 @onready var _background: ColorRect = $Background
@@ -21,6 +23,7 @@ func _ready() -> void:
 	EventBus.restart_requested.connect(_on_restart_requested)
 	EventBus.menu_requested.connect(_on_menu_requested)
 	EventBus.player_damaged.connect(_on_player_damaged)
+	_maybe_show_tutorial()
 
 func _process(delta: float) -> void:
 	if _shake_timer > 0.0:
@@ -68,3 +71,69 @@ func _get_gen_tint(gen: int) -> Color:
 
 func _on_menu_requested() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://src/scenes/MainMenu.tscn")
+
+func _maybe_show_tutorial() -> void:
+	if SaveManager.get_tutorial_shown():
+		return
+	SaveManager.set_tutorial_shown(true)
+	_build_tutorial_overlay()
+
+func _build_tutorial_overlay() -> void:
+	var layer: CanvasLayer = CanvasLayer.new()
+	layer.layer = 10
+	add_child(layer)
+
+	_tutorial_root = Control.new()
+	_tutorial_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_tutorial_root.mouse_filter = Control.MOUSE_FILTER_STOP
+	_tutorial_root.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventScreenTouch or event is InputEventMouseButton:
+			_dismiss_tutorial()
+	)
+	layer.add_child(_tutorial_root)
+
+	var dim: ColorRect = ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.0, 0.0, 0.0, 0.45)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tutorial_root.add_child(dim)
+
+	var vp: Vector2 = get_viewport_rect().size
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override(&"separation", 10)
+	vbox.position = Vector2(vp.x * 0.5 - 140.0, vp.y * 0.5 - 48.0)
+	vbox.custom_minimum_size = Vector2(280.0, 0.0)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tutorial_root.add_child(vbox)
+
+	var hint: Label = Label.new()
+	hint.text = "Arrastra con el dedo\npara moverte"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override(&"font_size", 22)
+	hint.add_theme_color_override(&"font_color", Color(0.88, 1.0, 0.84))
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(hint)
+
+	var sub: Label = Label.new()
+	sub.text = "Toca para continuar"
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.add_theme_font_size_override(&"font_size", 13)
+	sub.add_theme_color_override(&"font_color", Color(0.55, 0.65, 0.55))
+	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(sub)
+
+	var timer: Timer = Timer.new()
+	timer.wait_time = 3.5
+	timer.one_shot = true
+	timer.timeout.connect(_dismiss_tutorial)
+	add_child(timer)
+	timer.start()
+
+func _dismiss_tutorial() -> void:
+	if _tutorial_dismissed or _tutorial_root == null:
+		return
+	_tutorial_dismissed = true
+	var layer: Node = _tutorial_root.get_parent()
+	var tween: Tween = create_tween()
+	tween.tween_property(_tutorial_root, "modulate:a", 0.0, 0.35)
+	tween.tween_callback(layer.queue_free)

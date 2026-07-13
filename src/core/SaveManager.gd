@@ -26,6 +26,8 @@ var _data: Dictionary = {
 	"unlocked_characters": {},
 	"daily_missions": {},
 	"weekly_challenges": {},
+	"tutorial_shown": false,
+	"high_scores": [],
 }
 
 func _ready() -> void:
@@ -39,6 +41,7 @@ func _on_game_over(score: int, _duration: float) -> void:
 	if score > _data.get("best_score", 0):
 		_data["best_score"] = score
 	_data["total_sessions"] = _data.get("total_sessions", 0) + 1
+	_add_high_score(score, false)
 	_save()
 
 func _on_game_won(score: int, _duration: float) -> void:
@@ -46,6 +49,7 @@ func _on_game_won(score: int, _duration: float) -> void:
 		_data["best_score"] = score
 	_data["total_sessions"] = _data.get("total_sessions", 0) + 1
 	_data["victories"] = _data.get("victories", 0) + 1
+	_add_high_score(score, true)
 	_save()
 
 func _on_gold_earned(amount: int) -> void:
@@ -70,6 +74,31 @@ func get_total_sessions() -> int:
 
 func get_victories() -> int:
 	return _data.get("victories", 0)
+
+func get_high_scores() -> Array:
+	return _data.get("high_scores", []) as Array
+
+func _add_high_score(score: int, won: bool) -> void:
+	if not _data.has("high_scores"):
+		_data["high_scores"] = []
+	var scores: Array = _data["high_scores"] as Array
+	scores.append({
+		"score": score,
+		"char": str(get_selected_character()),
+		"won": won,
+	})
+	scores.sort_custom(func(a: Variant, b: Variant) -> bool:
+		return (a as Dictionary).get("score", 0) > (b as Dictionary).get("score", 0)
+	)
+	if scores.size() > 10:
+		scores.resize(10)
+
+func get_tutorial_shown() -> bool:
+	return _data.get("tutorial_shown", false) as bool
+
+func set_tutorial_shown(value: bool) -> void:
+	_data["tutorial_shown"] = value
+	_save()
 
 func get_swipe_sensitivity() -> float:
 	return float(_data.get("swipe_sensitivity", 1.0))
