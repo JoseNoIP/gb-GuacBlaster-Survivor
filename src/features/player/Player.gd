@@ -152,9 +152,15 @@ func _on_game_started() -> void:
 	_update_shield(shield_level * Constants.META_STARTER_SHIELD_PER_LEVEL)
 	_nacho_wall_stacks = 0
 	var sprite_tint: Color = char_data.get("sprite_tint", Color.WHITE) as Color
-	var spr := get_node_or_null(^"Sprite2D") as Node2D
+	var char_id: StringName = char_data.get("id", &"") as StringName
+	var char_sprite: String = "res://assets/sprites/characters/player_" + str(char_id) + ".png"
+	var spr := get_node_or_null(^"Sprite2D") as Sprite2D
 	if spr != null:
-		spr.modulate = sprite_tint
+		if ResourceLoader.exists(char_sprite):
+			spr.texture = load(char_sprite) as Texture2D
+			spr.modulate = Color.WHITE
+		else:
+			spr.modulate = sprite_tint
 	EventBus.player_health_changed.emit(_health, _max_health)
 
 func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:

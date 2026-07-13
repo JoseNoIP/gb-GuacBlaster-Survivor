@@ -341,7 +341,7 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 | ~~HapticManager~~ | ✅ Completado | Eventos: damaged, powerup, boss_phase, heart |
 | ~~Logros persistentes~~ | ✅ Completado | 10 logros, AchievementManager autoload + AchievementsScreen |
 | ~~Misiones diarias~~ | ✅ Completado | DailyMissionsManager autoload + DailyMissionsScreen |
-| ~~Personajes alternativos~~ | ✅ Completado | 3 personajes, CharacterSelectScreen, Player aplica modificadores |
+| ~~Personajes alternativos~~ | ✅ Completado | 8 personajes con fire_mode, CharacterSelectScreen, Player carga sprite único por personaje |
 | ~~Mapa de biomas~~ | ✅ Completado | BiomeMapScreen, lock/unlock por victorias |
 | ~~Desafío semanal~~ | ✅ Completado | WeeklyChallengeManager autoload + WeeklyChallengeScreen + 3 desafíos |
 | ~~Toast personaje~~ | ✅ Completado | CharacterSelectScreen + HUD muestran nombre al seleccionar/iniciar |
@@ -357,6 +357,8 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 | 5 enemigos + boss | `assets/sprites/enemy_*.png` | ✅ AI-generated | Pollinations.ai (Flux) |
 | Proyectil, gema, corazón | `assets/sprites/{projectile,gem,heart}.png` | ✅ AI-generated | Pollinations.ai (Flux) |
 | 9 íconos de power-up | `assets/sprites/powerup_icons/*.png` | ✅ Mejorados (procedural) | gen_assets.py rediseñado |
+| 8 íconos de menú principal | `src/features/ui/IconPainter.gd` | ✅ Procedural en _draw() | IconPainter Control |
+| 8 sprites de personaje | `assets/sprites/characters/player_*.png` | ✅ AI-generated | Pollinations.ai (Flux) 64×64 |
 | Boot splash + App icon | `assets/splash.png`, `assets/icon.png` | ✅ Procedural (GuacamoleBit logo) | gen_assets.py |
 | 7 SFX | `assets/audio/*.wav` | ✅ Sintéticos | gen_assets.py |
 
@@ -368,6 +370,10 @@ python3 tools/gen_assets.py
 # Re-generar assets AI (backgrounds + sprites principales)
 /tmp/gb_venv/bin/python3 tools/fetch_ai_assets.py
 # (requiere: python3 -m venv /tmp/gb_venv && /tmp/gb_venv/bin/pip install Pillow)
+
+# Re-descargar sprites de personaje únicamente
+/tmp/gb_venv/bin/python3 tools/fetch_character_sprites.py
+# Después: godot --headless -e --quit  (regenerar .import)
 
 # Re-descargar solo biomas 0 y 1 (si fueron sobrescritos)
 /tmp/gb_venv/bin/python3 tools/redownload_missing_bgs.py

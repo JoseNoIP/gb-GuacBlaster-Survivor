@@ -137,15 +137,34 @@ func _build_ui() -> void:
 	root.add_child(play_margin)
 
 	_play_btn = Button.new()
-	_play_btn.text = "▶   JUGAR"
-	_play_btn.custom_minimum_size = Vector2(0.0, 62.0)
-	_play_btn.add_theme_font_size_override(&"font_size", 28)
+	_play_btn.text = ""
+	_play_btn.custom_minimum_size = Vector2(0.0, 72.0)
 	_play_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_play_btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_PLAY_COLOR, Color.TRANSPARENT, 14))
 	_play_btn.add_theme_stylebox_override(&"hover", _make_sb(BTN_PLAY_HOVER, Color.TRANSPARENT, 14))
 	_play_btn.add_theme_stylebox_override(&"pressed", _make_sb(BTN_PLAY_HOVER, Color.TRANSPARENT, 14))
 	_play_btn.pressed.connect(_on_play_pressed)
 	play_margin.add_child(_play_btn)
+
+	var play_inner: HBoxContainer = HBoxContainer.new()
+	play_inner.set_anchors_preset(Control.PRESET_FULL_RECT)
+	play_inner.alignment = BoxContainer.ALIGNMENT_CENTER
+	play_inner.add_theme_constant_override(&"separation", 14)
+	play_inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_play_btn.add_child(play_inner)
+
+	var play_icon: IconPainter = IconPainter.new()
+	play_icon.icon_id = &"play"
+	play_icon.custom_minimum_size = Vector2(44.0, 44.0)
+	play_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	play_inner.add_child(play_icon)
+
+	var play_lbl: Label = Label.new()
+	play_lbl.text = "JUGAR"
+	play_lbl.add_theme_font_size_override(&"font_size", 28)
+	play_lbl.add_theme_color_override(&"font_color", Color(0.9, 1.0, 0.88))
+	play_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	play_inner.add_child(play_lbl)
 
 	# --- Secondary button grid ---
 	var grid_pad: Control = Control.new()
@@ -158,18 +177,18 @@ func _build_ui() -> void:
 	root.add_child(grid_margin)
 
 	var grid: GridContainer = GridContainer.new()
-	grid.columns = 2
+	grid.columns = 3
 	grid.add_theme_constant_override(&"h_separation", 10)
 	grid.add_theme_constant_override(&"v_separation", 10)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid_margin.add_child(grid)
 
-	_add_grid_btn(grid, "◆", "PERSONAJE", _on_characters_pressed)
-	_add_grid_btn(grid, "▲", "MEJORAS", _on_upgrades_pressed)
-	_add_grid_btn(grid, "≡", "MISIONES", _on_missions_pressed)
-	_add_grid_btn(grid, "★", "LOGROS", _on_achievements_pressed)
-	_add_grid_btn(grid, "◉", "MAPA", _on_biome_map_pressed)
-	_add_grid_btn(grid, "⚡", "DESAFÍO", _on_weekly_challenge_pressed)
+	_add_grid_btn(grid, &"character", "PERSONAJE", _on_characters_pressed)
+	_add_grid_btn(grid, &"upgrades", "MEJORAS", _on_upgrades_pressed)
+	_add_grid_btn(grid, &"missions", "MISIONES", _on_missions_pressed)
+	_add_grid_btn(grid, &"achievements", "LOGROS", _on_achievements_pressed)
+	_add_grid_btn(grid, &"map", "MAPA", _on_biome_map_pressed)
+	_add_grid_btn(grid, &"challenge", "DESAFÍO", _on_weekly_challenge_pressed)
 
 	# --- Settings (bottom, subtle) ---
 	var cfg_pad: Control = Control.new()
@@ -210,17 +229,40 @@ func _animate_title() -> void:
 	tween.tween_property(_title_label, "scale", Vector2(1.04, 1.04), 1.4)
 	tween.tween_property(_title_label, "scale", Vector2(1.0, 1.0), 1.4)
 
-func _add_grid_btn(parent: Control, icon: String, label: String, cb: Callable) -> void:
+func _add_grid_btn(
+		parent: Control, icon_id: StringName, label: String, cb: Callable
+) -> void:
 	var btn: Button = Button.new()
-	btn.text = icon + "  " + label
-	btn.custom_minimum_size = Vector2(0.0, 52.0)
-	btn.add_theme_font_size_override(&"font_size", 15)
+	btn.text = ""
+	btn.custom_minimum_size = Vector2(0.0, 88.0)
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_GRID_COLOR, BTN_GRID_BORDER, 10, 1))
-	btn.add_theme_stylebox_override(&"hover", _make_sb(BTN_GRID_HOVER, BTN_GRID_BORDER, 10, 1))
-	btn.add_theme_stylebox_override(&"pressed", _make_sb(BTN_GRID_HOVER, BTN_GRID_BORDER, 10, 1))
+	btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_GRID_COLOR, BTN_GRID_BORDER, 12, 1))
+	btn.add_theme_stylebox_override(&"hover", _make_sb(BTN_GRID_HOVER, BTN_GRID_BORDER, 12, 1))
+	btn.add_theme_stylebox_override(&"pressed", _make_sb(BTN_GRID_HOVER, BTN_GRID_BORDER, 12, 1))
 	btn.pressed.connect(cb)
 	parent.add_child(btn)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override(&"separation", 4)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(vbox)
+
+	var icon: IconPainter = IconPainter.new()
+	icon.icon_id = icon_id
+	icon.custom_minimum_size = Vector2(52.0, 52.0)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(icon)
+
+	var lbl: Label = Label.new()
+	lbl.text = label
+	lbl.add_theme_font_size_override(&"font_size", 11)
+	lbl.add_theme_color_override(&"font_color", Color(0.75, 0.85, 0.75))
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(lbl)
 
 func _make_sb(
 	bg: Color,
