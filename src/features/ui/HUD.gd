@@ -33,6 +33,7 @@ const TITLE_COLOR: Color = Color(1.0, 0.85, 0.2)
 const XP_BAR_HEIGHT: float = 14.0
 
 var _heart_labels: Array[Label] = []
+var _hearts_container: HBoxContainer = null
 var _xp_bar: ProgressBar
 var _boss_hp_bar: ProgressBar
 var _score_label: Label
@@ -89,16 +90,16 @@ func _build_ui() -> void:
 	_build_toast()
 
 func _build_hearts() -> void:
-	var container := HBoxContainer.new()
-	container.position = Vector2(10.0, 16.0)
-	container.add_theme_constant_override("separation", 4)
-	add_child(container)
+	_hearts_container = HBoxContainer.new()
+	_hearts_container.position = Vector2(10.0, 16.0)
+	_hearts_container.add_theme_constant_override("separation", 4)
+	add_child(_hearts_container)
 	for _i: int in Constants.PLAYER_BASE_HEALTH:
 		var lbl := Label.new()
 		lbl.text = "♥"
 		lbl.add_theme_font_size_override("font_size", 28)
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
-		container.add_child(lbl)
+		_hearts_container.add_child(lbl)
 		_heart_labels.append(lbl)
 
 func _build_score_and_level() -> void:
@@ -337,9 +338,10 @@ func _on_player_health_changed(current: int, maximum: int) -> void:
 		lbl.text = "♥"
 		lbl.add_theme_font_size_override("font_size", 28)
 		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
-		_heart_labels[0].get_parent().add_child(lbl)
+		_hearts_container.add_child(lbl)
 		_heart_labels.append(lbl)
 	for i: int in _heart_labels.size():
+		_heart_labels[i].visible = i < maximum
 		if i < current:
 			_heart_labels[i].add_theme_color_override("font_color", HEART_FULL_COLOR)
 		else:
@@ -409,8 +411,6 @@ func _on_game_started() -> void:
 	_boss_hp_bar.hide()
 	_timer_label.hide()
 	_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-	for lbl: Label in _heart_labels:
-		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR)
 	for pill: Label in _strip_pills.values():
 		pill.queue_free()
 	_strip_pills.clear()
