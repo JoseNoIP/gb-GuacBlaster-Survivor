@@ -117,15 +117,15 @@ El workflow parchea automáticamente el path en CI con `sed`.
 ### Power-ups activos (9 en total)
 | Iniciales | Nombre | Efecto | Duración |
 |---|---|---|---|
-| **TS** | Disparo Triple | +2 disparos diagonales | 30s por stack |
-| **SG** | Súper-Guac | Proyectiles penetran 3 enemigos | 30s por stack |
-| **RF** | Fuego Rápido | Cadencia ×2 por stack | 30s por stack |
-| **MG** | Granada Mole | AoE automático cada 5s | 30s por stack |
+| **TS** | Disparo Triple | +2 disparos diagonales | 45s por stack |
+| **SG** | Súper-Guac | Proyectiles penetran 3 enemigos | 45s por stack |
+| **RF** | Fuego Rápido | Cadencia ×2 por stack | 45s por stack |
+| **MG** | Granada Mole | AoE automático cada 5s | 45s por stack |
 | **JL** | Láser Jalapeño | Rayo de columna que sigue al jugador | 2s por stack |
-| **SB** | Rebote Picante | Proyectiles rebotan en bordes | 30s por stack |
-| **NW** | Muro Nachos | Escudo: absorbe 3 impactos por stack | 30s por stack |
-| **SM** | Imán Salsa | Gemas vuelan hacia el jugador | 30s por stack |
-| **GS** | Salvo Guac | +1 columna de disparos por stack (a ±40×N px del centro) | 30s por stack |
+| **SB** | Rebote Picante | Proyectiles rebotan en bordes | 45s por stack |
+| **NW** | Muro Nachos | Escudo: absorbe 3 impactos por stack | 45s por stack |
+| **SM** | Imán Salsa | Gemas vuelan hacia el jugador | 45s por stack |
+| **GS** | Salvo Guac | +1 columna de disparos por stack (a ±40×N px del centro) | 45s por stack |
 
 ### Tira de power-ups activos en HUD ✅
 - `VBoxContainer` anclado a la derecha de la pantalla, debajo del botón de pausa.
@@ -173,10 +173,10 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Constante: `GOLD_PER_HEART_KEPT = 25` en `Constants.gd`.
 
 ## Contador de victorias separado ✅
-- `SaveManager` ahora guarda `victories` independientemente de `total_sessions`.
+- `SaveManager` guarda `victories` independientemente de `total_sessions`.
 - `total_sessions` sigue contando todas las partidas (victorias + derrotas).
-- La **paleta de fondo** rota por victorias (`victories % 5`), no por sesiones totales.
-- Al perder se siente el mismo fondo; al ganar avanza al siguiente bioma.
+- La **paleta de fondo** rota por victorias (`victories % 6`, seis biomas), no por sesiones totales.
+- Al perder se mantiene el mismo bioma; al ganar avanza al siguiente.
 
 ## Corazones que caen durante la partida ✅
 - Cada 45 segundos cae un corazón (♥ rojo) desde arriba en posición X aleatoria.
@@ -191,14 +191,15 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Ahora: en cada tick, itera los enemigos del grupo y compara `absf(enemy.x - laser.x) <= 7px`.
 - El láser sigue dañando correctamente a todo enemigo que esté dentro de la columna mientras se mueve.
 
-## XP más rápido para combinaciones ✅
-- `XP_BASE_REQUIRED`: 60 → **40**
+## XP y costo de triadas de power-ups ✅
+- `XP_BASE_REQUIRED`: 60 → 40 → 120 → **150** (ajustes sucesivos para balancear dificultad)
 - `XP_SCALE_FACTOR`: 1.3 → **1.2**
 - `ENEMY_BASIC_XP`: 5 → **8**, `ENEMY_ZIGZAG_XP`: 10 → **15**, `ENEMY_TANK_XP`: 20 → **35**
-- Combinaciones de hasta 5 power-ups simultáneos son alcanzables (~23s para 5 level-ups, 7s de ventana antes de que expire el primero).
+- Primera triada requiere matar ~19 enemigos básicos (150/8 ≈ 18.75).
+- Combinaciones de hasta 5 power-ups simultáneos son alcanzables con 45s de duración.
 
 ## Duración de power-ups: 30s → 45s ✅
-- `POWERUP_DURATION` en `Constants.gd` cambiado de `30.0` a `45.0`.
+- `POWERUP_DURATION` en `Constants.gd` = `45.0` (valor actual; fue 30s originalmente).
 
 ## Paleta de biomas — colores claramente distintos ✅
 - Los colores anteriores eran todos prácticamente negros (0.04–0.13), visualmente indistinguibles.
@@ -217,7 +218,7 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Efecto: el jugador ve 18 fondos distintos antes de repetir, con variación de tono indefinida por generación.
 - Biomas (de más amigable a más oscuro): 0=Pradera Guacamole (tierra soleada), 1=Jungla Nocturna, 2=Crepúsculo Índigo, 3=Caldera Volcánica, 4=Abismo Oceánico, 5=Desierto de Luna Sangre.
 - Diseño intencional: primer mundo brillante/feliz para onboarding; oscuridad crece con dificultad.
-- La textura se carga como `TextureRect` hijo del `$Background` ColorRect; si no existe PNG usa el color de `BACKGROUND_PALETTE` como fallback.
+- La textura se carga como `Sprite2D` (Node2D) centrado en viewport; posición world-space float → sin pixel-snapping. Fallback al color de `BACKGROUND_PALETTE` si no existe PNG.
 - Pipeline de regeneración: `tools/fetch_ai_assets.py` (secuencial, 1 req a la vez, venv Pillow).
 
 ## Escalado 2× de todos los elementos de gameplay ✅
@@ -319,19 +320,25 @@ El workflow parchea automáticamente el path en CI con `sed`.
 - Tests: `tests/unit/test_daily_missions.gd` (11 pruebas).
 
 ## Sistema de Personajes ✅
-- 3 personajes definidos en `Constants.CHARACTERS` (Array de Dicts con id, name, desc, hp_bonus, fire_rate_mult, damage_mult, cost).
+- **8 personajes** definidos en `Constants.CHARACTERS` (Array de Dicts con id, name, desc, hp_bonus, fire_rate_mult, damage_mult, cost, fire_mode, sprite_tint, bullet_tint, bullet_scale).
+- Campo `fire_mode` determina el patrón de disparo: `&"normal"`, `&"double"`, `&"fan3"`, `&"fan5"`, `&"heavy"`.
+- Cada personaje tiene sprite propio en `assets/sprites/characters/player_{id}.png`.
 - Selección persistida en `SaveManager._data["selected_character"]` (default: "guac").
 - Desbloqueo en `SaveManager._data["unlocked_characters"]` (guac siempre disponible).
-- Métodos: `SaveManager.get_selected_character()`, `set_selected_character(id)`, `is_character_unlocked(id)`, `unlock_character(id, cost)`.
 - Player aplica modificadores en `_on_game_started()` después de los upgrades de meta.
-- Nueva pantalla: `src/scenes/CharacterSelectScreen.gd/.tscn` — cards con stats y botones ELEGIR/desbloquear.
+- `CharacterSelectScreen.gd/.tscn` — cards con stats, fire_mode, tinte y botones ELEGIR/COMPRAR.
 - Accesible desde MainMenu → botón PERSONAJE.
 
 | ID | Nombre | Costo | Efecto |
 |---|---|---|---|
-| guac | Guacamole | Gratis | Base (sin modificadores) |
-| habanero | Habanero | 200 oro | Fire rate ×1.25, -1 corazón |
-| serrano | Serrano | 300 oro | Daño ×1.15, +1 corazón, fire rate ×0.8 |
+| guac | Guacamole | Gratis | Base (normal) |
+| habanero | Habanero | 200 | Fire rate ×1.25, -1 corazón (normal) |
+| serrano | Serrano | 300 | Daño ×1.15, +1 corazón, fire rate ×0.8 (normal) |
+| doble_guac | Doble Guac | 450 | 2 balas simultáneas (double) |
+| veloz | Jalapeño Veloz | 600 | Fire rate ×1.7, daño -25%, balas pequeñas (normal) |
+| tornado | Tornado Verde | 750 | 3 balas en abanico ±25°, fire rate ×0.75 (fan3) |
+| aplastador | Mole Aplastador | 1000 | Daño ×2, balas grandes, +1 corazón, fire rate ×0.6 (heavy) |
+| gran_abanico | Gran Abanico | 1400 | 5 balas en abanico ±40°, fire rate ×0.5 (fan5) |
 
 ## Mapa de Biomas ✅
 - Nueva pantalla: `src/scenes/BiomeMapScreen.gd/.tscn`.
@@ -430,3 +437,75 @@ python3 tools/gen_assets.py
 ## Audio (pendiente de mejora)
 - 7 WAVs sintéticos en `assets/audio/` — funcional pero básico
 - Para mejor calidad: reemplazar con OGG de banco libre (freesound.org, kenney.nl)
+
+---
+
+# Features — Sesión 4+ (2026-07-13)
+
+## Modificadores de Bioma ✅
+- 6 biomas (en lugar de 5) definidos en `Constants.BACKGROUND_PALETTE`.
+- `GameManager` guarda `_current_biome = victories % 6` al inicio de partida y expone getters:
+  - `get_biome_spawn_mult()`, `get_biome_speed_mult()`, `get_biome_elite_mult()`, `get_biome_boss_hp_mult()`, `get_biome_gold_mult()`
+- Arrays en `Constants.gd` (índice = bioma):
+  - `BIOME_SPAWN_MULT` — factor de intervalo de spawn (< 1.0 = más rápido)
+  - `BIOME_ELITE_MULT` — multiplicador de probabilidad de élite
+  - `BIOME_BOSS_HP_MULT` — multiplicador de HP del jefe
+  - `BIOME_SPEED_MULT` — multiplicador de velocidad de enemigos
+  - `BIOME_GOLD_MULT` — multiplicador de oro ganado
+- `EnemySpawner` lee los multiplicadores de bioma en `_on_game_started()` junto con los del desafío semanal.
+- `GameManager._calc_gold()` multiplica por `get_biome_gold_mult()`.
+
+## Combo System ✅
+- `GameManager` mantiene `_combo_kills: int` que se incrementa en cada `enemy_destroyed`.
+- Al recibir daño, el combo se resetea a 0.
+- `get_combo_multiplier() → float`: 5 kills=×1.5, 10=×2.0, 20=×3.0, 30=×5.0.
+- Emite `EventBus.combo_changed(kills, multiplier)` al cambiar nivel o al resetear.
+- HUD muestra el combo activo en pantalla cuando está activo.
+
+## Modo Sin Fin (Endless Mode) ✅
+- `GameManager.enable_endless_mode(true)` desactiva la condición de victoria por jefe.
+- En modo endless, el jefe muere pero la partida continúa indefinidamente.
+- Accesible desde MainMenu (opción separada o contexto específico).
+- `get_endless_mode() → bool` permite que HUD/otros sistemas adapten su comportamiento.
+
+## Pantalla de Mejores Puntuaciones ✅
+- `src/scenes/HighScoresScreen.gd/.tscn` — tabla top-10 de puntuaciones.
+- Muestra score, resultado (ganó/perdió), oro obtenido y fecha de cada entrada.
+- Accesible desde MainMenu → botón PUNTUACIONES.
+- Datos persistidos en `SaveManager` (array de entradas con score, won, gold, date).
+
+## Animación del Menú Principal ✅
+- `_build_animated_bg()`: fondo animado con CPUParticles2D y efectos de color en MainMenu.
+- `_animate_title()`: título "GUACBLASTER" hace loop de escala 1.0 ↔ 1.04 (Tween 1.4s cada dirección).
+- `_run_entrance_animation()`: botones del menú aparecen en secuencia con fade-in escalonado (0.25s por botón).
+
+## Dificultad Escalable ✅
+- `EnemySpawner._update_difficulty()` reduce el intervalo de spawn progresivamente:
+  - Inicial: `SPAWNER_INITIAL_INTERVAL = 0.8s`
+  - Mínimo: `SPAWNER_MIN_INTERVAL = 0.2s`
+  - Reducción: `SPAWNER_INTERVAL_DECREASE_PER_MIN = 0.1s/min`
+- Enemigo Tanque desbloquea a los 60s, Zigzag a los 30s.
+- Élites aplican multiplicador combinado: `SPAWNER_ELITE_CHANCE × challenge_elite_mult × biome_elite_mult`.
+- Los modificadores de bioma y desafío semanal se apilan con la dificultad base.
+
+## Animación del Fondo en Partida ✅
+- `Game.gd` implementa tres efectos simultáneos:
+  1. **Parallax scroll**: `Sprite2D` (no TextureRect — evita pixel-snapping) se mueve con `sin(time × speed) × amplitude` en X e Y independientemente. Constantes: `BG_SCROLL_X=22px`, `BG_SCROLL_Y=18px`, `BG_SPEED_X=0.11`, `BG_SPEED_Y=0.08`.
+  2. **Tinte pulsante**: `_background` (ColorRect) oscila entre color base y `lightened(0.10)` cada `BG_PULSE_SPEED=0.35` rad/s.
+  3. **Partículas ambiente**: `CPUParticles2D` (20 partículas, lifetime 9s) ascienden lentamente desde el borde inferior. Color por bioma definido en `_get_biome_particle_color()` (array lookup, no match — evita `max-returns` gdlint).
+- La escala del Sprite2D incluye margen de `BG_SCROLL_X*2/vp.x` para que nunca aparezcan bordes en el scroll.
+
+## Botón VOLVER Homologado en 8 Pantallas ✅
+- Todas las pantallas secundarias (AchievementsScreen, BiomeMapScreen, CharacterSelectScreen, DailyMissionsScreen, HighScoresScreen, SettingsScreen, UpgradeScreen, WeeklyChallengeScreen) usan el patrón idéntico:
+  - `Button` 160×44 px, `SIZE_SHRINK_CENTER`.
+  - `HBoxContainer` con `IconPainter(icon_id=&"back")` (20×20) + `Label(" VOLVER", 17px)`.
+  - `_notification(NOTIFICATION_WM_GO_BACK_REQUEST)` → `_on_back_pressed()`.
+- `IconPainter._draw_back()`: polígono de 7 puntos formando flecha izquierda con eje rectangular (procedural en `_draw()`).
+
+## Manejo del Botón Sistema "Volver Atrás" ✅
+- `project.godot`: `config/quit_on_go_back=false` → Godot no cierra la app automáticamente.
+- Todos los nodos reciben `NOTIFICATION_WM_GO_BACK_REQUEST` vía `propagate_notification` independientemente de `process_mode`.
+- **En pantallas secundarias**: `_notification` llama `_on_back_pressed()` → cambia a `MainMenu.tscn`.
+- **Mientras se juega**: `Game.gd._notification` detecta `state == PLAYING` → `GameManager.pause_game()`. `PauseScreen._notification` detecta `visible` → cierra confirm panel si estaba abierto, o reanuda si no.
+- **En MainMenu**: `_notification` muestra/oculta `_exit_confirm` (CanvasLayer layer=50 con overlay oscuro + card "¿Salir del juego?" + botones CANCELAR/SALIR).
+- Guards de estado evitan doble-acción cuando múltiples nodos reciben la misma notificación.
