@@ -168,7 +168,7 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 		&"rapid_fire":
 			_rapid_fire_stacks = count
 			var interval: float = (
-				_base_autofire_interval / pow(Constants.RAPID_FIRE_MULTIPLIER, float(count))
+				_base_autofire_interval / (1.0 + float(count) * Constants.RAPID_FIRE_LINEAR_FACTOR)
 			)
 			_current_autofire_interval = maxf(Constants.PLAYER_AUTOFIRE_MIN, interval)
 			_autofire_timer.wait_time = _current_autofire_interval

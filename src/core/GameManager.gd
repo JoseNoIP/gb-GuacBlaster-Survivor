@@ -6,6 +6,7 @@ enum GameState { MENU, PLAYING, PAUSED, LEVEL_UP, GAME_OVER, GAME_WON }
 
 var _state: GameState = GameState.MENU
 var _score: int = 0
+var _gold_xp: int = 0
 var _session_time: float = 0.0
 var _current_level: int = 0
 var _xp_current: int = 0
@@ -15,6 +16,7 @@ var _current_biome: int = 0
 var _combo_kills: int = 0
 var _endless_mode: bool = false
 var _waves_cleared: int = 0
+var _powerup_stacks: Dictionary = {}
 
 func _ready() -> void:
 	EventBus.player_died.connect(_on_player_died)
@@ -24,6 +26,7 @@ func _ready() -> void:
 	EventBus.boss_defeated.connect(_on_boss_defeated)
 	EventBus.enemy_destroyed.connect(_on_enemy_destroyed)
 	EventBus.player_damaged.connect(_on_player_damaged_combo)
+	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed_gm)
 
 func _process(delta: float) -> void:
 	if _state == GameState.PLAYING:
@@ -32,12 +35,14 @@ func _process(delta: float) -> void:
 func start_game() -> void:
 	_state = GameState.PLAYING
 	_score = 0
+	_gold_xp = 0
 	_session_time = 0.0
 	_current_level = 0
 	_xp_current = 0
 	_xp_required = Constants.XP_BASE_REQUIRED
 	_combo_kills = 0
 	_waves_cleared = 0
+	_powerup_stacks.clear()
 	var health_bonus: int = SaveManager.get_upgrade_level(&"health") * Constants.META_HEALTH_PER_LEVEL
 	_player_health = Constants.PLAYER_BASE_HEALTH + health_bonus
 	_current_biome = SaveManager.get_victories() % Constants.BACKGROUND_PALETTE.size()
@@ -115,7 +120,7 @@ func _calc_gold() -> int:
 	var gold_mult: float = 1.0 + float(gold_level) * Constants.META_GOLD_BONUS_PER_LEVEL
 	gold_mult *= WeeklyChallengeManager.get_gold_mult()
 	gold_mult *= get_biome_gold_mult()
-	return int(float(_score) * Constants.GOLD_PER_SCORE_POINT * gold_mult)
+	return int(float(_gold_xp) * Constants.GOLD_PER_SCORE_POINT * gold_mult)
 
 func _on_player_died() -> void:
 	_state = GameState.GAME_OVER
@@ -166,6 +171,7 @@ func _on_gem_collected(xp_value: int) -> void:
 	var level_xp: int = int(float(xp_value) * luck_mult)
 	var score_xp: int = int(float(xp_value) * luck_mult * get_combo_multiplier())
 	_score += score_xp
+	_gold_xp += level_xp
 	EventBus.xp_collected.emit(level_xp, _xp_current + level_xp, _xp_required)
 
 func _on_xp_collected(amount: int, _total: int, _required: int) -> void:
@@ -183,4 +189,14 @@ func _trigger_level_up() -> void:
 func _pick_powerup_options() -> Array:
 	var pool: Array = Constants.POWERUP_POOL.duplicate()
 	pool.shuffle()
-	return pool.slice(0, Constants.POWERUP_CARDS_PER_LEVEL)
+	var available: Array = []
+	for entry: Variant in pool:
+		var id: StringName = entry as StringName
+		if int(_powerup_stacks.get(id, 0)) < Constants.POWERUP_MAX_STACKS:
+			available.append(id)
+		if available.size() >= Constants.POWERUP_CARDS_PER_LEVEL:
+			break
+	return available
+
+func _on_powerup_stack_changed_gm(powerup_id: StringName, count: int) -> void:
+	_powerup_stacks[powerup_id] = count

@@ -93,6 +93,9 @@ func _instantiate_at_random_x(scene: PackedScene) -> void:
 	var vp_width: float = get_viewport_rect().size.x
 	enemy.position = Vector2(randf_range(30.0, vp_width - 30.0), -30.0)
 	enemy.set(&"_speed_mult", _biome_speed_mult)
+	var minutes: float = _elapsed / 60.0
+	var hp_mult: float = 1.0 + minutes * Constants.ENEMY_HP_SCALE_PER_MIN
+	enemy.set(&"_hp_time_mult", hp_mult)
 	get_parent().add_child(enemy)
 
 func _update_difficulty() -> void:

@@ -21,6 +21,8 @@ func _process(delta: float) -> void:
 	_update_laser_positions()
 
 func _on_powerup_selected(powerup_id: StringName) -> void:
+	if int(_stacks.get(powerup_id, 0)) >= Constants.POWERUP_MAX_STACKS:
+		return
 	if not _timers.has(powerup_id):
 		_timers[powerup_id] = []
 	var duration: float = Constants.POWERUP_DURATION

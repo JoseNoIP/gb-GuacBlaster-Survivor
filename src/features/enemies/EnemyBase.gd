@@ -12,10 +12,13 @@ var _health: int = 1
 var _xp_value: int = 5
 var _hit_tween: Tween = null
 var _speed_mult: float = 1.0
+var _hp_time_mult: float = 1.0
 
 func _ready() -> void:
 	add_to_group(&"enemies")
 	_initialize()
+	if _hp_time_mult != 1.0:
+		_health = maxi(1, int(float(_health) * _hp_time_mult))
 
 func _initialize() -> void:
 	pass
