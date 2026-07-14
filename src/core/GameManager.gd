@@ -163,9 +163,10 @@ func _on_gem_collected(xp_value: int) -> void:
 		return
 	var luck_level: int = SaveManager.get_upgrade_level(&"luck")
 	var luck_mult: float = 1.0 + float(luck_level) * Constants.META_LUCK_PER_LEVEL
-	var effective_xp: int = int(float(xp_value) * luck_mult * get_combo_multiplier())
-	_score += effective_xp
-	EventBus.xp_collected.emit(effective_xp, _xp_current + effective_xp, _xp_required)
+	var level_xp: int = int(float(xp_value) * luck_mult)
+	var score_xp: int = int(float(xp_value) * luck_mult * get_combo_multiplier())
+	_score += score_xp
+	EventBus.xp_collected.emit(level_xp, _xp_current + level_xp, _xp_required)
 
 func _on_xp_collected(amount: int, _total: int, _required: int) -> void:
 	_xp_current += amount
