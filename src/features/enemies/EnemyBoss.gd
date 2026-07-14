@@ -12,7 +12,7 @@ var _max_health: int = 0
 var _phase: int = 1
 
 func _initialize() -> void:
-	var session_mult: float = 1.0 + GameManager.get_session_time() / 120.0
+	var session_mult: float = 1.0 + GameManager.get_session_time() / 180.0
 	_health = int((Constants.BOSS_HP_BASE + _generation * Constants.BOSS_HP_PER_GENERATION)
 			* WeeklyChallengeManager.get_boss_hp_mult()
 			* GameManager.get_biome_boss_hp_mult()

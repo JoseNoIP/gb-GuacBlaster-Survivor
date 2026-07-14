@@ -70,7 +70,7 @@ const BOSS_PHASE2_SPREAD_COUNT: int = 3
 const BOSS_PHASE2_SPREAD_ANGLE: float = 20.0
 
 # --- Enemy HP time scaling ---
-const ENEMY_HP_SCALE_PER_MIN: float = 0.8
+const ENEMY_HP_SCALE_PER_MIN: float = 0.4
 
 # --- Spawner ---
 const SPAWNER_INITIAL_INTERVAL: float = 0.8
@@ -127,7 +127,7 @@ const HEART_DROP_SPEED: float = 80.0
 
 # --- XP ---
 const XP_BASE_REQUIRED: int = 150
-const XP_SCALE_FACTOR: float = 1.35
+const XP_SCALE_FACTOR: float = 1.25
 
 # --- Combat ---
 const PLAYER_CONTACT_INVINCIBILITY: float = 1.0
