@@ -58,8 +58,10 @@ jobs:
           chmod +x /usr/local/bin/godot
           rm godot.zip
 
-      # ── 5. Export templates + Gradle build template ─────────────────────────
-      - name: Instalar export templates y Gradle build template
+      # ── 5. Export templates ──────────────────────────────────────────────────
+      # --install-android-build-template (paso 7) lee android_source.zip desde
+      # esta carpeta y crea android/build/ + .build_version automáticamente.
+      - name: Instalar export templates
         run: |
           wget -q \
             "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz" \
@@ -69,55 +71,37 @@ jobs:
           mkdir -p "$TEMPLATES_DIR"
           unzip -q templates.tpz -d templates_tmp
           mv templates_tmp/templates/* "$TEMPLATES_DIR/"
-
-          # Gradle template en android/build/ (ruta por defecto de Godot)
-          mkdir -p android/build/
-          unzip -q "$TEMPLATES_DIR/android_source.zip" -d android/build/
-          godot --version | tr -d '\n' > android/build/.build_version
-          chmod +x android/build/gradlew
-
           rm -rf templates_tmp templates.tpz
 
       # ── 6. Keystore de release + version code ───────────────────────────────
       - name: Configurar keystore y version code
-        env:
-          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/guacblaster.keystore
 
-          sed -i "s|keystore/release=\"[^\"]*\"|keystore/release=\"/tmp/guacblaster.keystore\"|" export_presets.cfg
-          sed -i "s|keystore/release_user=\"[^\"]*\"|keystore/release_user=\"$KEYSTORE_ALIAS\"|" export_presets.cfg
-          sed -i "s|keystore/release_password=\"[^\"]*\"|keystore/release_password=\"$KEYSTORE_PASS\"|" export_presets.cfg
           sed -i "s|version/code=[0-9]*|version/code=${{ steps.ctx.outputs.version_code }}|" export_presets.cfg
           sed -i "s|gradle_build/use_gradle_build=false|gradle_build/use_gradle_build=true|" export_presets.cfg
 
-          grep -E "keystore|version/code|gradle_build/use" export_presets.cfg
+          grep -E "version/code|gradle_build/use" export_presets.cfg
 
-      # ── 7. Exportar APK con Gradle (popula android/build/ con assets del juego)
-      - name: Exportar APK con Gradle
+      # ── 7. Pre-heat Godot cache (evita crashes del scanner headless) ─────────
+      - name: Pre-heat Godot cache
+        run: godot --headless --editor --quit || true
+
+      # ── 8. Instalar build template + Exportar AAB ───────────────────────────
+      # --install-android-build-template: extrae android_source.zip al proyecto
+      # y escribe android/build/.build_version con el string correcto.
+      # Con use_gradle_build=true Godot llama a Gradle y produce el .aab directo.
+      - name: Exportar AAB (Gradle)
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /tmp/guacblaster.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: |
           mkdir -p builds/
-          godot --headless \
+          godot --headless --verbose \
+            --install-android-build-template \
             --export-release "${{ env.EXPORT_PRESET }}" \
-            "builds/GuacBlaster.apk"
-
-      # ── 8. Construir AAB firmado con Gradle ─────────────────────────────────
-      - name: Construir AAB con Gradle bundleRelease
-        env:
-          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-        run: |
-          cd android/build
-          ./gradlew bundleRelease \
-            "-Pandroid.injected.signing.store.file=/tmp/guacblaster.keystore" \
-            "-Pandroid.injected.signing.store.password=$KEYSTORE_PASS" \
-            "-Pandroid.injected.signing.key.alias=$KEYSTORE_ALIAS" \
-            "-Pandroid.injected.signing.key.password=$KEYSTORE_PASS"
-
-          AAB=$(find . -name "*.aab" -path "*/release/*" | head -1)
-          echo "AAB generado: $AAB"
-          cp "$AAB" ../../builds/GuacBlaster.aab
+            "builds/GuacBlaster.aab"
 
       - name: Verificar AAB generado
         run: ls -lh builds/
