@@ -73,7 +73,7 @@ jobs:
           # Gradle template en android/build/ (ruta por defecto de Godot)
           mkdir -p android/build/
           unzip -q "$TEMPLATES_DIR/android_source.zip" -d android/build/
-          echo "${{ env.GODOT_VERSION }}.stable" > android/build/.build_version
+          godot --version | tr -d '\n' > android/build/.build_version
           chmod +x android/build/gradlew
 
           rm -rf templates_tmp templates.tpz
