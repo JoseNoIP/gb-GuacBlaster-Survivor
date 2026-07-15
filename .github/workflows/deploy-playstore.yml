@@ -87,11 +87,11 @@ jobs:
       - name: Pre-heat Godot cache
         run: godot --headless --editor --quit || true
 
-      # ── 8. Instalar build template + Exportar AAB ───────────────────────────
-      # --install-android-build-template: extrae android_source.zip al proyecto
-      # y escribe android/build/.build_version con el string correcto.
-      # Con use_gradle_build=true Godot llama a Gradle y produce el .aab directo.
-      - name: Exportar AAB (Gradle)
+      # ── 8. Instalar template + Exportar APK (popula android/build/) ──────────
+      # --install-android-build-template instala el template y escribe
+      # android/build/.build_version correctamente (sin intervención manual).
+      # Godot 4.7 requiere extensión .apk; el AAB se genera en el paso 9.
+      - name: Exportar APK con Gradle template
         env:
           GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /tmp/guacblaster.keystore
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
@@ -101,7 +101,24 @@ jobs:
           godot --headless --verbose \
             --install-android-build-template \
             --export-release "${{ env.EXPORT_PRESET }}" \
-            "builds/GuacBlaster.aab"
+            "builds/GuacBlaster.apk"
+
+      # ── 9. Construir AAB firmado con Gradle ─────────────────────────────────
+      - name: Construir AAB con Gradle bundleRelease
+        env:
+          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          cd android/build
+          ./gradlew bundleRelease \
+            "-Pandroid.injected.signing.store.file=/tmp/guacblaster.keystore" \
+            "-Pandroid.injected.signing.store.password=$KEYSTORE_PASS" \
+            "-Pandroid.injected.signing.key.alias=$KEYSTORE_ALIAS" \
+            "-Pandroid.injected.signing.key.password=$KEYSTORE_PASS"
+
+          AAB=$(find . -name "*.aab" -path "*/release/*" | head -1)
+          echo "AAB generado: $AAB"
+          cp "$AAB" ../../builds/GuacBlaster.aab
 
       - name: Verificar AAB generado
         run: ls -lh builds/
