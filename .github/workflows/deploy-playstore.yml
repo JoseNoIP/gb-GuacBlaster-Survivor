@@ -70,9 +70,28 @@ jobs:
           unzip -q templates.tpz -d templates_tmp
           mv templates_tmp/templates/* "$TEMPLATES_DIR/"
 
+          echo "=== Archivos Android en TEMPLATES_DIR ==="
+          ls "$TEMPLATES_DIR/" | grep -i android
+
           # Instalar Gradle build template (necesario para exportar AAB)
-          unzip -q "$TEMPLATES_DIR/android_source.zip" -d android/
-          chmod +x android/build/gradlew
+          ANDROID_SRC="$TEMPLATES_DIR/android_source.zip"
+          if [ ! -f "$ANDROID_SRC" ]; then
+            echo "ERROR: android_source.zip no encontrado. Contenido del directorio:"
+            ls "$TEMPLATES_DIR/"
+            exit 1
+          fi
+
+          echo "=== Primeros 20 entries de android_source.zip ==="
+          unzip -l "$ANDROID_SRC" | head -25
+
+          mkdir -p android/
+          unzip -q "$ANDROID_SRC" -d android/
+
+          echo "=== Estructura android/ después de extraer ==="
+          find android/ -maxdepth 3 | head -30
+
+          # chmod gradlew dondequiera que esté dentro de android/
+          find android/ -name "gradlew" -exec chmod +x {} \;
 
           rm -rf templates_tmp templates.tpz
 
