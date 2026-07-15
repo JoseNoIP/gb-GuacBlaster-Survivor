@@ -12,7 +12,7 @@ Guía autoritativa de desarrollo para Claude Code. **Lee este archivo completo a
 | Testing | GUT (Godot Unit Testing) v9.7.1 — 185 tests |
 | Lint/Format | gdtoolkit (`gdlint` / `gdformat`) vía pipx |
 | Plataforma | iOS 14+ / Android API 24+ |
-| CI/CD | GitHub Actions → APK en Dropbox (`/prod/` o `/stg/`) |
+| CI/CD | GitHub Actions → AAB firmado en Google Play Store (Internal/Production) |
 | Arte | Pixel art / Vector toony |
 | Control | Touch drag relativo (1 dedo) |
 
@@ -155,6 +155,15 @@ func _exit_tree() -> void:
 16. **`for id: Variant in dict.keys()`** → tipo `Variant` no válido en for-loop en GDScript 4. Usar índice entero: `for i: int in arr.size()` + `arr[i]`, o dejar sin tipo.
 17. **`add_child()` desde callback de física** → usar `call_deferred(&"add_child", node)` siempre que la llamada se origine en `_on_body_entered`, `_on_area_entered` o similares.
 
+### Reglas Android CI/CD (Godot 4.7 → Google Play)
+18. **Godot 4.7 no exporta `.aab` directamente** — rechaza la extensión. Exportar siempre a `.apk` (paso 1: popula `android/build/`), luego producir AAB con `./gradlew bundleRelease` (paso 2).
+19. **`--install-android-build-template`** — este flag extrae `android_source.zip` y escribe `.build_version` con el string exacto que Godot espera. **Nunca** escribir `.build_version` a mano ni usar `godot --version` (no produce output en headless).
+20. **`shouldSign()` en `config.gradle` es `false` por defecto** — pasar **siempre** `-Pperform_signing=true -Prelease_keystore_file=RUTA -Prelease_keystore_password=PASS -Prelease_keystore_alias=ALIAS` a `bundleRelease`. Las props `android.injected.signing.*` no aplican al template de Godot.
+21. **Package name default de Godot es `com.godot.game`** — pasar **siempre** `-Pexport_package_name=com.tuempresa.tujuego` a `bundleRelease`. Sin esto, Play Store rechaza el AAB por fileprovider incorrecto.
+22. **`assetPackInstallTime/src/main/assets` debe existir** — `mkdir -p android/build/assetPackInstallTime/src/main/assets` antes de correr Gradle (el módulo de Play Asset Delivery lo requiere).
+23. **Primera subida a Play Store debe ser manual** — la API de Google Play retorna error genérico hasta que exista al menos una versión subida manualmente desde Play Console. Descargar el AAB del artefacto CI y subirlo una vez desde la web.
+24. **Pre-heat obligatorio** — `godot --headless --editor --quit || true` antes del export. Sin este paso, el file-system scanner de Godot puede crashear en headless al exportar.
+
 ---
 
 ## Roles Internos por Iteración
@@ -187,6 +196,26 @@ func _exit_tree() -> void:
 - [ ] ¿El feedback háptico está implementado para disparo y eventos críticos?
 - [ ] ¿La sesión puede completarse en 2–5 minutos?
 - [ ] ¿La feature se alinea con patrones probados del género o introduce diferenciación justificada?
+
+### ⚡ Feel / Combat Agent
+**Cuándo activa:** Implementación o revisión de contacto jugador-enemigo, curva de dificultad, cualquier sensación de impacto.  
+**Principios aprendidos (GuacBlaster, 2026-07):**
+- **Contacto enemigo-jugador tiene que tener consecuencia y lógica por tipo:**
+  - Enemigos desechables (básicos): mueren al tocar → `on_player_contact()` → daño + `_contact_die()` (no emite XP).
+  - Enemigos de peso (zigzag, tank): sobreviven al contacto → daño pero sin morir; el jugador los esquiva.
+  - Enemigos élite: cargan antes de explotar → tween rojo/dorado, 1.5s de telegrafía, 2 de daño → más impacto sin death-loop.
+- **`_invincibility_timer` es crítico** — sin él, un enemigo que hace overlap genera múltiples hits por frame = muerte instantánea injusta.
+- **Curva de dificultad: preferir rampas suaves y largas:**
+  - `BOSS_HP_BASE: 300` (no 400) — el primer jefe tiene que ser vencible con build modesta.
+  - `ENEMY_HP_SCALE_PER_MIN: 0.25` (no 0.4) — si escala muy rápido los últimos 30s del jefe se vuelven imposibles.
+  - `SPAWNER_WAVE_RAMP_INTERVAL: 90s` — olas cada 90s, no cada 30s; dar tiempo al jugador de nivel-up entre olas.
+- **Telegrafía = respeto al jugador:** cualquier ataque que haga más de 1 de daño debe tener al menos 0.75s de anticipación visual (tween de color, partícula, sonido).
+- **Checklist:**
+  - [ ] ¿Cada tipo de enemigo tiene un comportamiento de contacto con lógica propia (`on_player_contact`)?
+  - [ ] ¿El `_invincibility_timer` es > 0 después de cualquier hit de contacto?
+  - [ ] ¿El jefe gen-0 puede vencerse en una sesión con 1–2 power-ups? (target: 40 disparos de daño base)
+  - [ ] ¿Los enemigos élite telegrafían su ataque especial visualmente antes de dañar?
+  - [ ] ¿La tasa de spawn en minuto 1 deja al jugador aprender sin abrumarlo?
 
 ---
 
@@ -312,6 +341,7 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `/doc` | Al cerrar cualquier tarea — sincroniza idea-base.md, CLAUDE.md y memorias |
 | `/new-game [gdd.md]` | Para construir un juego nuevo desde cero — autónomo hasta build funcional |
 | `/gen-ai-art` | Generar arte final de un juego con Pollinations.ai (Flux, gratis) — backgrounds, sprites con transparencia, íconos procedurales |
+| `/android-deploy` | Configurar o depurar el pipeline CI/CD de GitHub Actions para publicar en Google Play Store como AAB firmado — incluye mapa completo de errores conocidos (Godot 4.7) |
 
 Los skills viven en `.claude/skills/<nombre>/SKILL.md`.
 
@@ -322,6 +352,7 @@ Los skills viven en `.claude/skills/<nombre>/SKILL.md`.
 | `godot-architect` | Code review de arquitectura — detecta violaciones SOLID, acoplamiento directo, anti-patrones |
 | `godot-qa` | Auditoría de tests — identifica cobertura faltante, escribe tests GUT |
 | `game-designer` | Balance review — verifica que los valores numéricos den una buena experiencia |
+| `game-feel` | Revisión de combat feel, contacto jugador-enemigo, curva de dificultad, telegrafía de ataques |
 
 Los agentes viven en `.claude/agents/<nombre>.md`.
 
@@ -346,7 +377,7 @@ El resultado aparece como `additionalContext` — informativo, no bloquea.
 | ~~Desafío semanal~~ | ✅ Completado | WeeklyChallengeManager autoload + WeeklyChallengeScreen + 3 desafíos |
 | ~~Toast personaje~~ | ✅ Completado | CharacterSelectScreen + HUD muestran nombre al seleccionar/iniciar |
 | Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
-| Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
+| ~~Export release Android~~ | ✅ Completado | `.github/workflows/deploy-playstore.yml` — AAB firmado → Google Play. Skill: `/android-deploy` |
 | Export release iOS | Provisioning profile, Apple Dev account | |
 
 ### Assets completados con IA
