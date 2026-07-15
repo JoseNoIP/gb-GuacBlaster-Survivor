@@ -109,6 +109,13 @@ jobs:
           KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
           KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: |
+          echo "=== Estructura android/build post-export ==="
+          find android/build -maxdepth 4 -type d | sort | head -60 || true
+
+          # assetPackInstallTime necesita existir para bundleRelease (AAB).
+          # Godot lo popula al exportar APK pero lo puede limpiar al terminar.
+          mkdir -p android/build/assetPackInstallTime/src/main/assets
+
           cd android/build
           ./gradlew bundleRelease \
             "-Pandroid.injected.signing.store.file=/tmp/guacblaster.keystore" \
