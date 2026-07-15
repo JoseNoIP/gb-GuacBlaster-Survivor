@@ -109,22 +109,14 @@ jobs:
           KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
           KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: |
-          # Godot instala el template con package name "com.godot.game" por defecto
-          # y no siempre lo actualiza en headless. Forzar el valor correcto en
-          # todos los archivos relevantes del proyecto Gradle.
-          PKG="${{ env.PACKAGE_NAME }}"
-          find android/build \( -name "*.gradle" -o -name "*.xml" -o -name "*.properties" \) \
-            -not -path "*/build/*" \
-            -exec sed -i "s|com\.godot\.game|${PKG}|g" {} \;
-
-          echo "=== packageId tras el fix ==="
-          grep -rh "packageId\|applicationId\|${PKG}" android/build/config.gradle 2>/dev/null || true
-
           # assetPackInstallTime necesita existir para bundleRelease (AAB).
           mkdir -p android/build/assetPackInstallTime/src/main/assets
 
           cd android/build
+          # export_package_name es la Gradle property que config.gradle usa para
+          # el applicationId. Sin ella el default es "com.godot.game".
           ./gradlew bundleRelease \
+            "-Pexport_package_name=${{ env.PACKAGE_NAME }}" \
             "-Pandroid.injected.signing.store.file=/tmp/guacblaster.keystore" \
             "-Pandroid.injected.signing.store.password=$KEYSTORE_PASS" \
             "-Pandroid.injected.signing.key.alias=$KEYSTORE_ALIAS" \
