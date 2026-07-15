@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       skip_upload:
-        description: "Solo construir AAB (sin subir a Play Store)"
+        description: "Solo construir APK (sin subir a Play Store)"
         type: boolean
         default: false
 
@@ -21,7 +21,7 @@ env:
 
 jobs:
   deploy:
-    name: "Build AAB & Deploy (${{ github.ref_name }})"
+    name: "Build APK & Deploy (${{ github.ref_name }})"
     runs-on: ubuntu-latest
 
     steps:
@@ -40,14 +40,7 @@ jobs:
           fi
           echo "version_code=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      # ── 3. Java (requerido por Gradle para AAB) ─────────────────────────────
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      # ── 4. Godot headless ───────────────────────────────────────────────────
+      # ── 3. Godot headless ───────────────────────────────────────────────────
       - name: Instalar Godot ${{ env.GODOT_VERSION }}
         run: |
           wget -q \
@@ -58,8 +51,8 @@ jobs:
           chmod +x /usr/local/bin/godot
           rm godot.zip
 
-      # ── 5. Export templates + Gradle build template ─────────────────────────
-      - name: Instalar export templates y Gradle build template
+      # ── 4. Export templates ─────────────────────────────────────────────────
+      - name: Instalar export templates de Android
         run: |
           wget -q \
             "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz" \
@@ -69,19 +62,9 @@ jobs:
           mkdir -p "$TEMPLATES_DIR"
           unzip -q templates.tpz -d templates_tmp
           mv templates_tmp/templates/* "$TEMPLATES_DIR/"
-
-          # Extraer Gradle build template a android/build/ (ruta que Godot busca por defecto)
-          mkdir -p android/build/
-          unzip -q "$TEMPLATES_DIR/android_source.zip" -d android/build/
-
-          # Archivo que Godot verifica para confirmar que el template está instalado
-          echo "${{ env.GODOT_VERSION }}.stable" > android/build/.build_version
-
-          chmod +x android/build/gradlew
-
           rm -rf templates_tmp templates.tpz
 
-      # ── 6. Keystore de release + version code ───────────────────────────────
+      # ── 5. Keystore de release + version code ───────────────────────────────
       - name: Configurar keystore y version code
         env:
           KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
@@ -96,42 +79,39 @@ jobs:
           # Version code auto-incremental basado en run number de GitHub
           sed -i "s|version/code=[0-9]*|version/code=${{ steps.ctx.outputs.version_code }}|" export_presets.cfg
 
-          # Habilitar Gradle build para producir AAB
-          sed -i "s|gradle_build/use_gradle_build=false|gradle_build/use_gradle_build=true|" export_presets.cfg
-
           echo "--- export_presets.cfg (sección clave) ---"
-          grep -E "keystore|version/code|gradle_build/use" export_presets.cfg
+          grep -E "keystore|version/code" export_presets.cfg
 
-      # ── 7. Verificar Android SDK ─────────────────────────────────────────────
+      # ── 6. Verificar Android SDK ─────────────────────────────────────────────
       - name: Verificar Android SDK
         run: echo "ANDROID_HOME=$ANDROID_HOME"
 
-      # ── 8. Exportar AAB ──────────────────────────────────────────────────────
-      - name: Exportar AAB release
+      # ── 7. Exportar APK release ──────────────────────────────────────────────
+      - name: Exportar APK release
         run: |
           mkdir -p builds/
           godot --headless \
             --export-release "${{ env.EXPORT_PRESET }}" \
-            "builds/GuacBlaster.aab"
+            "builds/GuacBlaster.apk"
 
-      - name: Verificar AAB generado
+      - name: Verificar APK generado
         run: ls -lh builds/
 
-      # ── 9. Guardar artefacto (para debugging) ───────────────────────────────
-      - name: Guardar AAB como artefacto
+      # ── 8. Guardar artefacto ─────────────────────────────────────────────────
+      - name: Guardar APK como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: aab-${{ steps.ctx.outputs.track }}-${{ github.run_number }}
-          path: builds/GuacBlaster.aab
+          name: apk-${{ steps.ctx.outputs.track }}-${{ github.run_number }}
+          path: builds/GuacBlaster.apk
           retention-days: 30
 
-      # ── 10. Subir a Google Play ──────────────────────────────────────────────
+      # ── 9. Subir a Google Play ───────────────────────────────────────────────
       - name: Subir a Google Play — track ${{ steps.ctx.outputs.track }}
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_upload == false }}
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_JSON }}
           packageName: ${{ env.PACKAGE_NAME }}
-          releaseFiles: builds/GuacBlaster.aab
+          releaseFiles: builds/GuacBlaster.apk
           track: ${{ steps.ctx.outputs.track }}
           status: completed
