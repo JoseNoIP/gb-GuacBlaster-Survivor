@@ -90,6 +90,9 @@ jobs:
           echo "=== Estructura android/ después de extraer ==="
           find android/ -maxdepth 3 | head -30
 
+          # Archivo que Godot verifica para confirmar que el template está instalado
+          echo "${{ env.GODOT_VERSION }}.stable" > android/build/.build_version
+
           # chmod gradlew dondequiera que esté dentro de android/
           find android/ -name "gradlew" -exec chmod +x {} \;
 
