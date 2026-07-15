@@ -123,7 +123,11 @@ jobs:
             "-Pandroid.injected.signing.key.alias=$KEYSTORE_ALIAS" \
             "-Pandroid.injected.signing.key.password=$KEYSTORE_PASS"
 
-          AAB=$(find . -name "*.aab" -path "*/release/*" | head -1)
+          AAB=$(find . -name "*.aab" -path "*/standardRelease/*" | head -1)
+          # fallback: cualquier aab fuera de intermediates
+          if [ -z "$AAB" ]; then
+            AAB=$(find . -name "*.aab" -not -path "*/intermediates/*" | head -1)
+          fi
           echo "AAB generado: $AAB"
           cp "$AAB" ../../builds/GuacBlaster.aab
 
