@@ -5,6 +5,7 @@ extends CanvasLayer
 
 var _panel: Control
 var _resume_btn: Button
+var _restart_btn: Button
 var _menu_btn: Button
 var _confirm_panel: Control
 var _confirm_cancel_btn: Button
@@ -31,8 +32,8 @@ func _build_ui() -> void:
 	_panel.anchor_bottom = 0.5
 	_panel.offset_left = -120.0
 	_panel.offset_right = 120.0
-	_panel.offset_top = -110.0
-	_panel.offset_bottom = 110.0
+	_panel.offset_top = -130.0
+	_panel.offset_bottom = 130.0
 	add_child(_panel)
 
 	var vbox := VBoxContainer.new()
@@ -53,6 +54,11 @@ func _build_ui() -> void:
 	_resume_btn.pressed.connect(_on_resume_pressed)
 	vbox.add_child(_resume_btn)
 
+	_restart_btn = Button.new()
+	_restart_btn.text = "REINICIAR"
+	_restart_btn.pressed.connect(_on_restart_pressed)
+	vbox.add_child(_restart_btn)
+
 	_menu_btn = Button.new()
 	_menu_btn.text = "MENU PRINCIPAL"
 	_menu_btn.pressed.connect(_on_menu_pressed)
@@ -65,21 +71,27 @@ func _build_confirm_panel() -> void:
 	add_child(_confirm_panel)
 
 	var dim := ColorRect.new()
-	dim.color = Color(0.0, 0.0, 0.0, 0.5)
+	dim.color = Color(0.0, 0.0, 0.0, 0.72)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_confirm_panel.add_child(dim)
 
+	var card := ColorRect.new()
+	card.color = Color(0.08, 0.08, 0.12, 1.0)
+	card.anchor_left = 0.5
+	card.anchor_right = 0.5
+	card.anchor_top = 0.5
+	card.anchor_bottom = 0.5
+	card.offset_left = -145.0
+	card.offset_right = 145.0
+	card.offset_top = -95.0
+	card.offset_bottom = 95.0
+	_confirm_panel.add_child(card)
+
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
-	box.anchor_left = 0.5
-	box.anchor_right = 0.5
-	box.anchor_top = 0.5
-	box.anchor_bottom = 0.5
-	box.offset_left = -130.0
-	box.offset_right = 130.0
-	box.offset_top = -80.0
-	box.offset_bottom = 80.0
-	_confirm_panel.add_child(box)
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(box)
 
 	var warning := Label.new()
 	warning.text = "Si sales ahora\nperderás el avance\nde la partida."
@@ -113,6 +125,10 @@ func _on_game_paused(is_paused: bool) -> void:
 func _on_resume_pressed() -> void:
 	GameManager.resume_game()
 
+func _on_restart_pressed() -> void:
+	GameManager.resume_game()
+	EventBus.restart_requested.emit()
+
 func _on_menu_pressed() -> void:
 	_confirm_panel.show()
 
@@ -124,11 +140,21 @@ func _on_confirm_exit_pressed() -> void:
 	GameManager.resume_game()
 	EventBus.menu_requested.emit()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and visible:
+		if _confirm_panel.visible:
+			_confirm_panel.hide()
+		else:
+			_on_resume_pressed()
+
 func get_panel() -> Control:
 	return _panel
 
 func get_resume_button() -> Button:
 	return _resume_btn
+
+func get_restart_button() -> Button:
+	return _restart_btn
 
 func get_menu_button() -> Button:
 	return _menu_btn

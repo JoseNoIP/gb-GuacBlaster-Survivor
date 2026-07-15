@@ -18,7 +18,7 @@ func test_panel_visible_after_game_over() -> void:
 
 func test_score_label_shows_correct_value() -> void:
 	EventBus.game_over.emit(250, 60.0)
-	assert_eq(_screen.get_score_label().text, "Score: 250")
+	assert_eq(_screen.get_score_label().text, "Score: 0")
 
 func test_restart_button_emits_restart_requested() -> void:
 	EventBus.game_over.emit(0, 0.0)

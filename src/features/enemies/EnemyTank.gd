@@ -8,8 +8,13 @@ func _initialize() -> void:
 
 func _move(_delta: float) -> void:
 	velocity = Vector2(0.0, Constants.ENEMY_TANK_SPEED)
-	move_and_slide()
 
 func _die() -> void:
 	EventBus.enemy_split_requested.emit(global_position, Constants.ENEMY_TANK_SPLIT_COUNT)
 	super._die()
+
+func on_player_contact(player: Node2D) -> void:
+	EventBus.enemy_split_requested.emit(global_position, Constants.ENEMY_TANK_SPLIT_COUNT)
+	if player.has_method(&"take_damage"):
+		player.call(&"take_damage", 1)
+	_contact_die()

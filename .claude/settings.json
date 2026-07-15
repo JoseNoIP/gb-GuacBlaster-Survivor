@@ -4,7 +4,7 @@
       "Bash(godot*)",
       "Bash(gdlint*)",
       "Bash(gdformat*)",
-      "Bash(pip install gdtoolkit*)",
+      "Bash(pip install gdtoolkit)",
       "Bash(find . *)",
       "Bash(ls*)",
       "Bash(ls -la*)",
@@ -12,9 +12,29 @@
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(git status*)",
-      "Bash(git add*)",
+      "Bash(git add src/*)",
+      "Bash(git add tests/*)",
       "Bash(grep -r*)",
-      "Bash(grep -n*)"
+      "Bash(grep -n*)",
+      "Bash(chmod +x .claude/hooks/*)",
+      "Bash(jq*)",
+      "Bash(cat .claude/*)",
+      "Bash(cat tests/*)",
+      "Bash(cat src/*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/lint-on-edit.sh",
+            "timeout": 20
+          }
+        ]
+      }
     ]
   }
 }

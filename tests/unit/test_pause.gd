@@ -93,3 +93,20 @@ func test_resume_hides_confirm_panel() -> void:
 	_screen.get_menu_button().pressed.emit()
 	EventBus.game_paused.emit(false)
 	assert_false(_screen.get_confirm_panel().visible)
+
+# --- Restart button ---
+
+func test_pause_screen_has_restart_button() -> void:
+	assert_not_null(_screen.get_restart_button())
+
+func test_restart_button_emits_restart_requested() -> void:
+	EventBus.game_paused.emit(true)
+	GameManager.pause_game()
+	watch_signals(EventBus)
+	_screen.get_restart_button().pressed.emit()
+	assert_signal_emitted(EventBus, "restart_requested")
+
+func test_restart_button_resumes_game_before_restarting() -> void:
+	GameManager.pause_game()
+	_screen.get_restart_button().pressed.emit()
+	assert_eq(GameManager.get_state(), GameManager.GameState.PLAYING)

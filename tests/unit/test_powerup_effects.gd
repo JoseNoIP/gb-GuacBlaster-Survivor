@@ -1,6 +1,6 @@
 extends GutTest
 ## Tests for power-up effects: Player (rapid_fire, nacho_wall),
-## ProjectileSpawner (super_guac, spicy_bounce), Projectile (bounce logic).
+## ProjectileSpawner (super_guac, spicy_bounce, guac_storm), Projectile (bounce logic).
 
 const ProjectileGd := preload("res://src/features/projectiles/Projectile.gd")
 const ProjectileSpawnerGd := preload("res://src/features/projectiles/ProjectileSpawner.gd")
@@ -39,22 +39,35 @@ func _make_player() -> Player:
 
 func test_rapid_fire_reduces_autofire_interval() -> void:
 	var initial: float = _player._current_autofire_interval
-	EventBus.powerup_selected.emit(&"rapid_fire")
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
 	assert_lt(_player._current_autofire_interval, initial)
 
 func test_rapid_fire_applies_correct_multiplier() -> void:
 	var initial: float = _player._current_autofire_interval
-	EventBus.powerup_selected.emit(&"rapid_fire")
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
 	assert_almost_eq(
 		_player._current_autofire_interval,
 		initial / Constants.RAPID_FIRE_MULTIPLIER,
 		0.0001
 	)
 
+func test_rapid_fire_stacks_divide_further() -> void:
+	var initial: float = _player._current_autofire_interval
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 2)
+	var expected: float = initial / pow(Constants.RAPID_FIRE_MULTIPLIER, 2.0)
+	var clamped: float = maxf(Constants.PLAYER_AUTOFIRE_MIN, expected)
+	assert_almost_eq(_player._current_autofire_interval, clamped, 0.0001)
+
+func test_rapid_fire_zero_stacks_restores_interval() -> void:
+	var initial: float = _player._current_autofire_interval
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 0)
+	assert_almost_eq(_player._current_autofire_interval, initial, 0.0001)
+
 # --- Player: nacho_wall ---
 
 func test_nacho_wall_absorbs_first_hit() -> void:
-	EventBus.powerup_selected.emit(&"nacho_wall")
+	EventBus.powerup_stack_changed.emit(&"nacho_wall", 1)
 	var hp: int = _player.get_health()
 	_player.take_damage(1)
 	assert_eq(_player.get_health(), hp)
@@ -65,14 +78,14 @@ func test_nacho_wall_does_not_absorb_without_shield() -> void:
 	assert_eq(_player.get_health(), hp - 1)
 
 func test_nacho_wall_absorbs_all_shield_hits() -> void:
-	EventBus.powerup_selected.emit(&"nacho_wall")
+	EventBus.powerup_stack_changed.emit(&"nacho_wall", 1)
 	var hp: int = _player.get_health()
 	for _i: int in Constants.NACHO_WALL_HITS:
 		_player.take_damage(1)
 	assert_eq(_player.get_health(), hp)
 
 func test_nacho_wall_hp_lost_after_shield_depleted() -> void:
-	EventBus.powerup_selected.emit(&"nacho_wall")
+	EventBus.powerup_stack_changed.emit(&"nacho_wall", 1)
 	for _i: int in Constants.NACHO_WALL_HITS:
 		_player.take_damage(1)
 	_player.take_damage(1)
@@ -81,19 +94,38 @@ func test_nacho_wall_hp_lost_after_shield_depleted() -> void:
 # --- ProjectileSpawner: power-up flags ---
 
 func test_super_guac_sets_pierce_count() -> void:
-	EventBus.powerup_selected.emit(&"super_guac")
+	EventBus.powerup_stack_changed.emit(&"super_guac", 1)
 	assert_eq(_spawner._pierce_count, Constants.SUPER_GUAC_PENETRATION)
 
+func test_super_guac_zero_clears_pierce() -> void:
+	EventBus.powerup_stack_changed.emit(&"super_guac", 1)
+	EventBus.powerup_stack_changed.emit(&"super_guac", 0)
+	assert_eq(_spawner._pierce_count, 0)
+
 func test_spicy_bounce_sets_bouncy_flag() -> void:
-	EventBus.powerup_selected.emit(&"spicy_bounce")
+	EventBus.powerup_stack_changed.emit(&"spicy_bounce", 1)
 	assert_true(_spawner._bouncy)
 
+func test_spicy_bounce_zero_clears_flag() -> void:
+	EventBus.powerup_stack_changed.emit(&"spicy_bounce", 1)
+	EventBus.powerup_stack_changed.emit(&"spicy_bounce", 0)
+	assert_false(_spawner._bouncy)
+
 func test_triple_shot_sets_flag() -> void:
-	EventBus.powerup_selected.emit(&"triple_shot")
+	EventBus.powerup_stack_changed.emit(&"triple_shot", 1)
 	assert_true(_spawner._triple_shot)
 
+func test_guac_storm_sets_extra_streams() -> void:
+	EventBus.powerup_stack_changed.emit(&"guac_storm", 2)
+	assert_eq(_spawner._extra_streams, 2)
+
+func test_guac_storm_zero_clears_streams() -> void:
+	EventBus.powerup_stack_changed.emit(&"guac_storm", 2)
+	EventBus.powerup_stack_changed.emit(&"guac_storm", 0)
+	assert_eq(_spawner._extra_streams, 0)
+
 func test_unrelated_powerup_does_not_set_pierce() -> void:
-	EventBus.powerup_selected.emit(&"rapid_fire")
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
 	assert_eq(_spawner._pierce_count, 0)
 
 # --- Projectile: setup ---

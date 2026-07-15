@@ -1,5 +1,5 @@
 extends GutTest
-## Unit tests for HUD — hearts, XP bar, score, level label, and power-up panel.
+## Unit tests for HUD — hearts, XP bar, score, level label, and power-up strip.
 
 const HUDGd := preload("res://src/features/ui/HUD.gd")
 
@@ -9,41 +9,26 @@ func before_each() -> void:
 	_hud = HUD.new()
 	add_child_autofree(_hud)
 
-# --- Power-up panel ---
+# --- Active power-up strip ---
 
-func test_powerup_panel_hidden_initially() -> void:
-	assert_false(_hud._powerup_panel.visible)
+func test_strip_shows_pill_on_stack_added() -> void:
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
+	assert_true(_hud._strip_pills.has(&"rapid_fire"))
 
-func test_powerup_panel_shows_on_selection_requested() -> void:
-	EventBus.powerup_selection_requested.emit([&"triple_shot"])
-	assert_true(_hud._powerup_panel.visible)
+func test_strip_pill_text_shows_abbrev_and_count() -> void:
+	EventBus.powerup_stack_changed.emit(&"triple_shot", 2)
+	var pill: Label = _hud._strip_pills.get(&"triple_shot") as Label
+	assert_eq(pill.text, "TS×2")
 
-func test_card_text_matches_powerup_name() -> void:
-	EventBus.powerup_selection_requested.emit([&"rapid_fire", &"triple_shot"])
-	assert_eq(_hud._card_buttons[0].text, "Fuego Rapido")
-	assert_eq(_hud._card_buttons[1].text, "Disparo Triple")
+func test_strip_removes_pill_when_count_zero() -> void:
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 0)
+	assert_false(_hud._strip_pills.has(&"rapid_fire"))
 
-func test_card_press_hides_panel() -> void:
-	EventBus.powerup_selection_requested.emit([&"triple_shot"])
-	_hud._card_buttons[0].pressed.emit()
-	assert_false(_hud._powerup_panel.visible)
-
-func test_card_press_emits_powerup_selected() -> void:
-	watch_signals(EventBus)
-	EventBus.powerup_selection_requested.emit([&"triple_shot", &"rapid_fire"])
-	_hud._card_buttons[0].pressed.emit()
-	assert_signal_emitted_with_parameters(EventBus, "powerup_selected", [&"triple_shot"])
-
-func test_second_card_emits_second_option() -> void:
-	watch_signals(EventBus)
-	EventBus.powerup_selection_requested.emit([&"triple_shot", &"rapid_fire"])
-	_hud._card_buttons[1].pressed.emit()
-	assert_signal_emitted_with_parameters(EventBus, "powerup_selected", [&"rapid_fire"])
-
-func test_game_over_hides_powerup_panel() -> void:
-	EventBus.powerup_selection_requested.emit([&"triple_shot"])
-	EventBus.game_over.emit(0, 0.0)
-	assert_false(_hud._powerup_panel.visible)
+func test_strip_clears_on_game_started() -> void:
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
+	EventBus.game_started.emit()
+	assert_true(_hud._strip_pills.is_empty())
 
 # --- XP bar ---
 
@@ -77,3 +62,30 @@ func test_score_resets_on_game_started() -> void:
 func test_level_label_updates_on_level_up() -> void:
 	EventBus.player_level_up.emit(3)
 	assert_eq(_hud._level_label.text, "Lvl 3")
+
+# --- Boss HP bar ---
+
+func test_boss_hp_bar_hidden_initially() -> void:
+	assert_false(_hud._boss_hp_bar.visible)
+
+func test_boss_hp_bar_shows_on_health_changed() -> void:
+	EventBus.boss_health_changed.emit(80, 100)
+	assert_true(_hud._boss_hp_bar.visible)
+
+func test_boss_hp_bar_value_updated() -> void:
+	EventBus.boss_health_changed.emit(60, 100)
+	assert_eq(_hud._boss_hp_bar.value, 60.0)
+
+func test_boss_hp_bar_max_updated() -> void:
+	EventBus.boss_health_changed.emit(50, 150)
+	assert_eq(_hud._boss_hp_bar.max_value, 150.0)
+
+func test_boss_hp_bar_hides_on_boss_defeated() -> void:
+	EventBus.boss_health_changed.emit(50, 100)
+	EventBus.boss_defeated.emit(1)
+	assert_false(_hud._boss_hp_bar.visible)
+
+func test_boss_hp_bar_hides_on_game_started() -> void:
+	EventBus.boss_health_changed.emit(50, 100)
+	EventBus.game_started.emit()
+	assert_false(_hud._boss_hp_bar.visible)

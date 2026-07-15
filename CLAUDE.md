@@ -8,12 +8,13 @@ Guía autoritativa de desarrollo para Claude Code. **Lee este archivo completo a
 
 | Capa | Tecnología |
 |---|---|
-| Motor | Godot 4.x (GDScript con tipado estático) |
-| Testing | GUT (Godot Unit Testing) v7.x |
-| Lint/Format | gdtoolkit (`gdlint` / `gdformat`) vía pip |
+| Motor | Godot 4.7 (GDScript con tipado estático) |
+| Testing | GUT (Godot Unit Testing) v9.7.1 — 185 tests |
+| Lint/Format | gdtoolkit (`gdlint` / `gdformat`) vía pipx |
 | Plataforma | iOS 14+ / Android API 24+ |
+| CI/CD | GitHub Actions → APK en Dropbox (`/prod/` o `/stg/`) |
 | Arte | Pixel art / Vector toony |
-| Control | Touch & Drag horizontal (1 dedo) |
+| Control | Touch drag relativo (1 dedo) |
 
 ---
 
@@ -53,17 +54,19 @@ godot --headless --export-release "Android" builds/release/GuacBlaster.apk
 ```
 src/
 ├── core/                   # Singletons / Autoloads globales
+│   ├── Constants.gd        # Constantes tipadas (cargado PRIMERO)
 │   ├── EventBus.gd         # Bus de señales (TODA comunicación cross-feature)
 │   ├── GameManager.gd      # Máquina de estados de partida
-│   ├── Constants.gd        # Constantes tipadas (sin magic numbers)
 │   └── SaveManager.gd      # Persistencia JSON (user://)
 ├── features/
 │   ├── player/             # Input, movimiento, vida del jugador
 │   ├── projectiles/        # Proyectiles y sus variantes
 │   ├── enemies/            # EnemyBase + cada subtipo + Spawner
-│   ├── powerups/           # Sistema de power-ups y UI de selección
+│   ├── powerups/           # PowerUpManager, PowerUpDrop, PowerUpDropper
+│   ├── gems/               # XPGem, GemSpawner
 │   ├── meta/               # ProgressionManager, árbol de mejoras
 │   ├── audio/              # AudioManager + HapticManager
+│   ├── vfx/                # ParticleSpawner
 │   └── ui/                 # HUD, pantallas, menús
 ├── scenes/                 # Escenas raíz (.tscn)
 └── shared/                 # Recursos compartidos (.tres, temas UI)
@@ -148,6 +151,9 @@ func _exit_tree() -> void:
 12. **`change_scene_to_file()` en `_ready()`** → usar `.call_deferred()` siempre.
 13. **Herencia por class_name** → si `B extends A` y `A` no es autoload, usar `extends "res://ruta/A.gd"` (path-based) para forzar la carga. `extends NombreDeClase` falla en headless si A no estaba cargado previamente.
 14. **Preload-consts** → deben ser PascalCase (`const EnemyBasicGd := preload(...)`) — gdlint regla `load-constant-name`.
+15. **`class_name` como tipo en otro script** → falla en parse si la clase no estaba previamente cargada. Usar la clase base (`Area2D`, `Node2D`, etc.) como tipo y `set(&"prop", val)` para asignar propiedades. Ver `PowerUpDropper.gd`.
+16. **`for id: Variant in dict.keys()`** → tipo `Variant` no válido en for-loop en GDScript 4. Usar índice entero: `for i: int in arr.size()` + `arr[i]`, o dejar sin tipo.
+17. **`add_child()` desde callback de física** → usar `call_deferred(&"add_child", node)` siempre que la llamada se origine en `_on_body_entered`, `_on_area_entered` o similares.
 
 ---
 
@@ -174,11 +180,13 @@ func _exit_tree() -> void:
 ### 🎮 Game Designer / Polish Agent
 **Cuándo activa:** Features de gameplay, power-ups, enemigos, feedback.  
 **Checklist:**
+- [ ] **Referencia competitiva**: ¿Se buscó cómo resuelven esta mecánica los juegos top del género actual? (WebSearch con género + mecánica antes de decidir valores o diseño — no asumir genre, leer CLAUDE.md primero)
 - [ ] ¿Los valores vienen de `Constants.gd`?
 - [ ] ¿El comportamiento respeta exactamente el GDD §3 (power-ups) y §4 (enemigos)?
 - [ ] ¿Hay feedback visual (partículas/tween) Y auditivo (SFX) en cada interacción?
 - [ ] ¿El feedback háptico está implementado para disparo y eventos críticos?
 - [ ] ¿La sesión puede completarse en 2–5 minutos?
+- [ ] ¿La feature se alinea con patrones probados del género o introduce diferenciación justificada?
 
 ---
 
@@ -191,9 +199,41 @@ a) PLAN      — Listar: qué archivos se modifican, qué tests se agregan
 b) IMPL      — Código mínimo y tipado (sin over-engineering)
 c) VALIDATE  — Ejecutar: gdlint src/ && tests GUT headless → BUILD GREEN
 d) SANITY    — Verificar que features existentes no se rompieron
+e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblaster.md)
 ```
 
-**Una tarea NO está terminada hasta que el paso (c) pase en verde.**
+**Una tarea NO está terminada hasta que los pasos (c) y (e) estén completos.**  
+**El paso (e) es OBLIGATORIO y debe ejecutarse SIN que el usuario lo pida.**
+
+---
+
+## Estado Actual del Juego
+
+### Mecánicas implementadas
+- **Victoria:** matar al jefe (NO timer). Timer en HUD aparece solo en los últimos 90s.
+- **Derrota:** jugador pierde todos los corazones.
+- **Controles:** drag con ancla — `InputEventScreenTouch` registra `_drag_anchor_x` y `_drag_anchor_player_x`; `InputEventScreenDrag` aplica `_target_x = anchor_player + (finger_x - anchor_x) × sensitivity`. El jugador NO salta al primer toque.
+- **Level-up:** el juego NO se pausa. Caen 3 power-up drops; al tocar uno, los otros desaparecen.
+- **Power-ups:** temporales (**30s**), stackables, con timers independientes por stack.
+- **Oro:** `score × 0.1 × gold_mult + hearts_left × 25` al ganar.
+- **Paleta de fondo:** rota por victorias (`victories % 5`), no por sesiones totales.
+
+### Señales clave en EventBus
+| Señal | Emisor | Receptores principales |
+|---|---|---|
+| `powerup_selected(id)` | PowerUpDrop | PowerUpManager, PowerUpDropper |
+| `powerup_stack_changed(id, count)` | PowerUpManager | Player, ProjectileSpawner, XPGem, HUD |
+| `powerup_expired(id)` | PowerUpManager | (informativa) |
+| `player_shield_changed(hits)` | Player | HUD |
+| `powerup_selection_requested(opts)` | GameManager | PowerUpDropper |
+| `boss_health_changed(current, maximum)` | EnemyBoss | HUD |
+| `boss_phase_changed(phase)` | EnemyBoss | HUD (flash "¡FASE 2!"), HapticManager |
+| `elite_powerup_dropped(position, powerup_id)` | EnemyElite | PowerUpDropper |
+| `heart_collected` | HeartDrop | Player, HapticManager |
+| `achievement_unlocked(id)` | AchievementManager | (informativa — UI puede escuchar) |
+| `mission_completed(id, reward)` | DailyMissionsManager | (informativa — UI puede escuchar) |
+| `mission_progress(id, current, target)` | DailyMissionsManager | (informativa) |
+| `weekly_challenge_completed(id)` | WeeklyChallengeManager | HUD (toast morado) |
 
 ---
 
@@ -205,40 +245,142 @@ d) SANITY    — Verificar que features existentes no se rompieron
 | HP | 3 corazones | +1 corazón/nivel |
 | Velocidad | 200 px/s | +3%/nivel |
 | Daño base | 10 | +5%/nivel |
-| Autofire interval | 0.4s | reducible con Fuego Rápido |
+| Autofire interval | 0.4s | ÷2 por stack de Fuego Rápido (mín 0.05s) |
+| Sensibilidad swipe | 1.0 (base) | Configurable en Settings (100%–200%). Guardado en SaveManager. |
 
 ### Enemigos
-| Tipo | HP | Comportamiento especial |
-|---|---|---|
-| Burbuja Básica | 1 | Línea recta descendente |
-| Burbuja Tanque | N | Split en 4 básicas al morir |
-| Mosca Nacho | 1 | Zigzag diagonal, rápida |
-| Jefe | Alto | Dispara proyectiles lentos, cada 3 min |
+| Tipo | HP | Disparos para matar (daño base=10) | Comportamiento especial |
+|---|---|---|---|
+| Burbuja Básica | 10 | 1 | Línea recta descendente |
+| Burbuja Tanque | 80 | 8 | Split en 4 básicas al morir |
+| Mosca Nacho | 50 | 5 | Zigzag diagonal, doble tamaño de básica |
+| Élite Dorada | 200 (10×20) | 20 | Drop power-up al morir |
+| Jefe | 400+80×gen | 40+ | Dispara proyectiles, aparece cada 3 min |
 
-### Power-ups (IDs en Constants.POWERUP_POOL)
-| ID | Nombre | Efecto |
-|---|---|---|
-| `triple_shot` | Disparo Triple | +2 disparos diagonales |
-| `super_guac` | Súper-Guac | Proyectiles grandes que penetran 3 enemigos |
-| `rapid_fire` | Fuego Rápido | +25% cadencia |
-| `mole_grenade` | Granada de Mole | AoE cada 5s |
-| `jalapeno_laser` | Láser de Jalapeño | Haz 2s columna entera |
-| `spicy_bounce` | Rebote Picante | Proyectiles rebotan en bordes |
-| `nacho_wall` | Muro de Nachos | Escudo: absorbe 3 impactos |
-| `salsa_magnet` | Imán de Salsa | Atrae gemas de XP automáticamente |
+### Power-ups (IDs en Constants.POWERUP_POOL) — todos temporales **45s**, stackables
+**guac_storm**: streams distribuidos simétricamente. 1 stack=X2 (±20px), 2=X3 (-40/0/+40), …, 5=X6. Triple Shot aplica a todos los streams.
+
+
+| ID | Abrev | Nombre | Efecto por stack |
+|---|---|---|---|
+| `triple_shot` | TS | Disparo Triple | +2 disparos diagonales |
+| `super_guac` | SG | Súper-Guac | Proyectiles penetran 3 enemigos |
+| `rapid_fire` | RF | Fuego Rápido | Cadencia ×2 (apilable) |
+| `mole_grenade` | MG | Granada de Mole | AoE cada 5s automático |
+| `jalapeno_laser` | JL | Láser Jalapeño | Rayo 2s que sigue al jugador |
+| `spicy_bounce` | SB | Rebote Picante | Proyectiles rebotan en bordes |
+| `nacho_wall` | NW | Muro de Nachos | Escudo: absorbe 3 impactos |
+| `salsa_magnet` | SM | Imán de Salsa | Gemas vuelan hacia el jugador |
+| `guac_storm` | GS | Salvo Guac | +1 columna de disparos a ±40×N px |
 
 ### Metagame
-- Moneda: Oro (drop al final de partida + misiones diarias)
-- Árbol de mejoras permanentes: Daño, Velocidad, Vida, Suerte
+- **Moneda:** Oro — score × 0.1 + corazones × 25 (al ganar) / score × 0.1 (al perder)
+- **Upgrades permanentes (6):** Daño, Velocidad, Vida, Suerte, Bono de Oro, Escudo Inicial
+- **Costo:** `50 × 1.8^nivel` — cap nivel 5
+- **Personajes (3):** guac (base/gratis), habanero (200 oro), serrano (300 oro). Modificadores de HP, fire_rate_mult y damage_mult aplicados en `Player._on_game_started()`.
+- **Logros (10):** persistidos en SaveManager. Pantalla en AchievementsScreen.tscn.
+- **Misiones diarias (3/día):** generadas por hash de fecha. Progreso persiste en SaveManager. Recompensa en oro.
 
 ---
 
 ## Autoloads registrados en project.godot
 
+**Orden crítico — Constants debe ir primero:**
+
 | Nombre | Archivo | Rol |
 |---|---|---|
+| `Constants` | `src/core/Constants.gd` | Constantes del juego (cargado primero) |
 | `EventBus` | `src/core/EventBus.gd` | Bus de señales global |
 | `GameManager` | `src/core/GameManager.gd` | Estado de partida |
-| `Constants` | `src/core/Constants.gd` | Constantes del juego |
 | `SaveManager` | `src/core/SaveManager.gd` | Persistencia |
-| `AudioManager` | `src/features/audio/AudioManager.gd` | SFX + Hápticos |
+| `AudioManager` | `src/features/audio/AudioManager.gd` | SFX + Hápticos (disparo, boss) |
+| `HapticManager` | `src/features/audio/HapticManager.gd` | Hápticos orientados a eventos |
+| `AchievementManager` | `src/features/meta/AchievementManager.gd` | Logros persistentes |
+| `DailyMissionsManager` | `src/features/meta/DailyMissionsManager.gd` | Misiones diarias |
+| `WeeklyChallengeManager` | `src/features/meta/WeeklyChallengeManager.gd` | Desafío semanal |
+
+---
+
+## Skills y Agentes Disponibles
+
+### Skills (slash commands)
+
+| Comando | Cuándo usar |
+|---|---|
+| `/validate` | Antes de cualquier commit — corre gdlint + GUT y reporta GREEN/BLOQUEADO |
+| `/feature [nombre]` | Al implementar cualquier feature nueva — guía completa PLAN→IMPL→VALIDATE→SANITY→DOC |
+| `/doc` | Al cerrar cualquier tarea — sincroniza idea-base.md, CLAUDE.md y memorias |
+| `/new-game [gdd.md]` | Para construir un juego nuevo desde cero — autónomo hasta build funcional |
+| `/gen-ai-art` | Generar arte final de un juego con Pollinations.ai (Flux, gratis) — backgrounds, sprites con transparencia, íconos procedurales |
+
+Los skills viven en `.claude/skills/<nombre>/SKILL.md`.
+
+### Agentes sub-agent
+
+| Agente | Cuándo delegar |
+|---|---|
+| `godot-architect` | Code review de arquitectura — detecta violaciones SOLID, acoplamiento directo, anti-patrones |
+| `godot-qa` | Auditoría de tests — identifica cobertura faltante, escribe tests GUT |
+| `game-designer` | Balance review — verifica que los valores numéricos den una buena experiencia |
+
+Los agentes viven en `.claude/agents/<nombre>.md`.
+
+### Hook automático
+
+`.claude/hooks/lint-on-edit.sh` corre `gdlint` en cada archivo `.gd` que se edita o escribe.
+El resultado aparece como `additionalContext` — informativo, no bloquea.
+
+---
+
+## Pendientes Documentados
+
+### Solo código (sin assets externos)
+| Feature | Archivo(s) a crear/modificar | Notas |
+|---|---|---|
+| ~~Settings screen~~ | ✅ Completado | Sensibilidad + sonido on/off + vibración on/off |
+| ~~HapticManager~~ | ✅ Completado | Eventos: damaged, powerup, boss_phase, heart |
+| ~~Logros persistentes~~ | ✅ Completado | 10 logros, AchievementManager autoload + AchievementsScreen |
+| ~~Misiones diarias~~ | ✅ Completado | DailyMissionsManager autoload + DailyMissionsScreen |
+| ~~Personajes alternativos~~ | ✅ Completado | 8 personajes con fire_mode, CharacterSelectScreen, Player carga sprite único por personaje |
+| ~~Mapa de biomas~~ | ✅ Completado | BiomeMapScreen, lock/unlock por victorias |
+| ~~Desafío semanal~~ | ✅ Completado | WeeklyChallengeManager autoload + WeeklyChallengeScreen + 3 desafíos |
+| ~~Toast personaje~~ | ✅ Completado | CharacterSelectScreen + HUD muestran nombre al seleccionar/iniciar |
+| Cuentas de usuario | SDK externo requerido | Facebook/Google/propio |
+| Export release Android | `export_presets.cfg`, keystore secret | Keystore firmado en GitHub Secrets |
+| Export release iOS | Provisioning profile, Apple Dev account | |
+
+### Assets completados con IA
+| Asset | Ruta | Estado | Herramienta |
+|---|---|---|---|
+| 18 fondos de bioma (6 biomas × 3 variantes) | `assets/sprites/backgrounds/bg_N_V.png` | ✅ AI-generated | Pollinations.ai (Flux) 390×844 |
+| Player | `assets/sprites/player.png` | ✅ AI-generated | Pollinations.ai (Flux) 64×64 |
+| 5 enemigos + boss | `assets/sprites/enemy_*.png` | ✅ AI-generated | Pollinations.ai (Flux) |
+| Proyectil, gema, corazón | `assets/sprites/{projectile,gem,heart}.png` | ✅ AI-generated | Pollinations.ai (Flux) |
+| 9 íconos de power-up | `assets/sprites/powerup_icons/*.png` | ✅ Mejorados (procedural) | gen_assets.py rediseñado |
+| 8 íconos de menú principal | `src/features/ui/IconPainter.gd` | ✅ Procedural en _draw() | IconPainter Control |
+| 8 sprites de personaje | `assets/sprites/characters/player_*.png` | ✅ AI-generated | Pollinations.ai (Flux) 64×64 |
+| Boot splash + App icon | `assets/splash.png`, `assets/icon.png` | ✅ Procedural (GuacamoleBit logo) | gen_assets.py |
+| 7 SFX | `assets/audio/*.wav` | ✅ Sintéticos | gen_assets.py |
+
+**Pipeline de regeneración de assets:**
+```bash
+# Regenerar sprites + íconos procedurales (fallback si AI falla)
+python3 tools/gen_assets.py
+
+# Re-generar assets AI (backgrounds + sprites principales)
+/tmp/gb_venv/bin/python3 tools/fetch_ai_assets.py
+# (requiere: python3 -m venv /tmp/gb_venv && /tmp/gb_venv/bin/pip install Pillow)
+
+# Re-descargar sprites de personaje únicamente
+/tmp/gb_venv/bin/python3 tools/fetch_character_sprites.py
+# Después: godot --headless -e --quit  (regenerar .import)
+
+# Re-descargar solo biomas 0 y 1 (si fueron sobrescritos)
+/tmp/gb_venv/bin/python3 tools/redownload_missing_bgs.py
+```
+
+### Assets aún pendientes
+| Asset | Notas |
+|---|---|
+| 7 SFX en formato OGG | Actualmente WAV sintéticos; Godot puede importar WAV, no bloquea |
+| Audio de mejor calidad | Música loop y SFX mejorados requieren compositor o banco de sonidos libre |

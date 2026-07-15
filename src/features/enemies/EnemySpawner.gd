@@ -10,22 +10,27 @@ extends Node2D
 @export var tank_scene: PackedScene
 @export var zigzag_scene: PackedScene
 @export var boss_scene: PackedScene
+@export var elite_scene: PackedScene
 
 var _active: bool = false
 var _spawn_timer: float = 0.0
 var _spawn_interval: float = Constants.SPAWNER_INITIAL_INTERVAL
+var _wave_size: int = 1
 var _elapsed: float = 0.0
 var _boss_timer: float = Constants.BOSS_SPAWN_INTERVAL
 var _boss_alive: bool = false
 var _boss_generation: int = 0
 var _boss_warning_emitted: bool = false
+var _challenge_spawn_mult: float = 1.0
+var _challenge_elite_mult: float = 1.0
+var _biome_spawn_mult: float = 1.0
+var _biome_elite_mult: float = 1.0
+var _biome_speed_mult: float = 1.0
 
 func _ready() -> void:
-	EventBus.game_started.connect(func(): _active = true)
+	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(func(_s: int, _d: float): _active = false)
 	EventBus.game_won.connect(func(_s: int, _d: float): _active = false)
-	EventBus.player_level_up.connect(func(_lvl: int): _active = false)
-	EventBus.powerup_selected.connect(func(_id: StringName): _active = true)
 	EventBus.enemy_split_requested.connect(_on_enemy_split_requested)
 	EventBus.boss_defeated.connect(func(_id: int): _boss_alive = false)
 
@@ -47,10 +52,33 @@ func _process(delta: float) -> void:
 		_boss_warning_emitted = false
 		_spawn_boss()
 
+func _on_game_started() -> void:
+	_active = true
+	_elapsed = 0.0
+	_spawn_timer = 0.0
+	_spawn_interval = Constants.SPAWNER_INITIAL_INTERVAL
+	_wave_size = 1
+	_boss_timer = Constants.BOSS_SPAWN_INTERVAL
+	_boss_alive = false
+	_boss_warning_emitted = false
+	_challenge_spawn_mult = WeeklyChallengeManager.get_spawn_rate_mult()
+	_challenge_elite_mult = WeeklyChallengeManager.get_elite_chance_mult()
+	var biome: int = GameManager.get_current_biome()
+	_biome_spawn_mult = Constants.BIOME_SPAWN_MULT[biome]
+	_biome_elite_mult = Constants.BIOME_ELITE_MULT[biome]
+	_biome_speed_mult = Constants.BIOME_SPEED_MULT[biome]
+
 func _spawn_wave() -> void:
-	_instantiate_at_random_x(_pick_scene())
+	for _i: int in _wave_size:
+		_instantiate_at_random_x(_pick_scene())
 
 func _pick_scene() -> PackedScene:
+	var elite_ready: bool = elite_scene != null and _elapsed >= Constants.SPAWNER_ELITE_UNLOCK_TIME
+	var elite_chance: float = (
+		Constants.SPAWNER_ELITE_CHANCE * _challenge_elite_mult * _biome_elite_mult
+	)
+	if elite_ready and randf() < minf(1.0, elite_chance):
+		return elite_scene
 	if _elapsed >= Constants.SPAWNER_TANK_UNLOCK_TIME and randf() < Constants.SPAWNER_TANK_CHANCE:
 		return tank_scene
 	if _elapsed >= Constants.SPAWNER_ZIGZAG_UNLOCK_TIME and randf() < Constants.SPAWNER_ZIGZAG_CHANCE:
@@ -64,6 +92,10 @@ func _instantiate_at_random_x(scene: PackedScene) -> void:
 	var enemy: Node2D = scene.instantiate()
 	var vp_width: float = get_viewport_rect().size.x
 	enemy.position = Vector2(randf_range(30.0, vp_width - 30.0), -30.0)
+	enemy.set(&"_speed_mult", _biome_speed_mult)
+	var minutes: float = _elapsed / 60.0
+	var hp_mult: float = 1.0 + minutes * Constants.ENEMY_HP_SCALE_PER_MIN
+	enemy.set(&"_hp_time_mult", hp_mult)
 	get_parent().add_child(enemy)
 
 func _update_difficulty() -> void:
@@ -71,13 +103,14 @@ func _update_difficulty() -> void:
 	_spawn_interval = maxf(
 		Constants.SPAWNER_MIN_INTERVAL,
 		Constants.SPAWNER_INITIAL_INTERVAL - minutes * Constants.SPAWNER_INTERVAL_DECREASE_PER_MIN
-	)
+	) * _challenge_spawn_mult * _biome_spawn_mult
+	_wave_size = mini(1 + int(_elapsed / Constants.SPAWNER_WAVE_RAMP_INTERVAL), 3)
 
 func _spawn_boss() -> void:
 	if boss_scene == null:
 		return
 	var boss: Node2D = boss_scene.instantiate()
-	boss.set(&"_generation", _boss_generation)
+	boss.set(&"_generation", SaveManager.get_victories())
 	var vp_width: float = get_viewport_rect().size.x
 	boss.position = Vector2(vp_width * 0.5, 60.0)
 	get_parent().add_child(boss)

@@ -51,3 +51,45 @@ func test_generation_scales_hp_correctly() -> void:
 	add_child_autofree(boss_gen3)
 	var expected_hp: int = Constants.BOSS_HP_BASE + 3 * Constants.BOSS_HP_PER_GENERATION
 	assert_eq(boss_gen3.get_health(), expected_hp)
+
+func test_take_damage_emits_boss_health_changed() -> void:
+	watch_signals(EventBus)
+	_boss.take_damage(10)
+	assert_signal_emitted(EventBus, "boss_health_changed")
+
+func test_boss_health_changed_carries_correct_current() -> void:
+	watch_signals(EventBus)
+	_boss.take_damage(10)
+	assert_signal_emitted_with_parameters(
+		EventBus, "boss_health_changed",
+		[Constants.BOSS_HP_BASE - 10, Constants.BOSS_HP_BASE]
+	)
+
+func test_boss_starts_in_phase_one() -> void:
+	assert_eq(_boss.get(&"_phase"), 1)
+
+func test_boss_phase_two_triggered_at_half_hp() -> void:
+	var half: int = Constants.BOSS_HP_BASE / 2
+	_boss.take_damage(half)
+	assert_eq(_boss.get(&"_phase"), 2)
+
+func test_boss_phase_two_emits_boss_phase_changed() -> void:
+	watch_signals(EventBus)
+	var half: int = Constants.BOSS_HP_BASE / 2
+	_boss.take_damage(half)
+	assert_signal_emitted(EventBus, "boss_phase_changed")
+
+func test_boss_phase_two_signal_carries_phase_number() -> void:
+	watch_signals(EventBus)
+	var half: int = Constants.BOSS_HP_BASE / 2
+	_boss.take_damage(half)
+	assert_signal_emitted_with_parameters(EventBus, "boss_phase_changed", [2])
+
+func test_boss_no_phase_change_on_small_damage() -> void:
+	_boss.take_damage(1)
+	assert_eq(_boss.get(&"_phase"), 1)
+
+func test_boss_no_phase_two_on_lethal_hit() -> void:
+	watch_signals(EventBus)
+	_boss.take_damage(Constants.BOSS_HP_BASE)
+	assert_signal_not_emitted(EventBus, "boss_phase_changed")

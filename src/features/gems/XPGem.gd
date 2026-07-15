@@ -14,20 +14,26 @@ func _ready() -> void:
 	collision_mask = 1
 	var shape: CollisionShape2D = CollisionShape2D.new()
 	var circle: CircleShape2D = CircleShape2D.new()
-	circle.radius = 10.0
+	circle.radius = 20.0
 	shape.shape = circle
 	add_child(shape)
-	var diamond: Polygon2D = Polygon2D.new()
-	diamond.color = Color(0.9, 0.85, 0.1)
-	diamond.polygon = PackedVector2Array([
-		Vector2(0.0, -10.0),
-		Vector2(7.0, 0.0),
-		Vector2(0.0, 10.0),
-		Vector2(-7.0, 0.0),
-	])
-	add_child(diamond)
+	var visual: Node2D
+	const GEM_TEX := "res://assets/sprites/gem.png"
+	if ResourceLoader.exists(GEM_TEX):
+		var sprite := Sprite2D.new()
+		sprite.texture = load(GEM_TEX) as Texture2D
+		visual = sprite
+	else:
+		var diamond := Polygon2D.new()
+		diamond.color = Color(0.9, 0.85, 0.1)
+		diamond.polygon = PackedVector2Array([
+			Vector2(0.0, -20.0), Vector2(14.0, 0.0),
+			Vector2(0.0, 20.0), Vector2(-14.0, 0.0),
+		])
+		visual = diamond
+	add_child(visual)
 	body_entered.connect(_on_body_entered)
-	EventBus.powerup_selected.connect(_on_powerup_selected)
+	EventBus.powerup_stack_changed.connect(_on_powerup_stack_changed)
 	EventBus.game_over.connect(func(_s: int, _d: float): queue_free())
 	EventBus.game_won.connect(func(_s: int, _d: float): queue_free())
 
@@ -80,6 +86,6 @@ func _spawn_collect_burst() -> void:
 	p.finished.connect(func(): p.queue_free())
 	get_parent().call_deferred(&"add_child", p)
 
-func _on_powerup_selected(powerup_id: StringName) -> void:
+func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 	if powerup_id == &"salsa_magnet":
-		XPGem.magnet_active = true
+		XPGem.magnet_active = count > 0

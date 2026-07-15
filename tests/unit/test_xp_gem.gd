@@ -34,9 +34,14 @@ func test_magnet_not_active_by_default() -> void:
 	assert_false(XPGem.magnet_active)
 
 func test_salsa_magnet_activates_magnet() -> void:
-	EventBus.powerup_selected.emit(&"salsa_magnet")
+	EventBus.powerup_stack_changed.emit(&"salsa_magnet", 1)
 	assert_true(XPGem.magnet_active)
 
+func test_salsa_magnet_zero_deactivates_magnet() -> void:
+	EventBus.powerup_stack_changed.emit(&"salsa_magnet", 1)
+	EventBus.powerup_stack_changed.emit(&"salsa_magnet", 0)
+	assert_false(XPGem.magnet_active)
+
 func test_other_powerup_does_not_activate_magnet() -> void:
-	EventBus.powerup_selected.emit(&"rapid_fire")
+	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
 	assert_false(XPGem.magnet_active)

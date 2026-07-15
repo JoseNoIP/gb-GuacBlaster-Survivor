@@ -89,11 +89,25 @@ func _build_ui() -> void:
 	root.add_child(bottom_pad)
 
 	var back_btn: Button = Button.new()
-	back_btn.text = "VOLVER AL MENÚ"
-	back_btn.custom_minimum_size = Vector2(200.0, 46.0)
-	back_btn.add_theme_font_size_override(&"font_size", 17)
+	back_btn.custom_minimum_size = Vector2(160.0, 44.0)
 	back_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back_btn.pressed.connect(_on_back_pressed)
+	var back_hbox: HBoxContainer = HBoxContainer.new()
+	back_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	back_hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	back_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back_btn.add_child(back_hbox)
+	var back_icon: IconPainter = IconPainter.new()
+	back_icon.icon_id = &"back"
+	back_icon.icon_color = Color(1.0, 1.0, 1.0, 0.9)
+	back_icon.custom_minimum_size = Vector2(20.0, 20.0)
+	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back_hbox.add_child(back_icon)
+	var back_lbl: Label = Label.new()
+	back_lbl.text = " VOLVER"
+	back_lbl.add_theme_font_size_override(&"font_size", 17)
+	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back_hbox.add_child(back_lbl)
 	root.add_child(back_btn)
 
 	var final_pad: Control = Control.new()
@@ -198,6 +212,10 @@ func _on_buy_pressed(upgrade_id: StringName) -> void:
 		_refresh_gold_label()
 		for def: Dictionary in UPGRADE_DEFS:
 			_refresh_card(def.id as StringName)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back_pressed()
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred(MAIN_MENU_SCENE)

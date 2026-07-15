@@ -1,6 +1,9 @@
 class_name BossProjectile
 extends Area2D
-## Slow downward projectile fired by the boss. Damages the player on contact.
+## Slow projectile fired by the boss. Phase 1: straight down. Phase 2: directional spread.
+## Set _velocity before adding to tree to override the default downward direction.
+
+var _velocity: Vector2 = Vector2(0.0, Constants.BOSS_PROJECTILE_SPEED)
 
 func _ready() -> void:
 	collision_layer = 8
@@ -18,8 +21,10 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func _process(delta: float) -> void:
-	position.y += Constants.BOSS_PROJECTILE_SPEED * delta
-	if position.y > get_viewport_rect().size.y + 20.0:
+	position += _velocity * delta
+	var vp: Rect2 = get_viewport_rect()
+	if (position.y > vp.size.y + 40.0 or position.y < -40.0
+			or position.x < -40.0 or position.x > vp.size.x + 40.0):
 		queue_free()
 
 func _on_body_entered(body: Node2D) -> void:

@@ -22,18 +22,15 @@ func test_player_died_transitions_to_game_over() -> void:
 	assert_eq(GameManager.get_state(), GameManager.GameState.GAME_OVER)
 
 func test_xp_below_threshold_does_not_level_up() -> void:
-	GameManager._on_xp_collected(50, 50, 100)
+	var below: int = Constants.XP_BASE_REQUIRED - 1
+	GameManager._on_xp_collected(below, below, Constants.XP_BASE_REQUIRED)
 	assert_eq(GameManager.get_current_level(), 0)
 	assert_eq(GameManager.get_state(), GameManager.GameState.PLAYING)
 
 func test_xp_at_threshold_triggers_level_up() -> void:
-	GameManager._on_xp_collected(100, 100, 100)
+	var req: int = Constants.XP_BASE_REQUIRED
+	GameManager._on_xp_collected(req, req, req)
 	assert_eq(GameManager.get_current_level(), 1)
-	assert_eq(GameManager.get_state(), GameManager.GameState.LEVEL_UP)
-
-func test_powerup_selected_resumes_playing() -> void:
-	GameManager._on_xp_collected(100, 100, 100)
-	GameManager._on_powerup_selected(&"rapid_fire")
 	assert_eq(GameManager.get_state(), GameManager.GameState.PLAYING)
 
 func test_pick_powerup_options_returns_correct_count() -> void:

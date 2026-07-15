@@ -14,8 +14,13 @@ config/name="GuacBlaster Survivor"
 config/description="Hyper-casual survivor shooter by GuacamoleBit"
 config/version="0.1.0"
 run/main_scene="res://src/scenes/Main.tscn"
+config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "Mobile")
-config/icon="res://assets/icon.svg"
+config/icon="res://assets/icon.png"
+boot_splash/image="res://assets/splash.png"
+boot_splash/bg_color=Color(0.031, 0.051, 0.031, 1)
+boot_splash/fullsize=false
+boot_splash/use_filter=false
 
 [autoload]
 
@@ -24,6 +29,10 @@ EventBus="*res://src/core/EventBus.gd"
 GameManager="*res://src/core/GameManager.gd"
 SaveManager="*res://src/core/SaveManager.gd"
 AudioManager="*res://src/features/audio/AudioManager.gd"
+HapticManager="*res://src/features/audio/HapticManager.gd"
+AchievementManager="*res://src/features/meta/AchievementManager.gd"
+DailyMissionsManager="*res://src/features/meta/DailyMissionsManager.gd"
+WeeklyChallengeManager="*res://src/features/meta/WeeklyChallengeManager.gd"
 
 [display]
 
@@ -31,8 +40,10 @@ window/size/viewport_width=390
 window/size/viewport_height=844
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
+window/handheld/orientation=1
 
 [rendering]
 
 renderer/rendering_method="mobile"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

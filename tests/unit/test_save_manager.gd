@@ -11,6 +11,7 @@ func before_each() -> void:
 		},
 		"best_score": 0,
 		"total_sessions": 0,
+		"victories": 0,
 	}
 
 func test_get_gold_returns_zero_initially() -> void:
@@ -40,6 +41,18 @@ func test_game_over_does_not_lower_best_score() -> void:
 	SaveManager._on_game_over(500, 90.0)
 	SaveManager._on_game_over(200, 60.0)
 	assert_eq(SaveManager.get_best_score(), 500)
+
+func test_game_won_increments_victories() -> void:
+	SaveManager._on_game_won(100, 60.0)
+	assert_eq(SaveManager.get_victories(), 1)
+
+func test_game_over_does_not_increment_victories() -> void:
+	SaveManager._on_game_over(100, 60.0)
+	assert_eq(SaveManager.get_victories(), 0)
+
+func test_game_won_also_increments_total_sessions() -> void:
+	SaveManager._on_game_won(100, 60.0)
+	assert_eq(SaveManager.get_total_sessions(), 1)
 
 func test_purchase_upgrade_increments_level() -> void:
 	SaveManager._data["gold"] = 1000
@@ -86,3 +99,48 @@ func test_cost_grows_exponentially() -> void:
 	SaveManager.purchase_upgrade(&"damage")
 	var cost_lvl2: int = SaveManager._data["gold"]
 	assert_gt(100000 - cost_lvl2, 100000 - cost_lvl1)
+
+# --- Swipe sensitivity ---
+
+func test_swipe_sensitivity_defaults_to_one() -> void:
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 1.0, 0.001)
+
+func test_set_swipe_sensitivity_stores_value() -> void:
+	SaveManager.set_swipe_sensitivity(1.4)
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 1.4, 0.001)
+
+func test_set_swipe_sensitivity_clamps_below_one() -> void:
+	SaveManager.set_swipe_sensitivity(0.5)
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 1.0, 0.001)
+
+func test_set_swipe_sensitivity_clamps_above_two() -> void:
+	SaveManager.set_swipe_sensitivity(5.0)
+	assert_almost_eq(SaveManager.get_swipe_sensitivity(), 2.0, 0.001)
+
+# --- Sound ---
+
+func test_sound_enabled_defaults_to_true() -> void:
+	assert_true(SaveManager.get_sound_enabled())
+
+func test_set_sound_enabled_stores_false() -> void:
+	SaveManager.set_sound_enabled(false)
+	assert_false(SaveManager.get_sound_enabled())
+
+func test_set_sound_enabled_stores_true() -> void:
+	SaveManager.set_sound_enabled(false)
+	SaveManager.set_sound_enabled(true)
+	assert_true(SaveManager.get_sound_enabled())
+
+# --- Vibration ---
+
+func test_vibration_enabled_defaults_to_true() -> void:
+	assert_true(SaveManager.get_vibration_enabled())
+
+func test_set_vibration_enabled_stores_false() -> void:
+	SaveManager.set_vibration_enabled(false)
+	assert_false(SaveManager.get_vibration_enabled())
+
+func test_set_vibration_enabled_stores_true() -> void:
+	SaveManager.set_vibration_enabled(false)
+	SaveManager.set_vibration_enabled(true)
+	assert_true(SaveManager.get_vibration_enabled())
