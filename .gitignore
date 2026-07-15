@@ -14,6 +14,9 @@ mono/
 # Exported builds
 builds/
 
+# Gradle build template (generado en CI desde export templates, no commitear)
+android/
+
 # Python (gdtoolkit)
 __pycache__/
 *.pyc
