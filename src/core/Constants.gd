@@ -54,7 +54,7 @@ const BACKGROUND_PALETTE: Array = [
 	Color(0.22, 0.02, 0.08),  # luna sangre / desierto final (mundo 6)
 ]
 const BOSS_TIMER_SHOW_REMAINING: float = 90.0
-const BOSS_HP_BASE: int = 400
+const BOSS_HP_BASE: int = 300
 const BOSS_HP_PER_GENERATION: int = 80
 const BOSS_SPEED: float = 60.0
 const BOSS_XP: int = 100
@@ -70,12 +70,13 @@ const BOSS_PHASE2_SPREAD_COUNT: int = 3
 const BOSS_PHASE2_SPREAD_ANGLE: float = 20.0
 
 # --- Enemy HP time scaling ---
-const ENEMY_HP_SCALE_PER_MIN: float = 0.4
+const ENEMY_HP_SCALE_PER_MIN: float = 0.25
 
 # --- Spawner ---
 const SPAWNER_INITIAL_INTERVAL: float = 0.8
 const SPAWNER_MIN_INTERVAL: float = 0.2
 const SPAWNER_INTERVAL_DECREASE_PER_MIN: float = 0.1
+const SPAWNER_WAVE_RAMP_INTERVAL: float = 90.0
 const SPAWNER_TANK_UNLOCK_TIME: float = 60.0
 const SPAWNER_ZIGZAG_UNLOCK_TIME: float = 30.0
 const SPAWNER_TANK_CHANCE: float = 0.15

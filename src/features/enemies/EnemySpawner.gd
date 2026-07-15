@@ -104,7 +104,7 @@ func _update_difficulty() -> void:
 		Constants.SPAWNER_MIN_INTERVAL,
 		Constants.SPAWNER_INITIAL_INTERVAL - minutes * Constants.SPAWNER_INTERVAL_DECREASE_PER_MIN
 	) * _challenge_spawn_mult * _biome_spawn_mult
-	_wave_size = mini(1 + int(_elapsed / 60.0), 3)
+	_wave_size = mini(1 + int(_elapsed / Constants.SPAWNER_WAVE_RAMP_INTERVAL), 3)
 
 func _spawn_boss() -> void:
 	if boss_scene == null:
