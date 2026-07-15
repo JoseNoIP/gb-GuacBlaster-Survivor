@@ -113,14 +113,16 @@ jobs:
           mkdir -p android/build/assetPackInstallTime/src/main/assets
 
           cd android/build
-          # export_package_name es la Gradle property que config.gradle usa para
-          # el applicationId. Sin ella el default es "com.godot.game".
+          # Propiedades de config.gradle (Godot 4.7):
+          #   export_package_name  → applicationId
+          #   perform_signing=true → activa signingConfig release (default: false)
+          #   release_keystore_*   → keystore path / password / alias
           ./gradlew bundleRelease \
             "-Pexport_package_name=${{ env.PACKAGE_NAME }}" \
-            "-Pandroid.injected.signing.store.file=/tmp/guacblaster.keystore" \
-            "-Pandroid.injected.signing.store.password=$KEYSTORE_PASS" \
-            "-Pandroid.injected.signing.key.alias=$KEYSTORE_ALIAS" \
-            "-Pandroid.injected.signing.key.password=$KEYSTORE_PASS"
+            "-Pperform_signing=true" \
+            "-Prelease_keystore_file=/tmp/guacblaster.keystore" \
+            "-Prelease_keystore_password=$KEYSTORE_PASS" \
+            "-Prelease_keystore_alias=$KEYSTORE_ALIAS"
 
           AAB=$(find . -name "*.aab" -path "*/standardRelease/*" | head -1)
           # fallback: cualquier aab fuera de intermediates
