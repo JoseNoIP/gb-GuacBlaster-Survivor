@@ -8,3 +8,8 @@ func _initialize() -> void:
 
 func _move(_delta: float) -> void:
 	velocity = Vector2(0.0, Constants.ENEMY_BASIC_SPEED)
+
+func on_player_contact(player: Node2D) -> void:
+	if player.has_method(&"take_damage"):
+		player.call(&"take_damage", 1)
+	_contact_die()

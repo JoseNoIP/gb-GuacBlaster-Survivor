@@ -118,11 +118,14 @@ func _update_shield(value: int) -> void:
 func _on_enemy_contact(body: Node2D) -> void:
 	if GameManager.get_state() != GameManager.GameState.PLAYING:
 		return
-	if _invincibility_timer > 0.0:
-		return
 	if not body.is_in_group(&"enemies"):
 		return
-	take_damage(1)
+	if _invincibility_timer > 0.0:
+		return
+	if body.has_method(&"on_player_contact"):
+		body.call(&"on_player_contact", self)
+	else:
+		take_damage(1)
 	_invincibility_timer = Constants.PLAYER_CONTACT_INVINCIBILITY
 
 func _on_game_started() -> void:

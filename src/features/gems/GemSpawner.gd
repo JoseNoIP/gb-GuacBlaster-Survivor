@@ -9,6 +9,8 @@ func _ready() -> void:
 	EventBus.game_started.connect(func() -> void: XPGem.magnet_active = false)
 
 func _on_enemy_destroyed(_enemy_id: int, spawn_pos: Vector2, xp_value: int) -> void:
+	if xp_value <= 0:
+		return
 	var count: int = _gem_count(xp_value)
 	var per_gem: int = maxi(1, xp_value / count)
 	for i: int in count:

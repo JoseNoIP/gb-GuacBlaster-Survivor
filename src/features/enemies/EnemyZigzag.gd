@@ -15,3 +15,7 @@ func _move(delta: float) -> void:
 		* Constants.ENEMY_ZIGZAG_AMPLITUDE
 	)
 	velocity = Vector2(h_vel, Constants.ENEMY_ZIGZAG_SPEED)
+
+func on_player_contact(player: Node2D) -> void:
+	if player.has_method(&"take_damage"):
+		player.call(&"take_damage", 1)

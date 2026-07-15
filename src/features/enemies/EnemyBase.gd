@@ -60,5 +60,9 @@ func _die() -> void:
 	EventBus.enemy_destroyed.emit(get_instance_id(), global_position, _xp_value)
 	queue_free()
 
+func _contact_die() -> void:
+	EventBus.enemy_destroyed.emit(get_instance_id(), global_position, 0)
+	queue_free()
+
 func _on_screen_exited() -> void:
 	queue_free()
