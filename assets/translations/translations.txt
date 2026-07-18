@@ -40,6 +40,19 @@ BOSS_WARNING,¡JEFE EN CAMINO!,BOSS INCOMING!,CHEFE A CAMINHO!,PATRON EN APPROCH
 PAUSE_WARNING,Si sales ahora[BR]perderás el avance[BR]de la partida.,If you leave now[BR]you'll lose your progress.,Se sair agora[BR]perderá o progresso[BR]da partida.,Quitter fera perdre[BR]votre progression.
 TUTORIAL_HINT,Arrastra con el dedo[BR]para moverte,Drag to move,Arraste para mover,Glissez pour bouger
 TUTORIAL_TAP,Toca para continuar,Tap to continue,Toque para continuar,Appuyez pour continuer
+TUTORIAL_WELCOME_TITLE,¡Bienvenido a GuacBlaster!,Welcome to GuacBlaster!,Bem-vindo ao GuacBlaster!,Bienvenue dans GuacBlaster !
+TUTORIAL_WELCOME_HINT,Te guiaremos en tu primera partida,We'll guide you through your first match,Vamos guiá-lo na sua primeira partida,Nous vous guiderons dans votre première partie
+TUTORIAL_BTN_START,¡EMPEZAR!,START!,COMEÇAR!,COMMENCER !
+TUTORIAL_MOVE_TITLE,Muévete,Move,Mova-se,Déplacez-vous
+TUTORIAL_MOVE_HINT,Arrastra el dedo para mover la nave,Drag your finger to move the ship,Arraste o dedo para mover a nave,Faites glisser pour déplacer le vaisseau
+TUTORIAL_SHOOT_TITLE,¡Dispara!,Shoot!,Atire!,Tirez !
+TUTORIAL_SHOOT_HINT,La nave dispara sola. ¡Elimina al enemigo!,The ship fires automatically. Destroy the enemy!,A nave atira sozinha. Elimine o inimigo!,Le vaisseau tire seul. Éliminez l'ennemi !
+TUTORIAL_COLLECT_TITLE,Recoge gemas,Collect gems,Colete gemas,Collectez des gemmes
+TUTORIAL_COLLECT_HINT,Las gemas te dan experiencia para subir de nivel,Gems give you XP to level up,As gemas dão XP para subir de nível,Les gemmes donnent de l'XP pour progresser
+TUTORIAL_LEVELUP_TITLE,¡Sube de nivel!,Level up!,Subiu de nível!,Niveau supérieur !
+TUTORIAL_LEVELUP_HINT,Elige un power-up para mejorar tu nave,Choose a power-up to upgrade your ship,Escolha um power-up para melhorar a nave,Choisissez un power-up pour améliorer votre vaisseau
+TUTORIAL_DONE_TITLE,¡Estás listo!,You're ready!,Você está pronto!,Vous êtes prêt !
+TUTORIAL_DONE_HINT,Ya sabes todo lo que necesitas. ¡A jugar!,You know everything you need. Let's play!,Você já sabe tudo que precisa. Vamos jogar!,Vous savez tout ce qu'il faut. Jouons !
 SETTINGS_SENSITIVITY,SENSIBILIDAD DE CONTROL,CONTROL SENSITIVITY,SENSIBILIDADE DE CONTROLE,SENSIBILITÉ
 SETTINGS_SENS_HINT,100% = base  ·  200% = doble velocidad,100% = base  ·  200% = double speed,100% = base  ·  200% = dobro,100% = base  ·  200% = double
 SETTINGS_SOUND,SONIDO,SOUND,SOM,SON

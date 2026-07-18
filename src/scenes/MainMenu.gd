@@ -3,6 +3,7 @@ extends Node2D
 ## Main menu scene. Animated background, icon-button grid, stats display.
 
 const GAME_SCENE: String = "res://src/scenes/Game.tscn"
+const TUTORIAL_SCENE: String = "res://src/scenes/TutorialGame.tscn"
 const SETTINGS_SCENE: String = "res://src/scenes/SettingsScreen.tscn"
 const ACHIEVEMENTS_SCENE: String = "res://src/scenes/AchievementsScreen.tscn"
 const DAILY_MISSIONS_SCENE: String = "res://src/scenes/DailyMissionsScreen.tscn"
@@ -423,7 +424,8 @@ func _make_sb(
 	return sb
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_file.call_deferred(GAME_SCENE)
+	var dest: String = GAME_SCENE if SaveManager.get_tutorial_shown() else TUTORIAL_SCENE
+	get_tree().change_scene_to_file.call_deferred(dest)
 
 func _on_upgrades_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://src/scenes/UpgradeScreen.tscn")
