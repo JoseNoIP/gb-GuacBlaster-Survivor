@@ -135,6 +135,83 @@ Una muerte se siente injusta cuando:
 - [ ] ¿El jugador puede recuperarse de una racha mala (corazones drops)?
 - [ ] ¿El ritmo de la sesión tiene un arco: aprendizaje → acumulación → clímax (jefe)?
 
+### 6. Ilusión de profundidad / perspectiva (depth illusion)
+
+Para juegos con vista top-down o perspectiva isométrica-estilizada, una ilusión de profundidad mejora enormemente la legibilidad del espacio y la sensación de que el jugador "avanza" hacia el fondo.
+
+**Componentes del sistema (todos opcionales, evaluarlos según el juego):**
+
+| Componente | Efecto | Implementación |
+|---|---|---|
+| Vanishing point (VP) | Define el "horizonte" del juego | Constante: `VP_Y_RATIO = 0.25` (25% desde arriba) |
+| Escalado de enemigos | Parecen emerger de la distancia | Enemigos escalan de pequeños (cerca del VP) a grandes (al frente) |
+| Anclaje del jefe | El jefe "flota" en el horizonte | `position.y = vp.y * BOSS_Y_RATIO` cada frame |
+| Convergencia de proyectiles | Proyectiles apuntan ligeramente al VP | `direction.lerp(to_vp, 0.12).normalized()` |
+| Zoom del fondo | El fondo se acerca lentamente | `scale = base_scale * (1.0 + zoom_progress * 0.08)` |
+
+**Escalado de enemigos — la curva importa:**
+```gdscript
+# MAL: el enemigo crece hasta la mitad de la pantalla (se siente lento)
+var t: float = clampf((y - vp_y) / (screen_h - vp_y), 0.0, 1.0)
+
+# BIEN: el enemigo llega a tamaño completo al 45% desde arriba
+const FULL_SIZE_Y_RATIO: float = 0.45
+var full_y: float = screen_h * FULL_SIZE_Y_RATIO
+var t: float = clampf((y - vp_y) / (full_y - vp_y), 0.0, 1.0)
+var s: float = lerpf(SCALE_MIN, SCALE_MAX, t)  # SCALE_MIN ~0.35, SCALE_MAX 1.0
+```
+
+**Valores calibrados en GuacBlaster:**
+```
+PERSPECTIVE_VP_Y_RATIO = 0.25        # horizonte al 25% desde arriba
+PERSPECTIVE_FULL_SIZE_Y_RATIO = 0.45 # tamaño completo al 45% desde arriba
+PERSPECTIVE_SCALE_MIN = 0.35         # tamaño al nacer (cerca del horizonte)
+PERSPECTIVE_SCALE_MAX = 1.0          # tamaño completo
+BOSS_Y_RATIO = 0.33                  # jefe anclado al 33% (visible pero no invasivo)
+PROJECTILE_CONVERGENCE = 0.12        # 12% blend hacia el VP (sutil)
+```
+
+**Nota de implementación:** el jefe debe excluirse del sistema de escalado automático (`_use_perspective_scale = false`) ya que su tamaño es deliberado.
+
+### 7. Animación de victoria — el jugador "gana la pantalla"
+
+Cuando el jugador gana, la pantalla de victoria no debe aparecer inmediatamente. El jugador debe "salir" del campo antes de que aparezca el resumen.
+
+**Secuencia recomendada:**
+1. Jugador deja de moverse y disparar (desactivar input y autofire)
+2. Tween de squish → stretch + vuelo hacia arriba (sale de pantalla): ~0.7–1.0s
+3. `queue_free()` del jugador al terminar el tween
+4. Pantalla de victoria aparece con ~1.0s de delay desde que empieza la animación
+
+```gdscript
+func _on_game_won() -> void:
+    set_process(false)
+    set_process_input(false)
+    _autofire_timer.stop()
+    var tween: Tween = create_tween()
+    tween.tween_interval(0.3)
+    tween.tween_property(self, "scale", Vector2(1.3, 0.7), 0.1)   # squish
+    tween.tween_property(self, "scale", Vector2(0.6, 1.5), 0.12)  # stretch
+    (tween.parallel().tween_property(self, "position:y", -200.0, 0.7)
+            .set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC))
+    tween.tween_callback(queue_free)
+
+# En VictoryScreen.gd — esperar antes de mostrarse
+func _on_game_won(score: int, ...) -> void:
+    # preparar labels...
+    get_tree().create_timer(1.0).timeout.connect(
+        func() -> void: _reveal(score, is_new_record)
+    )
+```
+
+**Checklist de profundidad:**
+- [ ] ¿El juego tiene un punto de fuga claro o un "horizonte" implícito?
+- [ ] ¿Los enemigos emergen desde lejos y crecen al acercarse?
+- [ ] ¿La curva de escala llega a tamaño completo antes del 50% de la pantalla?
+- [ ] ¿El jefe está anclado en el horizonte (no baja al frente como los básicos)?
+- [ ] ¿Los proyectiles convergen ligeramente hacia el horizonte?
+- [ ] ¿La animación de victoria deja que el jugador "salga" antes de mostrar resultados?
+
 ## Formato de respuesta
 
 ```

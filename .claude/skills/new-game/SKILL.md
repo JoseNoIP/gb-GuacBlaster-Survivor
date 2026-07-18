@@ -42,6 +42,17 @@ Sigue estas fases en orden. Cada fase termina con su gate de validación antes d
 
 ---
 
+### FASE 0 — Preguntas de alcance (antes de implementar)
+
+Responder estas preguntas con el usuario ANTES de empezar a codificar:
+
+1. **¿Multi-idioma?** → Si sí, usar `/mobile-i18n`. Impacta todos los strings UI — mejor decidirlo antes que refactorizar después.
+2. **¿Vista top-down con sensación de profundidad?** → Evaluar ilusión de perspectiva (ver agente `game-feel`, sección 6). No es automático — requiere que el diseño del juego lo soporte.
+3. **¿Publicar en Google Play?** → Usar `/android-deploy` para el pipeline completo. Requiere keystore + cuenta de servicio de Google.
+4. **¿Sesiones cortas (< 5 min)?** → El arco sesión debe ser: aprendizaje (min 0–1) → acumulación (min 1–3) → clímax (boss / objetivo final).
+
+---
+
 ### FASE 1 — Parsear GDD
 
 Extraer y confirmar:
@@ -231,7 +242,8 @@ Pantallas mínimas requeridas:
 - **GameOverScreen.tscn** — score, oro ganado, botón REINTENTAR
 - **VictoryScreen.tscn** — score, oro, bioma siguiente, botón CONTINUAR
 - **UpgradeScreen.tscn** — grid de upgrades con costos
-- **SettingsScreen.tscn** — sensibilidad swipe (slider), sound on/off, vibración on/off
+- **SettingsScreen.tscn** — sensibilidad swipe (slider), sound on/off, vibración on/off, idioma (si multi-idioma activo)
+- **LanguageSelectScreen.tscn** — solo si el juego es multi-idioma (ver `/mobile-i18n`)
 
 Reglas UI:
 - Todo texto de gameplay: mínimo 18px (legibilidad en móvil)
@@ -282,6 +294,19 @@ godot --headless --export-debug "Android" builds/debug/game.apk 2>&1
 ```
 
 Los tres gates deben estar en verde. Si alguno falla → corregir antes de reportar terminado.
+
+---
+
+### FASE 11b — Features de calidad (evaluar con el usuario)
+
+Antes de cerrar, ofrecer estas features probadas que elevan la calidad percibida:
+
+| Feature | Skill / Agente | Cuándo aplicar |
+|---|---|---|
+| Multi-idioma | `/mobile-i18n` | Si el mercado objetivo incluye más de un idioma |
+| Ilusión de profundidad | agente `game-feel` §6 | Si el juego tiene vista top-down y enemigos que se acercan |
+| Animación de victoria | agente `game-feel` §7 | Siempre — el jugador debe "salir" antes de ver resultados |
+| CI/CD Google Play | `/android-deploy` | Si se va a publicar en Android |
 
 ---
 

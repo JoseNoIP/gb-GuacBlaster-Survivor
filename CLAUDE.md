@@ -164,6 +164,14 @@ func _exit_tree() -> void:
 22. **`assetPackInstallTime/src/main/assets` debe existir** — `mkdir -p android/build/assetPackInstallTime/src/main/assets` antes de correr Gradle (el módulo de Play Asset Delivery lo requiere).
 23. **Primera subida a Play Store debe ser manual** — la API de Google Play retorna error genérico hasta que exista al menos una versión subida manualmente desde Play Console. Descargar el AAB del artefacto CI y subirlo una vez desde la web.
 24. **Pre-heat obligatorio** — `godot --headless --editor --quit || true` antes del export. Sin este paso, el file-system scanner de Godot puede crashear en headless al exportar.
+### Reglas de Multi-idioma / i18n (Godot 4.7)
+26. **`LocalizationManager` NO lleva `class_name`** — es autoload. Añadirle `class_name` provoca conflicto fatal (regla #10).
+27. **No usar archivos `.translation` binarios en CI/CD** — requieren import del editor Godot. Usar CSV parseado en runtime con `FileAccess.get_csv_line()` y objetos `Translation` creados programáticamente.
+28. **Saltos de línea en CSV** — el separador de CSV rompe si se incluyen `\n` literales. Usar `[BR]` como placeholder y reemplazarlo por `"\n"` en `_load_csv()`.
+29. **`LocalizationManager` debe cargarse DESPUÉS de `SaveManager`** en `project.godot` — necesita `SaveManager.get_language()` en `_ready()`.
+30. **El CSV de traducciones no se exporta automáticamente a Android** — `FileAccess.open("res://...")` en runtime no hace que Godot incluya el archivo en el PCK. Añadir `*.csv` al `include_filter` en `export_presets.cfg`. Sin esto, `tr("KEY")` devuelve la clave cruda en Android pero funciona en el editor (que lee del disco directamente).
+31. **Chino y japonés requieren fuente especial** — el tema default de Godot no incluye esos glifos. No añadirlos sin fuente compatible.
+
 25. **`bundleRelease` no firma aunque se pasen `-Pperform_signing=true`** — en Godot 4.7, `config.gradle` puede ignorar estos flags. Solución: firmar el AAB explícitamente con `jarsigner` después de construirlo, antes de subir a Play Store. JAR Signature (v1) es suficiente — Google Play reemplaza la firma al distribuir si se usa Google Play App Signing. Ejemplo: `jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore KEY.keystore -storepass PASS builds/GuacBlaster.aab ALIAS`.
 
 ---
@@ -341,9 +349,10 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | `/validate` | Antes de cualquier commit — corre gdlint + GUT y reporta GREEN/BLOQUEADO |
 | `/feature [nombre]` | Al implementar cualquier feature nueva — guía completa PLAN→IMPL→VALIDATE→SANITY→DOC |
 | `/doc` | Al cerrar cualquier tarea — sincroniza idea-base.md, CLAUDE.md y memorias |
-| `/new-game [gdd.md]` | Para construir un juego nuevo desde cero — autónomo hasta build funcional |
+| `/new-game [gdd.md]` | Para construir un juego nuevo desde cero — autónomo hasta build funcional. Incluye FASE 0 de preguntas de alcance (i18n, perspectiva, CI/CD) |
 | `/gen-ai-art` | Generar arte final de un juego con Pollinations.ai (Flux, gratis) — backgrounds, sprites con transparencia, íconos procedurales |
-| `/android-deploy` | Configurar o depurar el pipeline CI/CD de GitHub Actions para publicar en Google Play Store como AAB firmado — incluye mapa completo de errores conocidos (Godot 4.7) |
+| `/android-deploy` | Configurar o depurar el pipeline CI/CD de GitHub Actions para publicar en Google Play Store como AAB firmado — incluye mapa completo de errores conocidos (Godot 4.7) y workflow probado y funcional |
+| `/mobile-i18n` | Agregar soporte multi-idioma a un juego Godot móvil — CSV runtime, LocalizationManager autoload, selector de idioma, SettingsScreen |
 
 Los skills viven en `.claude/skills/<nombre>/SKILL.md`.
 
