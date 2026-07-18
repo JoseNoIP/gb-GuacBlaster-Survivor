@@ -38,7 +38,8 @@ jobs:
           else
             echo "track=internal"   >> $GITHUB_OUTPUT
           fi
-          echo "version_code=${{ github.run_number }}" >> $GITHUB_OUTPUT
+          # Minutos desde 2024-01-01: compacto (~815k hoy), crece ~525k/año, válido por siglos
+          echo "version_code=$(( ($(date +%s) - 1704067200) / 60 ))" >> $GITHUB_OUTPUT
 
       # ── 3. Java (requerido por Gradle) ──────────────────────────────────────
       - name: Setup Java 17
