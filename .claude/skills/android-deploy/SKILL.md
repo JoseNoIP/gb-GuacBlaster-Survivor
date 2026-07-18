@@ -14,19 +14,39 @@ Usa este skill cuando:
 Checkout → Java 17 → Instalar Godot → Instalar templates
 → Configurar keystore + version_code → Pre-heat cache
 → Export APK (instala template Gradle + popula assets)
-→ bundleRelease (produce AAB firmado)
+→ bundleRelease (produce AAB)
+→ jarsigner (firma el AAB explícitamente)
 → Subir artefacto → Upload a Play Store
 ```
 
 El flujo **dos pasos** es obligatorio en Godot 4.7:
 1. `godot --export-release ... game.apk` — Godot exporta APK y popula `android/build/` con los assets del juego.
 2. `./gradlew bundleRelease` — Gradle produce el AAB que Play Store requiere.
+3. `jarsigner` — firma el AAB explícitamente (Gradle puede producirlo sin firma aunque se pasen los flags `-P`).
 
 Godot 4.7 **rechaza** la extensión `.aab` directamente. El AAB solo se puede producir vía Gradle.
 
 ---
 
-## Workflow completo probado y funcional
+## Version code — estándar recomendado
+
+**Usar minutos desde 2024-01-01:**
+```bash
+echo "version_code=$(( ($(date +%s) - 1704067200) / 60 ))" >> $GITHUB_OUTPUT
+```
+
+- ~815,000 hoy (julio 2026), crece ~525,000/año
+- Nunca colisiona con versiones subidas manualmente
+- Válido por siglos (muy lejos del límite 2,100,000,000 de Play Store)
+- El `version_code` es **interno** — usuarios nunca lo ven (ellos ven `version_name`)
+
+**No usar:**
+- `github.run_number` — colisiona si subes algo manualmente (empieza en 1)
+- Unix epoch (`date +%s`) — válido pero más largo (~1.75B) y expira ~2038
+
+---
+
+## Workflow completo — probado y funcional
 
 ```yaml
 name: Deploy → Google Play
@@ -43,9 +63,9 @@ on:
         default: false
 
 env:
-  GODOT_VERSION: "4.7"          # cambiar según versión del proyecto
-  EXPORT_PRESET: "Android"      # debe coincidir exactamente con export_presets.cfg
-  PACKAGE_NAME: "com.tuempresa.tujuego"   # ← CAMBIAR
+  GODOT_VERSION: "4.7"                        # cambiar según versión del proyecto
+  EXPORT_PRESET: "Android"                    # debe coincidir con export_presets.cfg
+  PACKAGE_NAME: "com.tuempresa.tujuego"       # ← CAMBIAR
 
 jobs:
   deploy:
@@ -61,7 +81,8 @@ jobs:
           else
             echo "track=internal"   >> $GITHUB_OUTPUT
           fi
-          echo "version_code=${{ github.run_number }}" >> $GITHUB_OUTPUT
+          # Minutos desde 2024-01-01: compacto, siempre creciente, nunca colisiona
+          echo "version_code=$(( ($(date +%s) - 1704067200) / 60 ))" >> $GITHUB_OUTPUT
 
       - uses: actions/setup-java@v4
         with:
@@ -90,8 +111,8 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/game.keystore
           sed -i "s|version/code=[0-9]*|version/code=${{ steps.ctx.outputs.version_code }}|" export_presets.cfg
           sed -i "s|gradle_build/use_gradle_build=false|gradle_build/use_gradle_build=true|" export_presets.cfg
+          grep -E "version/code|gradle_build/use" export_presets.cfg
 
-      # Pre-heat: evita crashes del file-system scanner en modo headless
       - name: Pre-heat Godot cache
         run: godot --headless --editor --quit || true
 
@@ -107,32 +128,52 @@ jobs:
             --export-release "${{ env.EXPORT_PRESET }}" \
             "builds/game.apk"
 
-      - name: Construir AAB firmado
+      - name: Construir AAB con Gradle
         env:
           KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
           KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: |
-          # El assetPackInstallTime module necesita existir para bundleRelease
           mkdir -p android/build/assetPackInstallTime/src/main/assets
 
           cd android/build
           # PROPIEDADES CRÍTICAS de config.gradle (Godot 4.7):
           #   export_package_name  → applicationId (default: com.godot.game)
-          #   perform_signing=true → activa signingConfig release (default: FALSE)
-          #   release_keystore_*   → datos del keystore de release
+          #   export_version_code  → versionCode   (default: 1 — SIEMPRE PASAR)
+          #   perform_signing=true → activa signingConfig release (default: false)
+          #   release_keystore_*   → datos del keystore
           ./gradlew bundleRelease \
             "-Pexport_package_name=${{ env.PACKAGE_NAME }}" \
+            "-Pexport_version_code=${{ steps.ctx.outputs.version_code }}" \
             "-Pperform_signing=true" \
             "-Prelease_keystore_file=/tmp/game.keystore" \
             "-Prelease_keystore_password=$KEYSTORE_PASS" \
             "-Prelease_keystore_alias=$KEYSTORE_ALIAS"
 
-          # Godot 4.7 genera variantes: standardRelease, monoRelease, instrumentedRelease
           AAB=$(find . -name "*.aab" -path "*/standardRelease/*" | head -1)
           if [ -z "$AAB" ]; then
             AAB=$(find . -name "*.aab" -not -path "*/intermediates/*" | head -1)
           fi
           cp "$AAB" ../../builds/game.aab
+
+      # Firmar explícitamente: bundleRelease puede ignorar -Pperform_signing
+      # en algunas configuraciones de Godot. jarsigner v1 es suficiente para
+      # Google Play App Signing (Google re-firma al distribuir).
+      - name: Firmar AAB con jarsigner
+        env:
+          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          jarsigner \
+            -verbose \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
+            -keystore /tmp/game.keystore \
+            -storepass "$KEYSTORE_PASS" \
+            -keypass "$KEYSTORE_PASS" \
+            builds/game.aab \
+            "$KEYSTORE_ALIAS"
+          jarsigner -verify builds/game.aab
+          echo "✓ AAB firmado"
 
       - name: Guardar AAB como artefacto
         uses: actions/upload-artifact@v4
@@ -158,9 +199,9 @@ jobs:
 
 | Secret | Cómo obtenerlo |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | `base64 -i mi.keystore` |
-| `ANDROID_KEYSTORE_ALIAS` | El alias que usaste al crear el keystore |
-| `ANDROID_KEYSTORE_PASS` | La contraseña del keystore (y del key) |
+| `ANDROID_KEYSTORE_BASE64` | `base64 -i mi.keystore` (en Mac: `base64 -i mi.keystore -o -`) |
+| `ANDROID_KEYSTORE_ALIAS` | El alias que usaste al crear el keystore con `keytool` |
+| `ANDROID_KEYSTORE_PASS` | La contraseña del keystore (y del key, si son iguales) |
 | `GOOGLE_PLAY_JSON` | Play Console → Configuración → Cuentas de servicio → JSON |
 
 ---
@@ -169,12 +210,13 @@ jobs:
 
 ```ini
 [preset.0]
-name="Android"           # debe coincidir con EXPORT_PRESET
+name="Android"           # debe coincidir con EXPORT_PRESET en el workflow
 
 [preset.0.options]
 package/unique_name="com.tuempresa.tujuego"
 gradle_build/use_gradle_build=false   # el CI lo activa via sed
-gradle_build/gradle_build_directory=""
+version/code=1                        # el CI lo sobreescribe con sed
+version/name="1.0"                    # lo que ve el usuario en Play Store
 ```
 
 ---
@@ -182,60 +224,66 @@ gradle_build/gradle_build_directory=""
 ## Errores conocidos y sus soluciones exactas
 
 ### `Trying to build from a gradle built template, but no version info for it exists`
-**Causa:** `.build_version` en `android/build/` está ausente o con contenido incorrecto.  
-**Solución:** Usar `--install-android-build-template` en el comando de Godot. Este flag extrae `android_source.zip` y escribe `.build_version` con el string exacto que Godot espera. **Nunca** escribir `.build_version` manualmente.
+**Causa:** `.build_version` ausente o con contenido incorrecto.
+**Solución:** Usar `--install-android-build-template`. Nunca escribir `.build_version` manualmente.
 
 ### `Android APK requires the *.apk extension`
-**Causa:** Godot 4.7 no soporta exportar directamente a `.aab`.  
-**Solución:** Exportar siempre a `.apk`. El AAB se produce en un paso separado con `./gradlew bundleRelease`.
+**Causa:** Godot 4.7 no exporta directo a `.aab`.
+**Solución:** Exportar a `.apk`. El AAB se produce con `./gradlew bundleRelease`.
 
-### `APKs are not allowed for this application`
-**Causa:** Play Store requiere AAB para apps nuevas.  
-**Solución:** Subir el AAB generado por Gradle, no el APK de Godot.
+### `All uploaded bundles must be signed. Please sign using jarsigner`
+**Causa:** `bundleRelease` puede ignorar `-Pperform_signing=true` según la configuración del template. El AAB sale sin firma de release.
+**Solución:** Agregar paso explícito de `jarsigner` después de `bundleRelease`. El mensaje de error de Play Store literalmente dice qué herramienta usar. Ver el template de workflow arriba.
+
+### `Version code X has already been used`
+**Causa:** El version code del AAB siempre es `1` porque `config.gradle` usa ese default si no se le pasa `-Pexport_version_code`. El `sed` sobre `export_presets.cfg` le llega a Godot (para el APK) pero NO a Gradle (para el AAB).
+**Solución:** Pasar `-Pexport_version_code=${{ steps.ctx.outputs.version_code }}` a `bundleRelease`. **Ambos** el `sed` y el `-P` son necesarios.
 
 ### `APK has the wrong package name` / `com.godot.game.fileprovider`
-**Causa:** El `config.gradle` de Godot usa `com.godot.game` como default si no se le pasa `-Pexport_package_name`.  
+**Causa:** `config.gradle` usa `com.godot.game` como default.
 **Solución:** Pasar `-Pexport_package_name=com.tuempresa.tujuego` a `bundleRelease`.
 
-### `All uploaded bundles must be signed`
-**Causa:** `shouldSign()` en `config.gradle` devuelve `false` por defecto (solo es `true` dentro de Android Studio).  
-**Solución:** Pasar `-Pperform_signing=true` a `bundleRelease`. Las propiedades de keystore correctas son `release_keystore_file`, `release_keystore_password`, `release_keystore_alias`. **No** usar `android.injected.signing.*` — esas no aplican al template de Godot.
-
 ### `assetPackInstrumentedReleasePreBundleTask FAILED`
-**Causa:** El directorio `android/build/assetPackInstallTime/src/main/assets` no existe. `bundleRelease` necesita este directorio para el módulo de Play Asset Delivery.  
-**Solución:** `mkdir -p android/build/assetPackInstallTime/src/main/assets` antes de correr Gradle.
+**Causa:** Falta el directorio `assetPackInstallTime/src/main/assets`.
+**Solución:** `mkdir -p android/build/assetPackInstallTime/src/main/assets` antes de Gradle.
 
-### `Error: APK has the wrong package name` (en el upload a Play Store)
-**Causa primaria:** Primera vez que se sube, sin carga manual previa.  
-**Requisito Play Store:** Antes de que la API de Google Play funcione, se debe subir manualmente al menos una versión desde la web de Play Console. Descargar el artefacto AAB del CI y subirlo manualmente una vez.
+### Primera subida falla con error genérico de la API
+**Causa:** La API de Google Play rechaza la primera subida si no existe ninguna versión previa.
+**Solución:** Descargar el AAB del artefacto de CI y subirlo **manualmente** una vez desde Play Console. Después, el CI funciona automáticamente.
+
+---
+
+## Advertencias de Play Store (ignorables)
+
+Play Store muestra estas advertencias para **todos** los juegos hechos con Godot. No bloquean la publicación:
+
+| Advertencia | Por qué aparece | Acción |
+|---|---|---|
+| "No hay archivo de desofuscación (R8/Proguard)" | R8/ProGuard es para código Java/Kotlin. Godot usa GDScript/C++, no pasa por ese proceso. | Ignorar permanentemente |
+| "Código nativo sin símbolos de depuración" | Godot exporta librerías `.so` del motor en C++. Los símbolos requieren compilar Godot desde fuente. | Ignorar salvo crashes frecuentes en el motor |
 
 ---
 
 ## Propiedades de config.gradle (Godot 4.7) — referencia completa
 
-Estas propiedades se pasan a Gradle con el prefijo `-P`:
-
 | Propiedad | Default | Descripción |
 |---|---|---|
 | `export_package_name` | `com.godot.game` | applicationId del APK/AAB |
-| `export_version_code` | `1` | versionCode |
-| `export_version_name` | `1.0` | versionName |
-| `perform_signing` | `false` | Activa signingConfig release |
+| `export_version_code` | `1` | versionCode — **siempre pasar explícitamente** |
+| `export_version_name` | `1.0` | versionName (visible al usuario) |
+| `perform_signing` | `false` | Intenta activar signingConfig — no siempre funciona, usar jarsigner además |
 | `release_keystore_file` | `.` | Ruta absoluta al .keystore |
-| `release_keystore_password` | `""` | Store password (también usado como key password) |
+| `release_keystore_password` | `""` | Store password |
 | `release_keystore_alias` | `""` | Key alias |
-| `export_enabled_abis` | todas | ABIs separadas por `\|` |
-| `export_build_type` | `debug` | `debug` o `release` |
-| `export_format` | `apk` | `apk` o `aab` |
 
 ---
 
 ## Variantes de build en Godot 4.7
 
 `bundleRelease` genera tres variantes. Usar siempre `standardRelease`:
-- `standardRelease` — build de producción normal ✓
-- `monoRelease` — build con .NET/C#
-- `instrumentedRelease` — build para tests de instrumentación
+- `standardRelease` — producción normal ✓
+- `monoRelease` — con .NET/C#
+- `instrumentedRelease` — para tests de instrumentación
 
 El AAB queda en: `android/build/app/build/outputs/bundle/standardRelease/*.aab`
 
@@ -243,7 +291,6 @@ El AAB queda en: `android/build/app/build/outputs/bundle/standardRelease/*.aab`
 
 ## Notas de Play Console
 
-- **Primera subida:** obligatoriamente manual desde la web. La API falla sin ella.
 - **Track interno:** push a `main` → Internal Testing (sin revisión de Google).
 - **Producción:** tag `v*.*.*` → Production (pasa por revisión de Google).
-- **Play Games Sidekick:** advertencia que aparece porque el template de Godot incluye el módulo `assetPackInstallTime`. Es ignorable para juegos pequeños (< 150 MB de assets).
+- El campo que ve el usuario en la tienda es `version/name` (ej. "1.0"), no `version/code`.
