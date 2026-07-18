@@ -1,6 +1,6 @@
 extends GutTest
 ## Tests for power-up effects: Player (rapid_fire, nacho_wall),
-## ProjectileSpawner (super_guac, spicy_bounce, guac_storm), Projectile (bounce logic).
+## ProjectileSpawner (chipotle_burst, spicy_bounce, guac_storm), Projectile (bounce logic).
 
 const ProjectileGd := preload("res://src/features/projectiles/Projectile.gd")
 const ProjectileSpawnerGd := preload("res://src/features/projectiles/ProjectileSpawner.gd")
@@ -93,14 +93,14 @@ func test_nacho_wall_hp_lost_after_shield_depleted() -> void:
 
 # --- ProjectileSpawner: power-up flags ---
 
-func test_super_guac_sets_pierce_count() -> void:
-	EventBus.powerup_stack_changed.emit(&"super_guac", 1)
-	assert_eq(_spawner._pierce_count, Constants.SUPER_GUAC_PENETRATION)
+func test_chipotle_burst_sets_flag() -> void:
+	EventBus.powerup_stack_changed.emit(&"chipotle_burst", 1)
+	assert_true(_spawner._burst)
 
-func test_super_guac_zero_clears_pierce() -> void:
-	EventBus.powerup_stack_changed.emit(&"super_guac", 1)
-	EventBus.powerup_stack_changed.emit(&"super_guac", 0)
-	assert_eq(_spawner._pierce_count, 0)
+func test_chipotle_burst_zero_clears_flag() -> void:
+	EventBus.powerup_stack_changed.emit(&"chipotle_burst", 1)
+	EventBus.powerup_stack_changed.emit(&"chipotle_burst", 0)
+	assert_false(_spawner._burst)
 
 func test_spicy_bounce_sets_bouncy_flag() -> void:
 	EventBus.powerup_stack_changed.emit(&"spicy_bounce", 1)

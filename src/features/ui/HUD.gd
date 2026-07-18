@@ -5,7 +5,7 @@ extends CanvasLayer
 
 const POWERUP_ABBREV: Dictionary = {
 	&"triple_shot": "TS",
-	&"super_guac": "SG",
+	&"chipotle_burst": "CB",
 	&"rapid_fire": "RF",
 	&"mole_grenade": "MG",
 	&"jalapeno_laser": "JL",
@@ -16,7 +16,7 @@ const POWERUP_ABBREV: Dictionary = {
 }
 const POWERUP_COLORS: Dictionary = {
 	&"triple_shot": Color(0.4, 0.8, 1.0),
-	&"super_guac": Color(0.3, 0.95, 0.3),
+	&"chipotle_burst": Color(1.0, 0.45, 0.1),
 	&"rapid_fire": Color(1.0, 0.5, 0.1),
 	&"mole_grenade": Color(1.0, 0.3, 0.3),
 	&"jalapeno_laser": Color(1.0, 0.95, 0.1),

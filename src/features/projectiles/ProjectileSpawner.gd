@@ -9,7 +9,7 @@ extends Node2D
 @export var projectile_scene: PackedScene
 
 var _triple_shot: bool = false
-var _pierce_count: int = 0
+var _burst: bool = false
 var _bouncy: bool = false
 var _extra_streams: int = 0
 var _fire_mode: StringName = &"normal"
@@ -77,7 +77,7 @@ func _spawn(spawn_position: Vector2, direction: Vector2, damage: float) -> void:
 	var proj: Node2D = projectile_scene.instantiate()
 	get_parent().add_child(proj)
 	proj.global_position = spawn_position
-	proj.call(&"setup", damage, converged, _pierce_count, _bouncy)
+	proj.call(&"setup", damage, converged, _burst, _bouncy)
 	proj.call(&"setup_visuals", _bullet_tint, _bullet_scale)
 	AudioManager.play_sfx(&"shoot")
 
@@ -85,8 +85,8 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 	match powerup_id:
 		&"triple_shot":
 			_triple_shot = count > 0
-		&"super_guac":
-			_pierce_count = Constants.SUPER_GUAC_PENETRATION if count > 0 else 0
+		&"chipotle_burst":
+			_burst = count > 0
 		&"spicy_bounce":
 			_bouncy = count > 0
 		&"guac_storm":
