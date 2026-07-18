@@ -115,11 +115,13 @@ jobs:
 
           cd android/build
           # Propiedades de config.gradle (Godot 4.7):
-          #   export_package_name  → applicationId
-          #   perform_signing=true → activa signingConfig release (default: false)
-          #   release_keystore_*   → keystore path / password / alias
+          #   export_package_name   → applicationId
+          #   export_version_code   → versionCode (default=1 si no se pasa)
+          #   perform_signing=true  → activa signingConfig release (default: false)
+          #   release_keystore_*    → keystore path / password / alias
           ./gradlew bundleRelease \
             "-Pexport_package_name=${{ env.PACKAGE_NAME }}" \
+            "-Pexport_version_code=${{ steps.ctx.outputs.version_code }}" \
             "-Pperform_signing=true" \
             "-Prelease_keystore_file=/tmp/guacblaster.keystore" \
             "-Prelease_keystore_password=$KEYSTORE_PASS" \
