@@ -153,6 +153,12 @@ func _on_game_won(score: int, duration: float) -> void:
 	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
 	_gold_label.text = "+%d oro" % _gold_this_run
 	_record_label.visible = is_new_record
+	_refresh_leaderboard(score)
+	get_tree().create_timer(1.0).timeout.connect(
+		func() -> void: _reveal(score, is_new_record)
+	)
+
+func _reveal(score: int, is_new_record: bool) -> void:
 	_panel.modulate.a = 0.0
 	_panel.show()
 	show()
@@ -165,7 +171,6 @@ func _on_game_won(score: int, duration: float) -> void:
 		func(v: float) -> void: _score_label.text = "Score: %d" % int(v),
 		0.0, float(score), 1.2
 	)
-	_refresh_leaderboard(score)
 	if is_new_record:
 		tween.tween_callback(_flash_record)
 

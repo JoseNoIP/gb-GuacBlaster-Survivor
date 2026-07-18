@@ -111,8 +111,8 @@ func _spawn_boss() -> void:
 		return
 	var boss: Node2D = boss_scene.instantiate()
 	boss.set(&"_generation", SaveManager.get_victories())
-	var vp_width: float = get_viewport_rect().size.x
-	boss.position = Vector2(vp_width * 0.5, 60.0)
+	var vp: Vector2 = get_viewport_rect().size
+	boss.position = Vector2(vp.x * 0.5, vp.y * Constants.BOSS_Y_RATIO)
 	get_parent().add_child(boss)
 	_boss_alive = true
 	_boss_generation += 1
