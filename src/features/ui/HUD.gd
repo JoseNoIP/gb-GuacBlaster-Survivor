@@ -202,7 +202,7 @@ func _build_world_label() -> void:
 
 func _build_phase2_label() -> void:
 	_phase2_label = Label.new()
-	_phase2_label.text = "¡FASE 2!"
+	_phase2_label.text = tr(&"HUD_PHASE2")
 	_phase2_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_phase2_label.anchor_left = 0.5
 	_phase2_label.anchor_right = 0.5
@@ -318,7 +318,7 @@ func _process(_delta: float) -> void:
 	if GameManager.get_state() != GameManager.GameState.PLAYING:
 		return
 	if _boss_spawned:
-		_timer_label.text = "¡JEFE!"
+		_timer_label.text = tr(&"HUD_BOSS")
 		_timer_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.1))
 		_timer_label.show()
 		return
@@ -330,7 +330,7 @@ func _process(_delta: float) -> void:
 		return
 	var mins: int = int(remaining) / 60
 	var secs: int = int(remaining) % 60
-	_timer_label.text = "JEFE EN: %02d:%02d" % [mins, secs]
+	_timer_label.text = tr(&"HUD_BOSS_TIMER") % [mins, secs]
 	if remaining <= 30.0:
 		_timer_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.1))
 	else:
@@ -417,7 +417,7 @@ func _on_game_started() -> void:
 	_show_world_banner()
 	_show_character_toast()
 	if GameManager.get_endless_mode():
-		_queue_toast("MODO ENDLESS — ¡sobrevive!", Color(0.5, 0.9, 0.5))
+		_queue_toast(tr(&"HUD_ENDLESS"), Color(0.5, 0.9, 0.5))
 
 func _show_character_toast() -> void:
 	var selected_id: StringName = SaveManager.get_selected_character()
@@ -427,7 +427,7 @@ func _show_character_toast() -> void:
 			char_name = (def as Dictionary).get("name", "") as String
 			break
 	if not char_name.is_empty():
-		_queue_toast("Jugando como: %s" % char_name, Color(0.3, 0.85, 0.2))
+		_queue_toast(tr(&"HUD_PLAYING_AS") % tr(char_name), Color(0.3, 0.85, 0.2))
 
 func _on_game_over(_score: int, _duration: float) -> void:
 	_pause_btn.disabled = true
@@ -439,18 +439,18 @@ func _on_achievement_unlocked(achievement_id: StringName) -> void:
 		if (def as Dictionary).get("id", &"") as StringName == achievement_id:
 			name_str = (def as Dictionary).get("name", "") as String
 			break
-	_queue_toast("★ %s" % name_str, Color(1.0, 0.85, 0.2))
+	_queue_toast("★ %s" % tr(name_str), Color(1.0, 0.85, 0.2))
 
 func _on_weekly_challenge_completed(_challenge_id: StringName) -> void:
-	_queue_toast("★ DESAFÍO SEMANAL COMPLETADO", Color(0.8, 0.5, 1.0))
+	_queue_toast(tr(&"TOAST_WEEKLY"), Color(0.8, 0.5, 1.0))
 
 func _on_mission_completed(mission_id: StringName, reward: int) -> void:
-	var desc_str: String = str(mission_id)
+	var desc_key: String = str(mission_id)
 	for def in Constants.DAILY_MISSION_POOL:
 		if (def as Dictionary).get("id", &"") as StringName == mission_id:
-			desc_str = (def as Dictionary).get("desc", str(mission_id)) as String
+			desc_key = (def as Dictionary).get("desc", str(mission_id)) as String
 			break
-	_queue_toast("✓ %s  +%d oro" % [desc_str, reward], Color(0.3, 0.95, 0.3))
+	_queue_toast(tr(&"TOAST_MISSION") % [tr(desc_key), reward], Color(0.3, 0.95, 0.3))
 
 func _queue_toast(text: String, color: Color) -> void:
 	_toast_queue.append({"text": text, "color": color})

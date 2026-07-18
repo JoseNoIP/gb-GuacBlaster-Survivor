@@ -34,7 +34,7 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "LOGROS"
+	title.text = tr(&"TITLE_ACHIEVEMENTS")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 28)
 	title.add_theme_color_override(&"font_color", GOLD_COLOR)
@@ -81,7 +81,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
@@ -112,14 +112,14 @@ func _build_row(parent: Control, def: Dictionary) -> void:
 	row.add_child(vbox)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = def.get("name", "") as String
+	name_lbl.text = tr(def.get("name", "") as String)
 	name_lbl.add_theme_font_size_override(&"font_size", 16)
 	var name_color: Color = UNLOCKED_COLOR if unlocked else LOCKED_COLOR
 	name_lbl.add_theme_color_override(&"font_color", name_color)
 	vbox.add_child(name_lbl)
 
 	var desc_lbl: Label = Label.new()
-	desc_lbl.text = def.get("desc", "") as String
+	desc_lbl.text = tr(def.get("desc", "") as String)
 	desc_lbl.add_theme_font_size_override(&"font_size", 12)
 	desc_lbl.add_theme_color_override(&"font_color", Color(0.6, 0.6, 0.6))
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

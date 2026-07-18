@@ -34,7 +34,7 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "MISIONES DIARIAS"
+	title.text = tr(&"TITLE_DAILY")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 26)
 	title.add_theme_color_override(&"font_color", GOLD_COLOR)
@@ -86,7 +86,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
@@ -124,7 +124,7 @@ func _build_card(parent: Control, mission: Dictionary) -> void:
 	card.add_child(vbox)
 
 	var desc_lbl: Label = Label.new()
-	desc_lbl.text = mission.get("desc", "") as String
+	desc_lbl.text = tr(mission.get("desc", "") as String)
 	desc_lbl.add_theme_font_size_override(&"font_size", 17)
 	var text_color: Color = DONE_COLOR if completed else Color(0.9, 0.9, 0.9)
 	desc_lbl.add_theme_color_override(&"font_color", text_color)

@@ -5,12 +5,12 @@ extends Node2D
 const MAIN_MENU_SCENE: String = "res://src/scenes/MainMenu.tscn"
 
 const BIOME_NAMES: Array = [
-	"Pradera Guacamole",
-	"Jungla Nocturna",
-	"Crepúsculo Índigo",
-	"Caldera Volcánica",
-	"Abismo Oceánico",
-	"Desierto de Luna Sangre",
+	"BIOME_0_NAME",
+	"BIOME_1_NAME",
+	"BIOME_2_NAME",
+	"BIOME_3_NAME",
+	"BIOME_4_NAME",
+	"BIOME_5_NAME",
 ]
 
 const BG_COLOR: Color = Color(0.05, 0.07, 0.05)
@@ -44,14 +44,14 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "MAPA DE BIOMAS"
+	title.text = tr(&"TITLE_BIOME")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 26)
 	title.add_theme_color_override(&"font_color", GOLD_COLOR)
 	root.add_child(title)
 
 	var subtitle: Label = Label.new()
-	subtitle.text = "Victorias: %d" % victories
+	subtitle.text = tr(&"LABEL_VICTORIES") % victories
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override(&"font_size", 15)
 	subtitle.add_theme_color_override(&"font_color", Color(0.65, 0.65, 0.65))
@@ -95,7 +95,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
@@ -126,7 +126,8 @@ func _build_biome_row(
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(vbox)
 
-	var biome_name: String = BIOME_NAMES[idx] if idx < BIOME_NAMES.size() else "Bioma %d" % (idx + 1)
+	var biome_key: String = BIOME_NAMES[idx] if idx < BIOME_NAMES.size() else "BIOME_%d_NAME" % idx
+	var biome_name: String = tr(biome_key)
 	var name_row_text: String = biome_name
 	if current and unlocked:
 		name_row_text += "  ◄ actual"
@@ -140,11 +141,11 @@ func _build_biome_row(
 
 	var status_lbl: Label = Label.new()
 	if idx == 0:
-		status_lbl.text = "Siempre disponible"
+		status_lbl.text = tr(&"BIOME_ALWAYS")
 	elif unlocked:
-		status_lbl.text = "Desbloqueado tras %d victoria(s)" % idx
+		status_lbl.text = tr(&"BIOME_UNLOCKED") % idx
 	else:
-		status_lbl.text = "Requiere %d victoria(s)" % idx
+		status_lbl.text = tr(&"BIOME_LOCKED") % idx
 	status_lbl.add_theme_font_size_override(&"font_size", 12)
 	status_lbl.add_theme_color_override(&"font_color", Color(0.55, 0.55, 0.55))
 	vbox.add_child(status_lbl)

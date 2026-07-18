@@ -183,7 +183,7 @@ func _build_tutorial_overlay() -> void:
 	_tutorial_root.add_child(vbox)
 
 	var hint: Label = Label.new()
-	hint.text = "Arrastra con el dedo\npara moverte"
+	hint.text = tr(&"TUTORIAL_HINT")
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override(&"font_size", 22)
 	hint.add_theme_color_override(&"font_color", Color(0.88, 1.0, 0.84))
@@ -191,7 +191,7 @@ func _build_tutorial_overlay() -> void:
 	vbox.add_child(hint)
 
 	var sub: Label = Label.new()
-	sub.text = "Toca para continuar"
+	sub.text = tr(&"TUTORIAL_TAP")
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.add_theme_font_size_override(&"font_size", 13)
 	sub.add_theme_color_override(&"font_color", Color(0.55, 0.65, 0.55))

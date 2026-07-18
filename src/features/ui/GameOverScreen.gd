@@ -49,7 +49,7 @@ func _build_ui() -> void:
 	add_child(_panel)
 
 	var title: Label = Label.new()
-	title.text = "GAME OVER"
+	title.text = tr(&"TITLE_GAME_OVER")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 42)
 	title.add_theme_color_override(&"font_color", TITLE_COLOR)
@@ -74,7 +74,7 @@ func _build_ui() -> void:
 	_panel.add_child(_best_label)
 
 	_record_label = Label.new()
-	_record_label.text = "¡NUEVO RÉCORD!"
+	_record_label.text = tr(&"LABEL_NEW_RECORD")
 	_record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_record_label.add_theme_font_size_override(&"font_size", 19)
 	_record_label.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.1))
@@ -89,7 +89,7 @@ func _build_ui() -> void:
 	_panel.add_child(_gold_label)
 
 	var sep: Label = Label.new()
-	sep.text = "── Mejores ──"
+	sep.text = tr(&"HISCORE_SEP")
 	sep.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sep.add_theme_font_size_override(&"font_size", 11)
 	sep.add_theme_color_override(&"font_color", Color(0.4, 0.4, 0.4))
@@ -104,7 +104,7 @@ func _build_ui() -> void:
 	_panel.add_child(spacer2)
 
 	_restart_btn = Button.new()
-	_restart_btn.text = "JUGAR DE NUEVO"
+	_restart_btn.text = tr(&"BTN_RESTART")
 	_restart_btn.custom_minimum_size = Vector2(220.0, 54.0)
 	_restart_btn.add_theme_font_size_override(&"font_size", 20)
 	var normal_sb: StyleBoxFlat = StyleBoxFlat.new()
@@ -125,7 +125,7 @@ func _build_ui() -> void:
 	_panel.add_child(spacer3)
 
 	_menu_btn = Button.new()
-	_menu_btn.text = "MENÚ PRINCIPAL"
+	_menu_btn.text = tr(&"BTN_MENU")
 	_menu_btn.custom_minimum_size = Vector2(220.0, 44.0)
 	_menu_btn.add_theme_font_size_override(&"font_size", 16)
 	var menu_sb: StyleBoxFlat = StyleBoxFlat.new()
@@ -144,10 +144,10 @@ func _build_ui() -> void:
 func _on_game_over(score: int, _duration: float) -> void:
 	var is_new_record: bool = score > _prev_best
 	_score_label.text = "Score: 0"
-	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
-	_gold_label.text = "+%d oro" % _gold_this_run
+	_best_label.text = tr(&"LABEL_BEST") % SaveManager.get_best_score()
+	_gold_label.text = tr(&"LABEL_GOLD_EARNED") % _gold_this_run
 	if GameManager.get_endless_mode() and GameManager.get_waves_cleared() > 0:
-		_gold_label.text += "  ·  %d olas" % GameManager.get_waves_cleared()
+		_gold_label.text += "  ·  %d" % GameManager.get_waves_cleared()
 	_record_label.visible = is_new_record
 	_bg.visible = true
 	_panel.modulate.a = 0.0

@@ -13,12 +13,12 @@ const BTN_DISABLED_COLOR: Color = Color(0.3, 0.3, 0.3)
 const GOLD_COLOR: Color = Color(1.0, 0.8, 0.1)
 
 const UPGRADE_DEFS: Array = [
-	{id = &"damage",         label = "DAÑO",      desc = "+5% daño por nivel"},
-	{id = &"speed",          label = "CADENCIA",  desc = "+3% vel. disparo/nivel"},
-	{id = &"health",         label = "VIDA",       desc = "+1 corazón por nivel"},
-	{id = &"luck",           label = "SUERTE",    desc = "+5% XP por nivel"},
-	{id = &"gold_bonus",     label = "BONUS ORO", desc = "+15% oro por partida/nivel"},
-	{id = &"starter_shield", label = "ESCUDO",    desc = "+1 escudo inicial por nivel"},
+	{id = &"damage",         label = "UPG_DAMAGE_NAME",  desc = "UPG_DAMAGE_DESC"},
+	{id = &"speed",          label = "UPG_SPEED_NAME",   desc = "UPG_SPEED_DESC"},
+	{id = &"health",         label = "UPG_HEALTH_NAME",  desc = "UPG_HEALTH_DESC"},
+	{id = &"luck",           label = "UPG_LUCK_NAME",    desc = "UPG_LUCK_DESC"},
+	{id = &"gold_bonus",     label = "UPG_GOLD_NAME",    desc = "UPG_GOLD_DESC"},
+	{id = &"starter_shield", label = "UPG_SHIELD_NAME",  desc = "UPG_SHIELD_DESC"},
 ]
 
 var _gold_label: Label
@@ -51,7 +51,7 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "MEJORAS PERMANENTES"
+	title.text = tr(&"TITLE_UPGRADES")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 26)
 	title.add_theme_color_override(&"font_color", Color(0.3, 0.85, 0.2))
@@ -104,7 +104,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
@@ -139,7 +139,7 @@ func _build_card(parent: Control, def: Dictionary) -> void:
 	card.add_child(vbox)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = def.label as String
+	name_lbl.text = tr(def.label as String)
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_font_size_override(&"font_size", 18)
 	name_lbl.add_theme_color_override(&"font_color", Color(0.9, 0.9, 0.9))
@@ -153,7 +153,7 @@ func _build_card(parent: Control, def: Dictionary) -> void:
 	vbox.add_child(level_lbl)
 
 	var desc_lbl: Label = Label.new()
-	desc_lbl.text = def.desc as String
+	desc_lbl.text = tr(def.desc as String)
 	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc_lbl.add_theme_font_size_override(&"font_size", 11)
 	desc_lbl.add_theme_color_override(&"font_color", Color(0.65, 0.65, 0.65))
@@ -168,7 +168,7 @@ func _build_card(parent: Control, def: Dictionary) -> void:
 	vbox.add_child(cost_lbl)
 
 	var btn: Button = Button.new()
-	btn.text = "COMPRAR"
+	btn.text = tr(&"BTN_BUY")
 	btn.custom_minimum_size = Vector2(100.0, 36.0)
 	btn.add_theme_font_size_override(&"font_size", 14)
 	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -183,18 +183,18 @@ func _refresh_card(upgrade_id: StringName) -> void:
 	var is_maxed: bool = current_level >= Constants.META_MAX_UPGRADE_LEVEL
 	var btn: Button = _buy_buttons[upgrade_id] as Button
 	if is_maxed:
-		(_level_labels[upgrade_id] as Label).text = "Nivel %d — MAX" % current_level
+		(_level_labels[upgrade_id] as Label).text = tr(&"UPG_LEVEL_MAX") % current_level
 		(_cost_labels[upgrade_id] as Label).text = ""
-		btn.text = "MAX"
+		btn.text = tr(&"BTN_MAX")
 		btn.disabled = true
 		return
 	var base: float = float(Constants.META_UPGRADE_COST_BASE)
 	var growth: float = pow(Constants.META_UPGRADE_COST_GROWTH, float(current_level))
 	var cost: int = int(base * growth)
 	var can_afford: bool = SaveManager.get_gold() >= cost
-	(_level_labels[upgrade_id] as Label).text = "Nivel %d" % current_level
-	(_cost_labels[upgrade_id] as Label).text = "Costo: %d oro" % cost
-	btn.text = "COMPRAR"
+	(_level_labels[upgrade_id] as Label).text = tr(&"UPG_LEVEL") % current_level
+	(_cost_labels[upgrade_id] as Label).text = tr(&"UPG_COST") % cost
+	btn.text = tr(&"BTN_BUY")
 	btn.disabled = not can_afford
 	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color = BTN_BUY_COLOR if can_afford else BTN_DISABLED_COLOR
@@ -205,7 +205,7 @@ func _refresh_card(upgrade_id: StringName) -> void:
 	btn.add_theme_stylebox_override(&"normal", sb)
 
 func _refresh_gold_label() -> void:
-	_gold_label.text = "Oro: %d" % SaveManager.get_gold()
+	_gold_label.text = tr(&"LABEL_GOLD_COLON") % SaveManager.get_gold()
 
 func _on_buy_pressed(upgrade_id: StringName) -> void:
 	if SaveManager.purchase_upgrade(upgrade_id):

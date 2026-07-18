@@ -43,24 +43,24 @@ func _build_ui() -> void:
 	_panel.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "JUEGO PAUSADO"
+	title.text = tr(&"TITLE_PAUSE")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
 	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	vbox.add_child(title)
 
 	_resume_btn = Button.new()
-	_resume_btn.text = "CONTINUAR"
+	_resume_btn.text = tr(&"BTN_CONTINUE")
 	_resume_btn.pressed.connect(_on_resume_pressed)
 	vbox.add_child(_resume_btn)
 
 	_restart_btn = Button.new()
-	_restart_btn.text = "REINICIAR"
+	_restart_btn.text = tr(&"BTN_RESTART_PAUSE")
 	_restart_btn.pressed.connect(_on_restart_pressed)
 	vbox.add_child(_restart_btn)
 
 	_menu_btn = Button.new()
-	_menu_btn.text = "MENU PRINCIPAL"
+	_menu_btn.text = tr(&"BTN_MENU")
 	_menu_btn.pressed.connect(_on_menu_pressed)
 	vbox.add_child(_menu_btn)
 
@@ -94,7 +94,7 @@ func _build_confirm_panel() -> void:
 	card.add_child(box)
 
 	var warning := Label.new()
-	warning.text = "Si sales ahora\nperderás el avance\nde la partida."
+	warning.text = tr(&"PAUSE_WARNING")
 	warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	warning.add_theme_font_size_override("font_size", 18)
 	warning.add_theme_color_override("font_color", Color(1.0, 0.9, 0.4))
@@ -106,12 +106,12 @@ func _build_confirm_panel() -> void:
 	box.add_child(buttons)
 
 	_confirm_cancel_btn = Button.new()
-	_confirm_cancel_btn.text = "CANCELAR"
+	_confirm_cancel_btn.text = tr(&"BTN_CANCEL")
 	_confirm_cancel_btn.pressed.connect(_on_confirm_cancel_pressed)
 	buttons.add_child(_confirm_cancel_btn)
 
 	_confirm_exit_btn = Button.new()
-	_confirm_exit_btn.text = "SALIR"
+	_confirm_exit_btn.text = tr(&"BTN_EXIT")
 	_confirm_exit_btn.pressed.connect(_on_confirm_exit_pressed)
 	buttons.add_child(_confirm_exit_btn)
 

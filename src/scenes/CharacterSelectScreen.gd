@@ -69,14 +69,14 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "ELIGE PERSONAJE"
+	title.text = tr(&"TITLE_CHARACTERS")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 26)
 	title.add_theme_color_override(&"font_color", Color(0.3, 0.85, 0.2))
 	root.add_child(title)
 
 	var gold_lbl: Label = Label.new()
-	gold_lbl.text = "Oro: %d" % SaveManager.get_gold()
+	gold_lbl.text = tr(&"LABEL_GOLD_COLON") % SaveManager.get_gold()
 	gold_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	gold_lbl.add_theme_font_size_override(&"font_size", 18)
 	gold_lbl.add_theme_color_override(&"font_color", GOLD_COLOR)
@@ -125,7 +125,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
@@ -189,14 +189,14 @@ func _build_card(
 	hbox.add_child(info)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = def.get("name", "") as String
+	name_lbl.text = tr(def.get("name", "") as String)
 	var name_color: Color = SELECTED_BORDER if selected else Color(0.9, 0.9, 0.9)
 	name_lbl.add_theme_color_override(&"font_color", name_color)
 	name_lbl.add_theme_font_size_override(&"font_size", 18)
 	info.add_child(name_lbl)
 
 	var desc_lbl: Label = Label.new()
-	desc_lbl.text = def.get("desc", "") as String
+	desc_lbl.text = tr(def.get("desc", "") as String)
 	desc_lbl.add_theme_font_size_override(&"font_size", 12)
 	desc_lbl.add_theme_color_override(&"font_color", Color(0.65, 0.65, 0.65))
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -206,13 +206,13 @@ func _build_card(
 	btn.custom_minimum_size = Vector2(100.0, 40.0)
 	btn.add_theme_font_size_override(&"font_size", 14)
 	if selected:
-		btn.text = "ACTIVO"
+		btn.text = tr(&"BTN_ACTIVE")
 		btn.disabled = true
 	elif unlocked:
-		btn.text = "ELEGIR"
+		btn.text = tr(&"BTN_SELECT_CHAR")
 		btn.pressed.connect(_on_select_pressed.bind(char_id))
 	else:
-		btn.text = "%d ORO" % cost
+		btn.text = tr(&"CHAR_BUY") % cost
 		btn.pressed.connect(_on_unlock_pressed.bind(char_id, cost, gold_lbl))
 	hbox.add_child(btn)
 
@@ -220,19 +220,19 @@ func _on_select_pressed(char_id: StringName) -> void:
 	SaveManager.set_selected_character(char_id)
 	var char_name: String = _get_char_name(char_id)
 	_rebuild()
-	_show_toast("✓ %s seleccionado" % char_name, SELECTED_BORDER)
+	_show_toast("✓ %s" % tr(char_name), SELECTED_BORDER)
 
 func _on_unlock_pressed(char_id: StringName, cost: int, _gold_lbl: Label) -> void:
 	if SaveManager.unlock_character(char_id, cost):
 		SaveManager.set_selected_character(char_id)
 		var char_name: String = _get_char_name(char_id)
 		_rebuild()
-		_show_toast("✓ %s desbloqueado" % char_name, GOLD_COLOR)
+		_show_toast("✓ %s" % tr(char_name), GOLD_COLOR)
 
 func _get_char_name(char_id: StringName) -> String:
 	for def in Constants.CHARACTERS:
 		if (def as Dictionary).get("id", &"") as StringName == char_id:
-			return (def as Dictionary).get("name", "") as String
+			return (def as Dictionary).get("name", "") as String  # tr() applied at call site
 	return str(char_id)
 
 func _rebuild() -> void:

@@ -37,7 +37,7 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "DESAFÍO SEMANAL"
+	title.text = tr(&"TITLE_WEEKLY")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 26)
 	title.add_theme_color_override(&"font_color", TITLE_COLOR)
@@ -79,14 +79,14 @@ func _build_ui() -> void:
 	inner_margin.add_child(card_vbox)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = challenge.get("name", "") as String
+	name_lbl.text = tr(challenge.get("name", "") as String)
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_font_size_override(&"font_size", 22)
 	name_lbl.add_theme_color_override(&"font_color", TITLE_COLOR)
 	card_vbox.add_child(name_lbl)
 
 	var desc_lbl: Label = Label.new()
-	desc_lbl.text = challenge.get("desc", "") as String
+	desc_lbl.text = tr(challenge.get("desc", "") as String)
 	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc_lbl.add_theme_font_size_override(&"font_size", 14)
 	desc_lbl.add_theme_color_override(&"font_color", Color(0.75, 0.75, 0.75))
@@ -98,7 +98,7 @@ func _build_ui() -> void:
 
 	var gold_mult: float = challenge.get("gold_mult", 1.0) as float
 	var reward_lbl: Label = Label.new()
-	reward_lbl.text = "Recompensa de oro: ×%.1f" % gold_mult
+	reward_lbl.text = tr(&"WEEKLY_REWARD") % gold_mult
 	reward_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	reward_lbl.add_theme_font_size_override(&"font_size", 16)
 	reward_lbl.add_theme_color_override(&"font_color", GOLD_COLOR)
@@ -106,7 +106,7 @@ func _build_ui() -> void:
 
 	if completed:
 		var done_lbl: Label = Label.new()
-		done_lbl.text = "✓ COMPLETADO ESTA SEMANA"
+		done_lbl.text = tr(&"WEEKLY_DONE")
 		done_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		done_lbl.add_theme_font_size_override(&"font_size", 14)
 		done_lbl.add_theme_color_override(&"font_color", DONE_COLOR)
@@ -117,7 +117,7 @@ func _build_ui() -> void:
 	root.add_child(gap2)
 
 	var play_btn: Button = Button.new()
-	play_btn.text = "JUGAR DESAFÍO"
+	play_btn.text = tr(&"BTN_PLAY_CHALLENGE")
 	play_btn.custom_minimum_size = Vector2(200.0, 54.0)
 	play_btn.add_theme_font_size_override(&"font_size", 20)
 	play_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -144,7 +144,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
