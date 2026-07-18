@@ -117,7 +117,10 @@ func _build_confirm_panel() -> void:
 
 func _on_game_paused(is_paused: bool) -> void:
 	if is_paused:
-		show()
+		# Deferred: prevents the same NOTIFICATION_WM_GO_BACK_REQUEST that triggered
+		# pause from being handled by PauseScreen (visible=true) in the same frame,
+		# which would immediately call _on_resume_pressed() and unpause.
+		show.call_deferred()
 	else:
 		hide()
 		_confirm_panel.hide()
