@@ -163,6 +163,7 @@ func _exit_tree() -> void:
 22. **`assetPackInstallTime/src/main/assets` debe existir** — `mkdir -p android/build/assetPackInstallTime/src/main/assets` antes de correr Gradle (el módulo de Play Asset Delivery lo requiere).
 23. **Primera subida a Play Store debe ser manual** — la API de Google Play retorna error genérico hasta que exista al menos una versión subida manualmente desde Play Console. Descargar el AAB del artefacto CI y subirlo una vez desde la web.
 24. **Pre-heat obligatorio** — `godot --headless --editor --quit || true` antes del export. Sin este paso, el file-system scanner de Godot puede crashear en headless al exportar.
+25. **`bundleRelease` no firma aunque se pasen `-Pperform_signing=true`** — en Godot 4.7, `config.gradle` puede ignorar estos flags. Solución: firmar el AAB explícitamente con `jarsigner` después de construirlo, antes de subir a Play Store. JAR Signature (v1) es suficiente — Google Play reemplaza la firma al distribuir si se usa Google Play App Signing. Ejemplo: `jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore KEY.keystore -storepass PASS builds/GuacBlaster.aab ALIAS`.
 
 ---
 

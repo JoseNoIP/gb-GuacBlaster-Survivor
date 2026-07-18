@@ -135,7 +135,28 @@ jobs:
       - name: Verificar AAB generado
         run: ls -lh builds/
 
-      # ── 9. Guardar artefacto ─────────────────────────────────────────────────
+      # ── 9b. Firmar AAB con jarsigner ────────────────────────────────────────
+      # bundleRelease puede producir un AAB sin firma de release si config.gradle
+      # no activa shouldSign() con los flags -P. jarsigner (v1/JAR) es suficiente
+      # para Google Play App Signing — Google reemplaza la firma al distribuir.
+      - name: Firmar AAB con jarsigner
+        env:
+          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          jarsigner \
+            -verbose \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
+            -keystore /tmp/guacblaster.keystore \
+            -storepass "$KEYSTORE_PASS" \
+            -keypass "$KEYSTORE_PASS" \
+            builds/GuacBlaster.aab \
+            "$KEYSTORE_ALIAS"
+          jarsigner -verify -verbose -certs builds/GuacBlaster.aab | head -5
+          echo "✓ AAB firmado correctamente"
+
+      # ── 10. Guardar artefacto ───────────────────────────────────────────────
       - name: Guardar AAB como artefacto
         uses: actions/upload-artifact@v4
         with:
