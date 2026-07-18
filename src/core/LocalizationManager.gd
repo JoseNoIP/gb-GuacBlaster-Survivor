@@ -2,7 +2,7 @@ extends Node
 ## Loads translations.csv at runtime and applies the saved locale.
 ## Autoloaded after SaveManager. Call set_language() to switch locale live.
 
-const CSV_PATH: String = "res://assets/translations/translations.csv"
+const CSV_PATH: String = "res://assets/translations/translations.txt"
 const DEFAULT_LOCALE: String = "es"
 const SUPPORTED_LOCALES: Array = ["es", "en", "pt_BR", "fr"]
 

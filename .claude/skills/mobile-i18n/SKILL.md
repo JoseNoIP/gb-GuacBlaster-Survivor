@@ -47,9 +47,9 @@ src/scenes/Main.gd                     ← enruta a selector o menú principal
 
 ## Implementación paso a paso
 
-### 1. Crear el CSV de traducciones
+### 1. Crear el archivo de traducciones
 
-`assets/translations/translations.csv`:
+`assets/translations/translations.txt` — extensión `.txt` obligatoria (ver anti-alucinación #5):
 ```csv
 keys,es,en,pt_BR,fr
 BTN_PLAY,JUGAR,PLAY,JOGAR,JOUER
@@ -69,7 +69,7 @@ Reglas del CSV:
 extends Node
 ## Carga traducciones de CSV en runtime. NO añadir class_name — es autoload (regla #10).
 
-const CSV_PATH: String = "res://assets/translations/translations.csv"
+const CSV_PATH: String = "res://assets/translations/translations.txt"
 const DEFAULT_LOCALE: String = "es"
 const SUPPORTED_LOCALES: Array = ["es", "en", "pt_BR", "fr"]
 
@@ -182,7 +182,7 @@ Usar `&"KEY"` (StringName) — más eficiente que `tr("KEY")` (String) al llamar
 2. **NO** usar archivos `.translation` binarios en CI/CD — requieren import del editor.
 3. **NO** asumir que `TranslationServer` tiene las traducciones en `_ready()` de otros scripts — `LocalizationManager` debe estar antes en el orden de autoloads.
 4. Los saltos de línea en CSV rompan el parser — usar `[BR]` como placeholder y reemplazar en `_load_csv()`.
-5. **El CSV no se empaqueta en Android automáticamente** — `FileAccess.open("res://...")` dinámico no hace que Godot incluya el archivo en el PCK. Añadir `*.csv` al `include_filter` en `export_presets.cfg`. Síntoma: `tr("KEY")` muestra la clave cruda en Android pero funciona en el editor (que lee del disco directamente).
+5. **NO usar extensión `.csv` para el archivo de traducciones** — Bug conocido de Godot ([#38957](https://github.com/godotengine/godot/issues/38957)): los `.csv` son excluidos del PCK incluso con `include_filter="*.csv"` porque Godot los clasifica internamente como recursos de traducción procesados. **Usar extensión `.txt`** y añadir `include_filter="*.txt"` en `export_presets.cfg`. El contenido puede seguir siendo CSV válido (`get_csv_line()` funciona igual sobre `.txt`).
 6. Los idiomas con glifos no-latinos (chino, japonés, árabe) requieren fuente separada en el tema de Godot. No los añadir si no hay fuente compatible disponible.
 
 ---
