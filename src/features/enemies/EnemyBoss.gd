@@ -36,10 +36,11 @@ func _physics_process(delta: float) -> void:
 	_move(delta)
 	velocity *= _speed_mult
 	move_and_slide()
-	var vp_width: float = get_viewport_rect().size.x
+	var vp: Vector2 = get_viewport_rect().size
+	position.y = vp.y * Constants.BOSS_Y_RATIO
 	if position.x <= 40.0:
 		_direction = 1.0
-	elif position.x >= vp_width - 40.0:
+	elif position.x >= vp.x - 40.0:
 		_direction = -1.0
 	_fire_timer -= delta
 	if _fire_timer <= 0.0:

@@ -32,6 +32,7 @@ const SPAWNER_ELITE_UNLOCK_TIME: float = 45.0
 const SPAWNER_ELITE_CHANCE: float = 0.08
 
 const BOSS_SPAWN_INTERVAL: float = 180.0
+const BOSS_Y_RATIO: float = 0.33  # boss Y position: 33% from top (near VP, still visible)
 
 # --- Character fire-mode geometry ---
 const CHAR_DOUBLE_OFFSET: float = 18.0
