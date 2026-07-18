@@ -29,7 +29,7 @@ func _build_ui() -> void:
 	_container.add_child(bg)
 
 	_label = Label.new()
-	_label.text = "¡JEFE EN CAMINO!"
+	_label.text = tr(&"BOSS_WARNING")
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_label.anchor_left = 0.0

@@ -123,6 +123,13 @@ func set_vibration_enabled(value: bool) -> void:
 	_data["vibration_enabled"] = value
 	_save()
 
+func get_language() -> String:
+	return _data.get("language", "") as String
+
+func set_language(lang: String) -> void:
+	_data["language"] = lang
+	_save()
+
 func get_achievements() -> Dictionary:
 	return _data.get("achievements", {}) as Dictionary
 

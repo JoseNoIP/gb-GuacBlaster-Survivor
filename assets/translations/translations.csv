@@ -1,0 +1,138 @@
+keys,es,en,pt_BR,fr
+BTN_PLAY,JUGAR,PLAY,JOGAR,JOUER
+BTN_BACK,VOLVER,BACK,VOLTAR,RETOUR
+BTN_RESTART,JUGAR DE NUEVO,PLAY AGAIN,JOGAR NOVAMENTE,REJOUER
+BTN_MENU,MENÚ PRINCIPAL,MAIN MENU,MENU PRINCIPAL,MENU PRINCIPAL
+BTN_CONTINUE,CONTINUAR,CONTINUE,CONTINUAR,CONTINUER
+BTN_RESTART_PAUSE,REINICIAR,RESTART,REINICIAR,RECOMMENCER
+BTN_BUY,COMPRAR,BUY,COMPRAR,ACHETER
+BTN_MAX,MAX,MAX,MAX,MAX
+BTN_ACTIVE,ACTIVO,ACTIVE,ATIVO,ACTIF
+BTN_SELECT_CHAR,ELEGIR,SELECT,ESCOLHER,CHOISIR
+BTN_CANCEL,CANCELAR,CANCEL,CANCELAR,ANNULER
+BTN_EXIT,SALIR,EXIT,SAIR,QUITTER
+BTN_PLAY_CHALLENGE,JUGAR DESAFÍO,PLAY CHALLENGE,JOGAR DESAFIO,JOUER AU DÉFI
+TITLE_GAME_OVER,GAME OVER,GAME OVER,GAME OVER,GAME OVER
+TITLE_PAUSE,JUEGO PAUSADO,PAUSED,JOGO PAUSADO,JEU EN PAUSE
+TITLE_ACHIEVEMENTS,LOGROS,ACHIEVEMENTS,CONQUISTAS,SUCCÈS
+TITLE_DAILY,MISIONES DIARIAS,DAILY MISSIONS,MISSÕES DIÁRIAS,MISSIONS QUOTIDIENNES
+TITLE_UPGRADES,MEJORAS PERMANENTES,PERMANENT UPGRADES,MELHORIAS PERMANENTES,AMÉLIORATIONS
+TITLE_WEEKLY,DESAFÍO SEMANAL,WEEKLY CHALLENGE,DESAFIO SEMANAL,DÉFI HEBDOMADAIRE
+TITLE_CHARACTERS,ELIGE PERSONAJE,CHOOSE CHARACTER,ESCOLHA PERSONAGEM,CHOISIR PERSONNAGE
+TITLE_HISCORES,MEJORES PUNTUACIONES,HIGH SCORES,MELHORES PONTUAÇÕES,MEILLEURS SCORES
+TITLE_BIOME,MAPA DE BIOMAS,BIOME MAP,MAPA DE BIOMAS,CARTE DES BIOMES
+TITLE_SETTINGS,CONFIGURACIÓN,SETTINGS,CONFIGURAÇÕES,PARAMÈTRES
+TITLE_LANG,IDIOMA,LANGUAGE,IDIOMA,LANGUE
+LABEL_SCORE,Score: %d,Score: %d,Pontos: %d,Score: %d
+LABEL_BEST,Mejor: %d,Best: %d,Melhor: %d,Meilleur: %d
+LABEL_TIME,Tiempo: %s,Time: %s,Tempo: %s,Temps: %s
+LABEL_GOLD_COLON,Oro: %d,Gold: %d,Ouro: %d,Or: %d
+LABEL_GOLD_EARNED,+%d oro,+%d gold,+%d ouro,+%d or
+LABEL_NEW_RECORD,¡NUEVO RÉCORD!,NEW RECORD!,NOVO RECORDE!,NOUVEAU RECORD!
+LABEL_VICTORIES,Victorias: %d,Victories: %d,Vitórias: %d,Victoires: %d
+LABEL_LVL,Lvl %d,Lvl %d,Nív %d,Niv %d
+HUD_BOSS,¡JEFE!,BOSS!,CHEFE!,PATRON!
+HUD_BOSS_TIMER,JEFE EN: %02d:%02d,BOSS IN: %02d:%02d,CHEFE EM: %02d:%02d,PATRON DS: %02d:%02d
+HUD_PHASE2,¡FASE 2!,PHASE 2!,FASE 2!,PHASE 2!
+HUD_ENDLESS,MODO ENDLESS — ¡sobrevive!,ENDLESS MODE — survive!,MODO INFINITO — sobreviva!,MODE INFINI — survivez!
+HUD_PLAYING_AS,Jugando como: %s,Playing as: %s,Jogando como: %s,Vous jouez: %s
+BOSS_WARNING,¡JEFE EN CAMINO!,BOSS INCOMING!,CHEFE A CAMINHO!,PATRON EN APPROCHE!
+PAUSE_WARNING,Si sales ahora[BR]perderás el avance[BR]de la partida.,If you leave now[BR]you'll lose your progress.,Se sair agora[BR]perderá o progresso[BR]da partida.,Quitter fera perdre[BR]votre progression.
+TUTORIAL_HINT,Arrastra con el dedo[BR]para moverte,Drag to move,Arraste para mover,Glissez pour bouger
+TUTORIAL_TAP,Toca para continuar,Tap to continue,Toque para continuar,Appuyez pour continuer
+SETTINGS_SENSITIVITY,SENSIBILIDAD DE CONTROL,CONTROL SENSITIVITY,SENSIBILIDADE DE CONTROLE,SENSIBILITÉ
+SETTINGS_SENS_HINT,100% = base  ·  200% = doble velocidad,100% = base  ·  200% = double speed,100% = base  ·  200% = dobro,100% = base  ·  200% = double
+SETTINGS_SOUND,SONIDO,SOUND,SOM,SON
+SETTINGS_VIBRATION,VIBRACIÓN,VIBRATION,VIBRAÇÃO,VIBRATION
+SETTINGS_LANGUAGE,IDIOMA,LANGUAGE,IDIOMA,LANGUE
+VICTORY_RUN,— Victoria %d —,— Victory %d —,— Vitória %d —,— Victoire %d —
+WEEKLY_REWARD,Recompensa de oro: ×%.1f,Gold reward: ×%.1f,Recompensa de ouro: ×%.1f,Récompense or: ×%.1f
+WEEKLY_DONE,✓ COMPLETADO ESTA SEMANA,✓ COMPLETED THIS WEEK,✓ CONCLUÍDO ESTA SEMANA,✓ COMPLÉTÉ CETTE SEMAINE
+HISCORE_EMPTY,Aún no hay puntuaciones registradas.[BR]¡Juega tu primera partida!,No scores yet.[BR]Play your first game!,Sem pontuações ainda.[BR]Jogue sua primeira partida!,Aucun score enregistré.[BR]Jouez votre première partie!
+HISCORE_SEP,── Mejores ──,── Best ──,── Melhores ──,── Meilleurs ──
+MENU_ENDLESS,MODO ENDLESS,ENDLESS MODE,MODO INFINITO,MODE INFINI
+MENU_HISCORES,🏆 RÉCORDS,🏆 HIGH SCORES,🏆 RECORDES,🏆 RECORDS
+MENU_SETTINGS,⚙  CONFIGURACIÓN,⚙  SETTINGS,⚙  CONFIGURAÇÕES,⚙  PARAMÈTRES
+EXIT_CONFIRM,¿Salir del juego?,Exit game?,Sair do jogo?,Quitter le jeu?
+TOAST_WEEKLY,★ DESAFÍO SEMANAL COMPLETADO,★ WEEKLY CHALLENGE COMPLETED,★ DESAFIO SEMANAL CONCLUÍDO,★ DÉFI HEBDOMADAIRE COMPLÉTÉ
+TOAST_MISSION,✓ %s  +%d oro,✓ %s  +%d gold,✓ %s  +%d ouro,✓ %s  +%d or
+UPG_DAMAGE_NAME,DAÑO,DAMAGE,DANO,DÉGÂTS
+UPG_DAMAGE_DESC,+5% daño por nivel,+5% damage per level,+5% dano por nível,+5% dégâts par niveau
+UPG_SPEED_NAME,CADENCIA,FIRE RATE,CADÊNCIA,CADENCE
+UPG_SPEED_DESC,+3% vel. disparo/nivel,+3% fire rate/level,+3% vel. disparo/nível,+3% cadence/niveau
+UPG_HEALTH_NAME,VIDA,HEALTH,VIDA,VIE
+UPG_HEALTH_DESC,+1 corazón por nivel,+1 heart per level,+1 coração por nível,+1 cœur par niveau
+UPG_LUCK_NAME,SUERTE,LUCK,SORTE,CHANCE
+UPG_LUCK_DESC,+5% XP por nivel,+5% XP per level,+5% XP por nível,+5% XP par niveau
+UPG_GOLD_NAME,BONUS ORO,GOLD BONUS,BÔNUS OURO,BONUS OR
+UPG_GOLD_DESC,+15% oro por partida/nivel,+15% gold per run/level,+15% ouro por partida/nível,+15% or par partie/niveau
+UPG_SHIELD_NAME,ESCUDO,SHIELD,ESCUDO,BOUCLIER
+UPG_SHIELD_DESC,+1 escudo inicial por nivel,+1 starting shield per level,+1 escudo inicial por nível,+1 bouclier de départ par niveau
+UPG_LEVEL,Nivel %d,Level %d,Nível %d,Niveau %d
+UPG_LEVEL_MAX,Nivel %d — MAX,Level %d — MAX,Nível %d — MAX,Niveau %d — MAX
+UPG_COST,Costo: %d oro,Cost: %d gold,Custo: %d ouro,Coût: %d or
+BIOME_0_NAME,Pradera Guacamole,Guacamole Prairie,Pradaria Guacamole,Prairie Guacamole
+BIOME_1_NAME,Jungla Nocturna,Night Jungle,Selva Noturna,Jungle Nocturne
+BIOME_2_NAME,Crepúsculo Índigo,Indigo Dusk,Crepúsculo Índigo,Crépuscule Indigo
+BIOME_3_NAME,Caldera Volcánica,Volcanic Caldera,Caldeira Vulcânica,Caldeira Volcanique
+BIOME_4_NAME,Abismo Oceánico,Ocean Abyss,Abismo Oceânico,Abîme Océanique
+BIOME_5_NAME,Desierto de Luna Sangre,Blood Moon Desert,Deserto Lua de Sangue,Désert de Lune de Sang
+BIOME_ALWAYS,Siempre disponible,Always available,Sempre disponível,Toujours disponible
+BIOME_UNLOCKED,Desbloqueado tras %d victoria(s),Unlocked after %d win(s),Desbloqueado após %d vitória(s),Débloqué après %d victoire(s)
+BIOME_LOCKED,Requiere %d victoria(s),Requires %d win(s),Requer %d vitória(s),Nécessite %d victoire(s)
+CHAR_GUAC_NAME,Guacamole,Guacamole,Guacamole,Guacamole
+CHAR_GUAC_DESC,Equilibrado. Estadísticas base.,Balanced. Base stats.,Equilibrado. Estatísticas base.,Équilibré. Stats de base.
+CHAR_HAB_NAME,Habanero,Habanero,Habanero,Habanero
+CHAR_HAB_DESC,Cadencia +25%. -1 corazón.,Fire rate +25%. -1 heart.,Cadência +25%. -1 coração.,Cadence +25%. -1 cœur.
+CHAR_SER_NAME,Serrano,Serrano,Serrano,Serrano
+CHAR_SER_DESC,Daño +15%. +1 corazón. Cadencia -20%.,Damage +15%. +1 heart. Fire rate -20%.,Dano +15%. +1 coração. Cadência -20%.,Dégâts +15%. +1 cœur. Cadence -20%.
+CHAR_DBL_NAME,Doble Guac,Double Guac,Duplo Guac,Double Guac
+CHAR_DBL_DESC,2 balas simultáneas en paralelo.,2 simultaneous parallel bullets.,2 balas simultâneas em paralelo.,2 balles simultanées en parallèle.
+CHAR_VEL_NAME,Jalapeño Veloz,Swift Jalapeño,Jalapeño Veloz,Jalapeño Rapide
+CHAR_VEL_DESC,Cadencia ×1.7. Daño -25%. Balas pequeñas.,Fire rate ×1.7. Damage -25%. Small bullets.,Cadência ×1.7. Dano -25%. Balas pequenas.,Cadence ×1.7. Dégâts -25%. Petites balles.
+CHAR_TOR_NAME,Tornado Verde,Green Tornado,Tornado Verde,Tornado Vert
+CHAR_TOR_DESC,3 balas en abanico (±25°). Cadencia -25%.,3 fan bullets (±25°). Fire rate -25%.,3 balas em leque (±25°). Cadência -25%.,3 balles en éventail (±25°). Cadence -25%.
+CHAR_APL_NAME,Mole Aplastador,Mole Crusher,Mole Esmagador,Mole Écraseur
+CHAR_APL_DESC,Daño ×2 + balas grandes. +1 corazón. Cadencia -40%.,Damage ×2 + large bullets. +1 heart. Fire rate -40%.,Dano ×2 + balas grandes. +1 coração. Cadência -40%.,Dégâts ×2 + grosses balles. +1 cœur. Cadence -40%.
+CHAR_FAN_NAME,Gran Abanico,Grand Fan,Grande Leque,Grand Éventail
+CHAR_FAN_DESC,5 balas en abanico (±40°). Cadencia -50%.,5 fan bullets (±40°). Fire rate -50%.,5 balas em leque (±40°). Cadência -50%.,5 balles en éventail (±40°). Cadence -50%.
+ACH_FIRST_WIN_NAME,Primera Victoria,First Victory,Primeira Vitória,Première Victoire
+ACH_FIRST_WIN_DESC,Gana tu primera partida,Win your first game,Ganhe sua primeira partida,Gagnez votre première partie
+ACH_FIVE_WIN_NAME,Campeón,Champion,Campeão,Champion
+ACH_FIVE_WIN_DESC,Gana 5 partidas,Win 5 games,Ganhe 5 partidas,Gagnez 5 parties
+ACH_BOSS_NAME,Cazajefes,Boss Slayer,Matador de Chefes,Tueur de Patron
+ACH_BOSS_DESC,Derrota a un jefe,Defeat a boss,Derrote um chefe,Vaincre un patron
+ACH_LVL10_NAME,Experto,Expert,Especialista,Expert
+ACH_LVL10_DESC,Alcanza nivel 10 en una partida,Reach level 10 in a game,Alcance nível 10 em uma partida,Atteindre le niveau 10
+ACH_GOLD_NAME,Rico Rico,Wealthy,Rico Rico,Riche
+ACH_GOLD_DESC,Acumula 500 oro disponible,Accumulate 500 available gold,Acumule 500 ouro disponível,Accumuler 500 or disponible
+ACH_HOARD_NAME,Coleccionista,Hoarder,Colecionador,Collectionneur
+ACH_HOARD_DESC,Recoge 50 power-ups en total,Collect 50 power-ups in total,Colete 50 power-ups no total,Collecter 50 power-ups au total
+ACH_VET_NAME,Veterano,Veteran,Veterano,Vétéran
+ACH_VET_DESC,Completa 25 sesiones,Complete 25 sessions,Complete 25 sessões,Compléter 25 sessions
+ACH_MASS_NAME,Masacre,Massacre,Massacre,Massacre
+ACH_MASS_DESC,Elimina 100 enemigos en partida,Eliminate 100 enemies in a game,Elimine 100 inimigos em uma partida,Éliminer 100 ennemis en partie
+ACH_SURV_NAME,Superviviente,Survivor,Sobrevivente,Survivant
+ACH_SURV_DESC,Sobrevive 90 segundos,Survive 90 seconds,Sobreviva 90 segundos,Survivre 90 secondes
+ACH_MAX_NAME,Perfeccionista,Perfectionist,Perfeccionista,Perfectionniste
+ACH_MAX_DESC,Maximiza cualquier mejora,Maximize any upgrade,Maximize qualquer melhoria,Maximiser n'importe quelle amélioration
+MISS_KILL20,Elimina 20 enemigos,Eliminate 20 enemies,Elimine 20 inimigos,Éliminer 20 ennemis
+MISS_KILL50,Elimina 50 enemigos,Eliminate 50 enemies,Elimine 50 inimigos,Éliminer 50 ennemis
+MISS_PUP5,Recoge 5 power-ups,Collect 5 power-ups,Colete 5 power-ups,Collecter 5 power-ups
+MISS_PUP10,Recoge 10 power-ups,Collect 10 power-ups,Colete 10 power-ups,Collecter 10 power-ups
+MISS_WIN,Gana una partida,Win a game,Ganhe uma partida,Gagner une partie
+MISS_PLAY3,Juega 3 partidas,Play 3 games,Jogue 3 partidas,Jouer 3 parties
+MISS_BOSS,Derrota al jefe,Defeat the boss,Derrote o chefe,Vaincre le patron
+MISS_LVL5,Alcanza nivel 5 en partida,Reach level 5 in a game,Alcance nível 5 em partida,Atteindre le niveau 5
+MISS_KILL100,Elimina 100 enemigos en total,Eliminate 100 enemies total,Elimine 100 inimigos no total,Éliminer 100 ennemis au total
+WEEK_HORDA_NAME,Horda Masiva,Massive Horde,Horda Massiva,Horde Massive
+WEEK_HORDA_DESC,Los enemigos aparecen 40% más rápido. Sin corazones caídos.,Enemies spawn 40% faster. No heart drops.,Inimigos aparecem 40% mais rápido. Sem corações.,Les ennemis apparaissent 40% plus vite. Sans cœurs.
+WEEK_ELITE_NAME,Lluvia Élite,Elite Rain,Chuva Élite,Pluie d'Élite
+WEEK_ELITE_DESC,Élites ×4 de frecuencia. El jefe tiene +50% HP.,Elites ×4 frequency. Boss has +50% HP.,Élites ×4 de frequência. Chefe com +50% HP.,Élites ×4 fréquence. Patron +50% HP.
+WEEK_SURV_NAME,Supervivencia Pura,Pure Survival,Sobrevivência Pura,Survie Pure
+WEEK_SURV_DESC,Sin corazones caídos. Spawn 25% más rápido.,No heart drops. Spawn 25% faster.,Sem corações. Spawn 25% mais rápido.,Sans cœurs. Spawn 25% plus vite.
+LANG_ES,Español,Español,Espanhol,Espagnol
+LANG_EN,English,English,Inglês,Anglais
+LANG_PT_BR,Português (BR),Português (BR),Português (BR),Portugais (BR)
+LANG_FR,Français,Français,Francês,Français
+CHAR_BUY,%d ORO,%d GOLD,%d OURO,%d OR

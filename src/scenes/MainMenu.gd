@@ -65,7 +65,7 @@ func _build_exit_confirm() -> void:
 	card.add_child(box)
 
 	var lbl: Label = Label.new()
-	lbl.text = "¿Salir del juego?"
+	lbl.text = tr(&"EXIT_CONFIRM")
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override(&"font_size", 22)
 	lbl.add_theme_color_override(&"font_color", Color(1.0, 0.9, 0.4))
@@ -77,13 +77,13 @@ func _build_exit_confirm() -> void:
 	box.add_child(btns)
 
 	var cancel_btn: Button = Button.new()
-	cancel_btn.text = "CANCELAR"
+	cancel_btn.text = tr(&"BTN_CANCEL")
 	cancel_btn.custom_minimum_size = Vector2(110.0, 42.0)
 	cancel_btn.pressed.connect(func() -> void: _exit_confirm.hide())
 	btns.add_child(cancel_btn)
 
 	var exit_btn: Button = Button.new()
-	exit_btn.text = "SALIR"
+	exit_btn.text = tr(&"BTN_EXIT")
 	exit_btn.custom_minimum_size = Vector2(90.0, 42.0)
 	exit_btn.pressed.connect(func() -> void: get_tree().quit())
 	btns.add_child(exit_btn)
@@ -211,7 +211,7 @@ func _build_ui() -> void:
 	endless_row.add_child(endless_check)
 
 	var endless_lbl: Label = Label.new()
-	endless_lbl.text = "MODO ENDLESS"
+	endless_lbl.text = tr(&"MENU_ENDLESS")
 	endless_lbl.add_theme_font_size_override(&"font_size", 14)
 	endless_lbl.add_theme_color_override(&"font_color", MUTED_COLOR)
 	endless_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -252,7 +252,7 @@ func _build_ui() -> void:
 	play_inner.add_child(play_icon)
 
 	var play_lbl: Label = Label.new()
-	play_lbl.text = "JUGAR"
+	play_lbl.text = tr(&"BTN_PLAY")
 	play_lbl.add_theme_font_size_override(&"font_size", 28)
 	play_lbl.add_theme_color_override(&"font_color", Color(0.9, 1.0, 0.88))
 	play_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -302,7 +302,7 @@ func _build_ui() -> void:
 	root.add_child(bottom_row)
 
 	var rec_btn: Button = Button.new()
-	rec_btn.text = "🏆 RÉCORDS"
+	rec_btn.text = tr(&"MENU_HISCORES")
 	rec_btn.custom_minimum_size = Vector2(140.0, 38.0)
 	rec_btn.add_theme_font_size_override(&"font_size", 14)
 	rec_btn.add_theme_stylebox_override(&"normal", _make_sb(BTN_CFG_COLOR, MUTED_COLOR, 8, 1))
@@ -316,7 +316,7 @@ func _build_ui() -> void:
 	bottom_row.add_child(rec_btn)
 
 	var cfg_btn: Button = Button.new()
-	cfg_btn.text = "⚙  CONFIGURACIÓN"
+	cfg_btn.text = tr(&"MENU_SETTINGS")
 	cfg_btn.custom_minimum_size = Vector2(160.0, 38.0)
 	cfg_btn.add_theme_font_size_override(&"font_size", 14)
 	var cfg_hover_color: Color = Color(0.16, 0.18, 0.16)

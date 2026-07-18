@@ -35,7 +35,7 @@ func _build_ui() -> void:
 	root.add_child(top_pad)
 
 	var title: Label = Label.new()
-	title.text = "MEJORES PUNTUACIONES"
+	title.text = tr(&"TITLE_HISCORES")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 28)
 	title.add_theme_color_override(&"font_color", TITLE_COLOR)
@@ -63,7 +63,7 @@ func _build_ui() -> void:
 	var scores: Array = SaveManager.get_high_scores()
 	if scores.is_empty():
 		var empty_lbl: Label = Label.new()
-		empty_lbl.text = "Aún no hay puntuaciones registradas.\n¡Juega tu primera partida!"
+		empty_lbl.text = tr(&"HISCORE_EMPTY")
 		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		empty_lbl.add_theme_font_size_override(&"font_size", 16)
 		empty_lbl.add_theme_color_override(&"font_color", MUTED_COLOR)
@@ -127,7 +127,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)

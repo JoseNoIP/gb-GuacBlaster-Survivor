@@ -10,10 +10,14 @@ const LABEL_COLOR: Color = Color(0.9, 0.9, 0.9)
 const VALUE_COLOR: Color = Color(0.3, 0.85, 0.2)
 const HINT_COLOR: Color = Color(0.55, 0.55, 0.55)
 
+const LANG_IDS: Array = ["es", "en", "pt_BR", "fr"]
+const LANG_KEYS: Array = ["LANG_ES", "LANG_EN", "LANG_PT_BR", "LANG_FR"]
+
 var _sensitivity_pct: int = 100
 var _sensitivity_label: Label
 var _sound_toggle: CheckButton
 var _vibration_toggle: CheckButton
+var _lang_label: Label
 
 func _ready() -> void:
 	var raw: int = roundi(SaveManager.get_swipe_sensitivity() * 100.0)
@@ -43,7 +47,7 @@ func _build_ui() -> void:
 	root.add_child(spacer_top)
 
 	var title: Label = Label.new()
-	title.text = "CONFIGURACIÓN"
+	title.text = tr(&"TITLE_SETTINGS")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override(&"font_size", 32)
 	title.add_theme_color_override(&"font_color", TITLE_COLOR)
@@ -58,7 +62,7 @@ func _build_ui() -> void:
 	root.add_child(section)
 
 	var section_title: Label = Label.new()
-	section_title.text = "SENSIBILIDAD DE CONTROL"
+	section_title.text = tr(&"SETTINGS_SENSITIVITY")
 	section_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	section_title.add_theme_font_size_override(&"font_size", 18)
 	section_title.add_theme_color_override(&"font_color", LABEL_COLOR)
@@ -82,7 +86,7 @@ func _build_ui() -> void:
 	section.add_child(slider)
 
 	var hint: Label = Label.new()
-	hint.text = "100% = base  ·  200% = doble velocidad"
+	hint.text = tr(&"SETTINGS_SENS_HINT")
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override(&"font_size", 13)
 	hint.add_theme_color_override(&"font_color", HINT_COLOR)
@@ -92,11 +96,18 @@ func _build_ui() -> void:
 	sep2.custom_minimum_size = Vector2(0.0, 16.0)
 	root.add_child(sep2)
 
-	var sound_row := _build_toggle_row("SONIDO", SaveManager.get_sound_enabled(), _on_sound_toggled)
+	var sound_row := _build_toggle_row(
+			tr(&"SETTINGS_SOUND"), true, SaveManager.get_sound_enabled(), _on_sound_toggled)
 	root.add_child(sound_row)
 	var vib_enabled: bool = SaveManager.get_vibration_enabled()
-	var vib_row := _build_toggle_row("VIBRACIÓN", vib_enabled, _on_vibration_toggled)
+	var vib_row := _build_toggle_row(
+			tr(&"SETTINGS_VIBRATION"), false, vib_enabled, _on_vibration_toggled)
 	root.add_child(vib_row)
+
+	var sep_lang: Control = Control.new()
+	sep_lang.custom_minimum_size = Vector2(0.0, 8.0)
+	root.add_child(sep_lang)
+	_build_language_row(root)
 
 	var spacer_bottom: Control = Control.new()
 	spacer_bottom.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -118,7 +129,7 @@ func _build_ui() -> void:
 	back_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_icon)
 	var back_lbl: Label = Label.new()
-	back_lbl.text = " VOLVER"
+	back_lbl.text = " " + tr(&"BTN_BACK")
 	back_lbl.add_theme_font_size_override(&"font_size", 17)
 	back_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_hbox.add_child(back_lbl)
@@ -129,7 +140,7 @@ func _build_ui() -> void:
 	root.add_child(spacer_final)
 
 func _build_toggle_row(
-		label_text: String, initial_value: bool, callback: Callable
+		label_text: String, is_sound: bool, initial_value: bool, callback: Callable
 ) -> HBoxContainer:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 16)
@@ -146,13 +157,45 @@ func _build_toggle_row(
 	var toggle: CheckButton = CheckButton.new()
 	toggle.button_pressed = initial_value
 	toggle.toggled.connect(callback)
-	if label_text == "SONIDO":
+	if is_sound:
 		_sound_toggle = toggle
 	else:
 		_vibration_toggle = toggle
 	row.add_child(toggle)
 
 	return row
+
+func _build_language_row(parent: VBoxContainer) -> void:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 16)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	row.custom_minimum_size = Vector2(280.0, 0.0)
+
+	var lbl: Label = Label.new()
+	lbl.text = tr(&"SETTINGS_LANGUAGE")
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override(&"font_size", 20)
+	lbl.add_theme_color_override(&"font_color", LABEL_COLOR)
+	row.add_child(lbl)
+
+	var current_lang: String = LocalizationManager.get_current_language()
+	var current_idx: int = LANG_IDS.find(current_lang)
+	if current_idx < 0:
+		current_idx = 0
+
+	_lang_label = Label.new()
+	_lang_label.text = tr(LANG_KEYS[current_idx] as String)
+	_lang_label.add_theme_font_size_override(&"font_size", 18)
+	_lang_label.add_theme_color_override(&"font_color", VALUE_COLOR)
+	row.add_child(_lang_label)
+
+	var next_btn: Button = Button.new()
+	next_btn.text = "▶"
+	next_btn.custom_minimum_size = Vector2(36.0, 36.0)
+	next_btn.pressed.connect(_on_lang_next_pressed)
+	row.add_child(next_btn)
+
+	parent.add_child(row)
 
 func _on_slider_changed(value: float) -> void:
 	_sensitivity_pct = int(value)
@@ -164,6 +207,13 @@ func _on_sound_toggled(pressed: bool) -> void:
 
 func _on_vibration_toggled(pressed: bool) -> void:
 	SaveManager.set_vibration_enabled(pressed)
+
+func _on_lang_next_pressed() -> void:
+	var current: String = LocalizationManager.get_current_language()
+	var idx: int = LANG_IDS.find(current)
+	idx = (idx + 1) % LANG_IDS.size()
+	LocalizationManager.set_language(LANG_IDS[idx] as String)
+	_lang_label.text = tr(LANG_KEYS[idx] as String)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:

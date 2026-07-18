@@ -153,8 +153,8 @@ const LASER_TICK_INTERVAL: float = 0.3
 const CHARACTERS: Array = [
 	{
 		"id": &"guac",
-		"name": "Guacamole",
-		"desc": "Equilibrado. Estadísticas base.",
+		"name": "CHAR_GUAC_NAME",
+		"desc": "CHAR_GUAC_DESC",
 		"hp_bonus": 0, "fire_rate_mult": 1.0, "damage_mult": 1.0, "cost": 0,
 		"fire_mode": &"normal",
 		"sprite_tint": Color(1.0, 1.0, 1.0),
@@ -163,8 +163,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"habanero",
-		"name": "Habanero",
-		"desc": "Cadencia +25%. -1 corazón.",
+		"name": "CHAR_HAB_NAME",
+		"desc": "CHAR_HAB_DESC",
 		"hp_bonus": -1, "fire_rate_mult": 1.25, "damage_mult": 1.0, "cost": 600,
 		"fire_mode": &"normal",
 		"sprite_tint": Color(1.0, 0.55, 0.15),
@@ -173,8 +173,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"serrano",
-		"name": "Serrano",
-		"desc": "Daño +15%. +1 corazón. Cadencia -20%.",
+		"name": "CHAR_SER_NAME",
+		"desc": "CHAR_SER_DESC",
 		"hp_bonus": 1, "fire_rate_mult": 0.8, "damage_mult": 1.15, "cost": 900,
 		"fire_mode": &"normal",
 		"sprite_tint": Color(0.65, 1.0, 0.15),
@@ -183,8 +183,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"doble_guac",
-		"name": "Doble Guac",
-		"desc": "2 balas simultáneas en paralelo.",
+		"name": "CHAR_DBL_NAME",
+		"desc": "CHAR_DBL_DESC",
 		"hp_bonus": 0, "fire_rate_mult": 1.0, "damage_mult": 1.0, "cost": 1350,
 		"fire_mode": &"double",
 		"sprite_tint": Color(0.2, 0.85, 1.0),
@@ -193,8 +193,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"veloz",
-		"name": "Jalapeño Veloz",
-		"desc": "Cadencia ×1.7. Daño -25%. Balas pequeñas.",
+		"name": "CHAR_VEL_NAME",
+		"desc": "CHAR_VEL_DESC",
 		"hp_bonus": 0, "fire_rate_mult": 1.7, "damage_mult": 0.75, "cost": 1800,
 		"fire_mode": &"normal",
 		"sprite_tint": Color(1.0, 1.0, 0.15),
@@ -203,8 +203,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"tornado",
-		"name": "Tornado Verde",
-		"desc": "3 balas en abanico (±25°). Cadencia -25%.",
+		"name": "CHAR_TOR_NAME",
+		"desc": "CHAR_TOR_DESC",
 		"hp_bonus": 0, "fire_rate_mult": 0.75, "damage_mult": 1.0, "cost": 2250,
 		"fire_mode": &"fan3",
 		"sprite_tint": Color(0.55, 0.25, 1.0),
@@ -213,8 +213,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"aplastador",
-		"name": "Mole Aplastador",
-		"desc": "Daño ×2, balas grandes. +1 corazón. Cadencia -40%.",
+		"name": "CHAR_APL_NAME",
+		"desc": "CHAR_APL_DESC",
 		"hp_bonus": 1, "fire_rate_mult": 0.6, "damage_mult": 2.0, "cost": 3000,
 		"fire_mode": &"heavy",
 		"sprite_tint": Color(0.65, 0.3, 0.08),
@@ -223,8 +223,8 @@ const CHARACTERS: Array = [
 	},
 	{
 		"id": &"gran_abanico",
-		"name": "Gran Abanico",
-		"desc": "5 balas en abanico (±40°). Cadencia -50%.",
+		"name": "CHAR_FAN_NAME",
+		"desc": "CHAR_FAN_DESC",
 		"hp_bonus": 0, "fire_rate_mult": 0.5, "damage_mult": 1.0, "cost": 4200,
 		"fire_mode": &"fan5",
 		"sprite_tint": Color(1.0, 0.2, 0.65),
@@ -235,29 +235,29 @@ const CHARACTERS: Array = [
 
 # --- Achievements ---
 const ACHIEVEMENTS: Array = [
-	{"id": &"first_victory",  "name": "Primera Victoria",   "desc": "Gana tu primera partida"},
-	{"id": &"five_victories", "name": "Campeón",            "desc": "Gana 5 partidas"},
-	{"id": &"boss_slayer",    "name": "Cazajefes",          "desc": "Derrota a un jefe"},
-	{"id": &"level_10",       "name": "Experto",            "desc": "Alcanza nivel 10 en una partida"},
-	{"id": &"gold_500",       "name": "Rico Rico",          "desc": "Acumula 500 oro disponible"},
-	{"id": &"power_hoarder",  "name": "Coleccionista",      "desc": "Recoge 50 power-ups en total"},
-	{"id": &"veteran",        "name": "Veterano",           "desc": "Completa 25 sesiones"},
-	{"id": &"massacre",      "name": "Masacre",        "desc": "Elimina 100 enemigos en partida"},
-	{"id": &"survivor_90",  "name": "Superviviente",  "desc": "Sobrevive 90 segundos"},
-	{"id": &"max_upgrade",  "name": "Perfeccionista", "desc": "Maximiza cualquier mejora"},
+	{"id": &"first_victory",  "name": "ACH_FIRST_WIN_NAME", "desc": "ACH_FIRST_WIN_DESC"},
+	{"id": &"five_victories", "name": "ACH_FIVE_WIN_NAME",  "desc": "ACH_FIVE_WIN_DESC"},
+	{"id": &"boss_slayer",    "name": "ACH_BOSS_NAME",      "desc": "ACH_BOSS_DESC"},
+	{"id": &"level_10",       "name": "ACH_LVL10_NAME",     "desc": "ACH_LVL10_DESC"},
+	{"id": &"gold_500",       "name": "ACH_GOLD_NAME",      "desc": "ACH_GOLD_DESC"},
+	{"id": &"power_hoarder",  "name": "ACH_HOARD_NAME",     "desc": "ACH_HOARD_DESC"},
+	{"id": &"veteran",        "name": "ACH_VET_NAME",       "desc": "ACH_VET_DESC"},
+	{"id": &"massacre",       "name": "ACH_MASS_NAME",      "desc": "ACH_MASS_DESC"},
+	{"id": &"survivor_90",    "name": "ACH_SURV_NAME",      "desc": "ACH_SURV_DESC"},
+	{"id": &"max_upgrade",    "name": "ACH_MAX_NAME",       "desc": "ACH_MAX_DESC"},
 ]
 
 # --- Daily Missions ---
 const DAILY_MISSION_POOL: Array = [
-	{"id": &"kill_20",     "desc": "Elimina 20 enemigos",          "target": 20,  "reward": 30},
-	{"id": &"kill_50",     "desc": "Elimina 50 enemigos",          "target": 50,  "reward": 60},
-	{"id": &"powerups_5",  "desc": "Recoge 5 power-ups",           "target": 5,   "reward": 40},
-	{"id": &"powerups_10", "desc": "Recoge 10 power-ups",          "target": 10,  "reward": 80},
-	{"id": &"win_game",    "desc": "Gana una partida",             "target": 1,   "reward": 100},
-	{"id": &"play_3",      "desc": "Juega 3 partidas",             "target": 3,   "reward": 50},
-	{"id": &"boss_kill",   "desc": "Derrota al jefe",              "target": 1,   "reward": 120},
-	{"id": &"level_5",     "desc": "Alcanza nivel 5 en partida",   "target": 5,   "reward": 35},
-	{"id": &"kill_100",    "desc": "Elimina 100 enemigos en total","target": 100, "reward": 75},
+	{"id": &"kill_20",     "desc": "MISS_KILL20",  "target": 20,  "reward": 30},
+	{"id": &"kill_50",     "desc": "MISS_KILL50",  "target": 50,  "reward": 60},
+	{"id": &"powerups_5",  "desc": "MISS_PUP5",    "target": 5,   "reward": 40},
+	{"id": &"powerups_10", "desc": "MISS_PUP10",   "target": 10,  "reward": 80},
+	{"id": &"win_game",    "desc": "MISS_WIN",      "target": 1,   "reward": 100},
+	{"id": &"play_3",      "desc": "MISS_PLAY3",   "target": 3,   "reward": 50},
+	{"id": &"boss_kill",   "desc": "MISS_BOSS",    "target": 1,   "reward": 120},
+	{"id": &"level_5",     "desc": "MISS_LVL5",    "target": 5,   "reward": 35},
+	{"id": &"kill_100",    "desc": "MISS_KILL100", "target": 100, "reward": 75},
 ]
 const DAILY_MISSIONS_COUNT: int = 3
 
@@ -265,8 +265,8 @@ const DAILY_MISSIONS_COUNT: int = 3
 const WEEKLY_CHALLENGE_POOL: Array = [
 	{
 		"id": &"horda_masiva",
-		"name": "Horda Masiva",
-		"desc": "Los enemigos aparecen 40% más rápido. Sin corazones caídos.",
+		"name": "WEEK_HORDA_NAME",
+		"desc": "WEEK_HORDA_DESC",
 		"spawn_rate_mult": 0.6,
 		"elite_chance_mult": 1.0,
 		"boss_hp_mult": 1.0,
@@ -275,8 +275,8 @@ const WEEKLY_CHALLENGE_POOL: Array = [
 	},
 	{
 		"id": &"lluvia_elite",
-		"name": "Lluvia Élite",
-		"desc": "Élites ×4 de frecuencia. El jefe tiene +50% HP.",
+		"name": "WEEK_ELITE_NAME",
+		"desc": "WEEK_ELITE_DESC",
 		"spawn_rate_mult": 1.0,
 		"elite_chance_mult": 4.0,
 		"boss_hp_mult": 1.5,
@@ -285,8 +285,8 @@ const WEEKLY_CHALLENGE_POOL: Array = [
 	},
 	{
 		"id": &"supervivencia_pura",
-		"name": "Supervivencia Pura",
-		"desc": "Sin corazones caídos. Spawn 25% más rápido.",
+		"name": "WEEK_SURV_NAME",
+		"desc": "WEEK_SURV_DESC",
 		"spawn_rate_mult": 0.75,
 		"elite_chance_mult": 1.0,
 		"boss_hp_mult": 1.0,

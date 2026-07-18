@@ -145,13 +145,13 @@ func _build_ui() -> void:
 
 func _on_game_won(score: int, duration: float) -> void:
 	var is_new_record: bool = score > _prev_best
-	_run_label.text = "— Victoria %d —" % SaveManager.get_victories()
-	_score_label.text = "Score: 0"
+	_run_label.text = tr(&"VICTORY_RUN") % SaveManager.get_victories()
+	_score_label.text = tr(&"LABEL_SCORE") % 0
 	var mins: int = int(duration) / 60
 	var secs: int = int(duration) % 60
-	_time_label.text = "Tiempo: %02d:%02d" % [mins, secs]
-	_best_label.text = "Mejor: %d" % SaveManager.get_best_score()
-	_gold_label.text = "+%d oro" % _gold_this_run
+	_time_label.text = tr(&"LABEL_TIME") % ("%02d:%02d" % [mins, secs])
+	_best_label.text = tr(&"LABEL_BEST") % SaveManager.get_best_score()
+	_gold_label.text = tr(&"LABEL_GOLD_EARNED") % _gold_this_run
 	_record_label.visible = is_new_record
 	_refresh_leaderboard(score)
 	get_tree().create_timer(1.0).timeout.connect(
@@ -168,7 +168,7 @@ func _reveal(score: int, is_new_record: bool) -> void:
 	var tween: Tween = create_tween()
 	tween.tween_property(_panel, ^"modulate:a", 1.0, 0.3)
 	tween.tween_method(
-		func(v: float) -> void: _score_label.text = "Score: %d" % int(v),
+		func(v: float) -> void: _score_label.text = tr(&"LABEL_SCORE") % int(v),
 		0.0, float(score), 1.2
 	)
 	if is_new_record:
