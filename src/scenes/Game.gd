@@ -5,7 +5,7 @@ const SHAKE_DURATION: float = 0.3
 const SHAKE_STRENGTH: float = 5.0
 
 const BG_PULSE_SPEED: float = 0.35
-# Vanishing point at 25% from top — enemies/projectiles will converge here later
+# Matches Constants.PERSPECTIVE_VP_Y_RATIO — kept local to avoid autoload const in const expr
 const VP_Y_RATIO: float = 0.25
 # Background zooms in slowly toward VP: 8% total over BG_ZOOM_DURATION seconds
 const BG_ZOOM_MAX: float = 0.08

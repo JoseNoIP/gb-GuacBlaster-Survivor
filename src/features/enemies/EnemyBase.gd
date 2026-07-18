@@ -13,6 +13,7 @@ var _xp_value: int = 5
 var _hit_tween: Tween = null
 var _speed_mult: float = 1.0
 var _hp_time_mult: float = 1.0
+var _use_perspective_scale: bool = true
 
 func _ready() -> void:
 	add_to_group(&"enemies")
@@ -27,6 +28,16 @@ func _physics_process(delta: float) -> void:
 	_move(delta)
 	velocity *= _speed_mult
 	move_and_slide()
+	if _use_perspective_scale:
+		_update_perspective_scale()
+
+func _update_perspective_scale() -> void:
+	var screen_h: float = get_viewport_rect().size.y
+	var vp_y: float = screen_h * Constants.PERSPECTIVE_VP_Y_RATIO
+	var full_y: float = screen_h * Constants.PERSPECTIVE_FULL_SIZE_Y_RATIO
+	var t: float = clampf((global_position.y - vp_y) / (full_y - vp_y), 0.0, 1.0)
+	var s: float = lerpf(Constants.PERSPECTIVE_SCALE_MIN, Constants.PERSPECTIVE_SCALE_MAX, t)
+	scale = Vector2(s, s)
 
 func _move(_delta: float) -> void:
 	pass
