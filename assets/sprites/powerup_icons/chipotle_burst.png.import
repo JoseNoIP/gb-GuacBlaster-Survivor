@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://begfvy8m2aq6j"
-path="res://.godot/imported/super_guac.png-a49b11ef9660c19b3e062b2a4842d5dd.ctex"
+uid="uid://cdsid7iw6itvb"
+path="res://.godot/imported/chipotle_burst.png-76d6813d3c535c3e6709a3e41fd32e62.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/powerup_icons/super_guac.png"
-dest_files=["res://.godot/imported/super_guac.png-a49b11ef9660c19b3e062b2a4842d5dd.ctex"]
+source_file="res://assets/sprites/powerup_icons/chipotle_burst.png"
+dest_files=["res://.godot/imported/chipotle_burst.png-76d6813d3c535c3e6709a3e41fd32e62.ctex"]
 
 [params]
 
