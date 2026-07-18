@@ -4,11 +4,12 @@ extends Node2D
 const SHAKE_DURATION: float = 0.3
 const SHAKE_STRENGTH: float = 5.0
 
-const BG_SCROLL_X: float = 22.0
-const BG_SCROLL_Y: float = 18.0
-const BG_SPEED_X: float = 0.11
-const BG_SPEED_Y: float = 0.08
 const BG_PULSE_SPEED: float = 0.35
+# Vanishing point at 25% from top — enemies/projectiles will converge here later
+const VP_Y_RATIO: float = 0.25
+# Background zooms in slowly toward VP: 8% total over BG_ZOOM_DURATION seconds
+const BG_ZOOM_MAX: float = 0.08
+const BG_ZOOM_DURATION: float = 180.0
 
 var _shake_timer: float = 0.0
 var _tutorial_root: Control = null
@@ -16,6 +17,7 @@ var _tutorial_dismissed: bool = false
 var _bg_time: float = 0.0
 var _bg_base_color: Color = Color(0.08, 0.1, 0.08, 1.0)
 var _bg_sprite: Sprite2D = null
+var _bg_initial_scale: Vector2 = Vector2.ONE
 var _vp_center: Vector2 = Vector2.ZERO
 
 @onready var _camera: Camera2D = $Camera2D
@@ -43,8 +45,13 @@ func _process(delta: float) -> void:
 	var pulse: float = (1.0 + sin(_bg_time * BG_PULSE_SPEED)) * 0.5
 	_background.color = _bg_base_color.lerp(_bg_base_color.lightened(0.10), pulse)
 	if _bg_sprite != null:
-		_bg_sprite.position.x = _vp_center.x + sin(_bg_time * BG_SPEED_X) * BG_SCROLL_X
-		_bg_sprite.position.y = _vp_center.y + sin(_bg_time * BG_SPEED_Y) * BG_SCROLL_Y
+		# Zoom slowly toward vanishing point (VP_Y_RATIO from top, centered horizontally).
+		# Math: for VP at (Cx, Cy - H*VP_Y_RATIO), keeping VP stationary while scaling:
+		#   position.y = Cy * (1 + 2 * VP_Y_RATIO * z)  where z = zoom progress 0→BG_ZOOM_MAX
+		var z: float = minf(_bg_time / BG_ZOOM_DURATION, 1.0) * BG_ZOOM_MAX
+		_bg_sprite.scale = _bg_initial_scale * (1.0 + z)
+		_bg_sprite.position.x = _vp_center.x
+		_bg_sprite.position.y = _vp_center.y * (1.0 + 2.0 * VP_Y_RATIO * z)
 	if _shake_timer > 0.0:
 		_shake_timer -= delta
 		_camera.offset = Vector2(
@@ -78,9 +85,8 @@ func _load_bg_texture(biome: int, variant: int, gen: int) -> void:
 	var tex_size: Vector2 = tex.get_size()
 	var vp: Vector2 = get_viewport_rect().size
 	var base_scale: Vector2 = Vector2(vp.x / tex_size.x, vp.y / tex_size.y)
-	var extra: float = maxf(
-		BG_SCROLL_X * 2.0 / vp.x, BG_SCROLL_Y * 2.0 / vp.y
-	) + 0.02
+	# Extra margin so VP zoom never reveals black edges (shift + scale growth)
+	var extra: float = BG_ZOOM_MAX * VP_Y_RATIO + 0.06
 	var sprite: Sprite2D = Sprite2D.new()
 	sprite.texture = tex
 	sprite.centered = true
@@ -88,6 +94,7 @@ func _load_bg_texture(biome: int, variant: int, gen: int) -> void:
 	sprite.scale = base_scale * (1.0 + extra)
 	sprite.modulate = _get_gen_tint(gen)
 	_bg_sprite = sprite
+	_bg_initial_scale = sprite.scale
 	add_child(sprite)
 	move_child(sprite, _background.get_index() + 1)
 
