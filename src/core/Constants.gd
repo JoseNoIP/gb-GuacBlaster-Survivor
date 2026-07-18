@@ -141,6 +141,7 @@ const PERSPECTIVE_VP_Y_RATIO: float = 0.25       # vanishing point at 25% from t
 const PERSPECTIVE_FULL_SIZE_Y_RATIO: float = 0.45 # enemies reach full size by 45% from top
 const PERSPECTIVE_SCALE_MIN: float = 0.35         # enemy size at vanishing point
 const PERSPECTIVE_SCALE_MAX: float = 1.0          # enemy size at full-size threshold
+const PROJECTILE_CONVERGENCE: float = 0.12        # blend toward VP direction (0=none, 1=full)
 const GRENADE_DAMAGE: int = 30
 const LASER_DAMAGE_PER_TICK: int = 5
 const LASER_TICK_INTERVAL: float = 0.3

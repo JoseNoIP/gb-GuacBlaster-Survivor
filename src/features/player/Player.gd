@@ -209,6 +209,13 @@ func _on_game_won_fired(_score: int, _duration: float) -> void:
 	set_process(false)
 	set_process_input(false)
 	_autofire_timer.stop()
+	var tween: Tween = create_tween()
+	tween.tween_interval(0.3)
+	tween.tween_property(self, "scale", Vector2(1.3, 0.7), 0.1)
+	tween.tween_property(self, "scale", Vector2(0.6, 1.5), 0.12)
+	(tween.parallel().tween_property(self, "position:y", -200.0, 0.7)
+			.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC))
+	tween.tween_callback(queue_free)
 
 func _die() -> void:
 	EventBus.player_died.emit()

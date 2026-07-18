@@ -70,10 +70,14 @@ func _spawn(spawn_position: Vector2, direction: Vector2, damage: float) -> void:
 	if projectile_scene == null:
 		push_error("ProjectileSpawner: projectile_scene not assigned")
 		return
+	var vp: Vector2 = get_viewport_rect().size
+	var vp_pos: Vector2 = Vector2(vp.x * 0.5, vp.y * Constants.PERSPECTIVE_VP_Y_RATIO)
+	var to_vp: Vector2 = (vp_pos - spawn_position).normalized()
+	var converged: Vector2 = direction.lerp(to_vp, Constants.PROJECTILE_CONVERGENCE).normalized()
 	var proj: Node2D = projectile_scene.instantiate()
 	get_parent().add_child(proj)
 	proj.global_position = spawn_position
-	proj.call(&"setup", damage, direction, _pierce_count, _bouncy)
+	proj.call(&"setup", damage, converged, _pierce_count, _bouncy)
 	proj.call(&"setup_visuals", _bullet_tint, _bullet_scale)
 	AudioManager.play_sfx(&"shoot")
 
