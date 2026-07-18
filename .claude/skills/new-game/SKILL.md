@@ -50,6 +50,7 @@ Responder estas preguntas con el usuario ANTES de empezar a codificar:
 2. **¿Vista top-down con sensación de profundidad?** → Evaluar ilusión de perspectiva (ver agente `game-feel`, sección 6). No es automático — requiere que el diseño del juego lo soporte.
 3. **¿Publicar en Google Play?** → Usar `/android-deploy` para el pipeline completo. Requiere keystore + cuenta de servicio de Google.
 4. **¿Sesiones cortas (< 5 min)?** → El arco sesión debe ser: aprendizaje (min 0–1) → acumulación (min 1–3) → clímax (boss / objetivo final).
+5. **¿Tutorial interactivo (FTUE)?** → Recomendado siempre. Ver arquitectura en FASE 8 y anti-alucinación §FTUE. El tutorial usa los sistemas reales del juego (Player, GemSpawner, PowerUpDropper) en una escena separada `TutorialGame.tscn`.
 
 ---
 
@@ -303,6 +304,7 @@ Antes de cerrar, ofrecer estas features probadas que elevan la calidad percibida
 
 | Feature | Skill / Agente | Cuándo aplicar |
 |---|---|---|
+| Tutorial interactivo (FTUE) | Ver §FTUE en este archivo | Siempre — reduce abandono en primera sesión |
 | Multi-idioma | `/mobile-i18n` | Si el mercado objetivo incluye más de un idioma |
 | Ilusión de profundidad | agente `game-feel` §6 | Si el juego tiene vista top-down y enemigos que se acercan |
 | Animación de victoria | agente `game-feel` §7 | Siempre — el jugador debe "salir" antes de ver resultados |
