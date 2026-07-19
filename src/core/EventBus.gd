@@ -49,6 +49,7 @@ signal menu_requested()
 
 # --- Pickups ---
 signal heart_collected()
+signal heart_converted_to_gold(amount: int)
 
 # --- Meta ---
 signal gold_earned(amount: int)

@@ -5,6 +5,8 @@ extends Node
 
 # --- Player ---
 const PLAYER_BASE_HEALTH: int = 3
+const PLAYER_MAX_HEALTH: int = 4
+const HEART_TO_GOLD: int = 25
 const PLAYER_BASE_SPEED: float = 200.0
 const PLAYER_BASE_DAMAGE: float = 10.0
 const PLAYER_AUTOFIRE_INTERVAL: float = 0.4
@@ -138,7 +140,7 @@ const PLAYER_CONTACT_INVINCIBILITY: float = 1.0
 const GRENADE_RADIUS: float = 80.0
 
 # --- Perspective / Depth illusion ---
-const PERSPECTIVE_VP_Y_RATIO: float = 0.10       # vanishing point at 10% from top
+const PERSPECTIVE_VP_Y_RATIO: float = 0.05       # vanishing point at 5% from top
 const PERSPECTIVE_FULL_SIZE_Y_RATIO: float = 0.45 # enemies reach full size by 45% from top
 const PERSPECTIVE_SCALE_MIN: float = 0.35         # enemy size at vanishing point
 const PERSPECTIVE_SCALE_MAX: float = 1.0          # enemy size at full-size threshold

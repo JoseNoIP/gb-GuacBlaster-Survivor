@@ -56,10 +56,10 @@ func test_heart_collected_heals_damaged_player() -> void:
 	EventBus.heart_collected.emit()
 	assert_eq(_player.get_health(), hp_before + 1)
 
-func test_heart_collected_does_not_overheal() -> void:
+func test_heart_collected_at_base_health_gains_extra_heart() -> void:
 	_player = _make_player()
 	EventBus.heart_collected.emit()
-	assert_eq(_player.get_health(), Constants.PLAYER_BASE_HEALTH)
+	assert_eq(_player.get_health(), Constants.PLAYER_BASE_HEALTH + 1)
 
 func test_heart_collected_emits_health_changed_when_damaged() -> void:
 	_player = _make_player()
@@ -68,8 +68,11 @@ func test_heart_collected_emits_health_changed_when_damaged() -> void:
 	EventBus.heart_collected.emit()
 	assert_signal_emitted(EventBus, "player_health_changed")
 
-func test_heart_collected_does_not_emit_health_changed_at_full_hp() -> void:
+func test_heart_collected_at_max_emits_gold_not_health_changed() -> void:
 	_player = _make_player()
+	for _i: int in (Constants.PLAYER_MAX_HEALTH - Constants.PLAYER_BASE_HEALTH):
+		EventBus.heart_collected.emit()
 	watch_signals(EventBus)
 	EventBus.heart_collected.emit()
+	assert_signal_emitted(EventBus, "gold_earned")
 	assert_signal_not_emitted(EventBus, "player_health_changed")
