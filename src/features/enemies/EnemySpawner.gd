@@ -129,9 +129,23 @@ func _spawn_boss() -> void:
 	var vp: Vector2 = get_viewport_rect().size
 	boss.position = Vector2(vp.x * 0.5, vp.y * Constants.BOSS_Y_RATIO)
 	get_parent().add_child(boss)
+	_spawn_boss_guards(vp)
 	_boss_alive = true
 	_boss_generation += 1
 	EventBus.boss_spawned.emit(boss.get_instance_id())
+
+func _spawn_boss_guards(vp: Vector2) -> void:
+	var count: int = mini(
+		Constants.BOSS_GUARD_BASE + _boss_generation * Constants.BOSS_GUARD_PER_GEN,
+		Constants.BOSS_GUARD_MAX
+	)
+	var guard_y: float = vp.y * Constants.BOSS_Y_RATIO + 40.0
+	for i: int in count:
+		var guard: Node2D = basic_scene.instantiate()
+		var t: float = (float(i) + 0.5) / float(count)
+		guard.position = Vector2(t * vp.x, guard_y)
+		guard.set(&"_speed_mult", _biome_speed_mult)
+		get_parent().add_child(guard)
 
 func _on_enemy_split_requested(spawn_position: Vector2, count: int) -> void:
 	for i: int in count:

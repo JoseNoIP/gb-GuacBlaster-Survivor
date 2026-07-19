@@ -17,6 +17,7 @@ var _use_perspective_scale: bool = true
 
 func _ready() -> void:
 	add_to_group(&"enemies")
+	z_index = 1
 	_initialize()
 	if _hp_time_mult != 1.0:
 		_health = maxi(1, int(float(_health) * _hp_time_mult))

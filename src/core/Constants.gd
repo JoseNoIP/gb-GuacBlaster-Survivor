@@ -58,6 +58,9 @@ const BACKGROUND_PALETTE: Array = [
 	Color(0.22, 0.02, 0.08),  # luna sangre / desierto final (mundo 6)
 ]
 const BOSS_TIMER_SHOW_REMAINING: float = 90.0
+const BOSS_GUARD_BASE: int = 15
+const BOSS_GUARD_PER_GEN: int = 3
+const BOSS_GUARD_MAX: int = 50
 const BOSS_HP_BASE: int = 300
 const BOSS_HP_PER_GENERATION: int = 80
 const BOSS_SPEED: float = 60.0
