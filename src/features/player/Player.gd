@@ -184,9 +184,13 @@ func _on_powerup_stack_changed(powerup_id: StringName, count: int) -> void:
 			_nacho_wall_stacks = count
 
 func _on_heart_collected() -> void:
-	if _health >= _max_health:
+	if _health >= Constants.PLAYER_MAX_HEALTH:
+		EventBus.gold_earned.emit(Constants.HEART_TO_GOLD)
+		EventBus.heart_converted_to_gold.emit(Constants.HEART_TO_GOLD)
 		return
-	_health = mini(_health + 1, _max_health)
+	_health = mini(_health + 1, Constants.PLAYER_MAX_HEALTH)
+	if _health > _max_health:
+		_max_health = _health
 	EventBus.player_health_changed.emit(_health, _max_health)
 
 func get_health() -> int:

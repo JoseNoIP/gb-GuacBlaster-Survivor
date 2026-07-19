@@ -32,8 +32,11 @@ const LEVEL_COLOR: Color = Color(1.0, 0.85, 0.2)
 const TITLE_COLOR: Color = Color(1.0, 0.85, 0.2)
 const XP_BAR_HEIGHT: float = 14.0
 
-var _heart_labels: Array[Label] = []
 var _hearts_container: HBoxContainer = null
+var _full_hearts_label: Label = null
+var _empty_hearts_label: Label = null
+var _current_hearts: int = 0
+var _max_hearts: int = 0
 var _xp_bar: ProgressBar
 var _boss_hp_bar: ProgressBar
 var _score_label: Label
@@ -74,6 +77,7 @@ func _ready() -> void:
 	EventBus.weekly_challenge_completed.connect(_on_weekly_challenge_completed)
 	EventBus.combo_changed.connect(_on_combo_changed)
 	EventBus.wave_started.connect(_on_wave_started)
+	EventBus.heart_converted_to_gold.connect(_on_heart_converted_to_gold)
 
 func _build_ui() -> void:
 	_build_hearts()
@@ -92,18 +96,16 @@ func _build_ui() -> void:
 func _build_hearts() -> void:
 	_hearts_container = HBoxContainer.new()
 	_hearts_container.position = Vector2(10.0, 16.0)
-	_hearts_container.add_theme_constant_override("separation", 4)
+	_hearts_container.add_theme_constant_override("separation", 2)
 	add_child(_hearts_container)
-	for _i: int in Constants.PLAYER_BASE_HEALTH:
-		_hearts_container.add_child(_make_heart_label(HEART_FULL_COLOR))
-
-func _make_heart_label(color: Color) -> Label:
-	var lbl := Label.new()
-	lbl.text = "♥"
-	lbl.add_theme_font_size_override("font_size", 28)
-	lbl.add_theme_color_override("font_color", color)
-	_heart_labels.append(lbl)
-	return lbl
+	_full_hearts_label = Label.new()
+	_full_hearts_label.add_theme_font_size_override("font_size", 28)
+	_full_hearts_label.add_theme_color_override("font_color", HEART_FULL_COLOR)
+	_hearts_container.add_child(_full_hearts_label)
+	_empty_hearts_label = Label.new()
+	_empty_hearts_label.add_theme_font_size_override("font_size", 28)
+	_empty_hearts_label.add_theme_color_override("font_color", HEART_EMPTY_COLOR)
+	_hearts_container.add_child(_empty_hearts_label)
 
 func _build_score_and_level() -> void:
 	_score_label = Label.new()
@@ -336,12 +338,13 @@ func _process(_delta: float) -> void:
 	_timer_label.show()
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
-	while _heart_labels.size() < maximum:
-		_hearts_container.add_child(_make_heart_label(HEART_FULL_COLOR))
-	for i: int in _heart_labels.size():
-		var lbl: Label = _heart_labels[i]
-		lbl.visible = i < maximum
-		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR)
+	_current_hearts = current
+	_max_hearts = maximum
+	_render_hearts()
+
+func _render_hearts() -> void:
+	_full_hearts_label.text = "♥".repeat(_current_hearts)
+	_empty_hearts_label.text = ""
 
 func _on_xp_collected(amount: int, total: int, required: int) -> void:
 	_displayed_score += amount
@@ -426,6 +429,9 @@ func _show_character_toast() -> void:
 			break
 	if not char_name.is_empty():
 		_queue_toast(tr(&"HUD_PLAYING_AS") % tr(char_name), Color(0.3, 0.85, 0.2))
+
+func _on_heart_converted_to_gold(amount: int) -> void:
+	_queue_toast("♥ → +%d" % amount, Color(1.0, 0.85, 0.2))
 
 func _on_game_over(_score: int, _duration: float) -> void:
 	_pause_btn.disabled = true
