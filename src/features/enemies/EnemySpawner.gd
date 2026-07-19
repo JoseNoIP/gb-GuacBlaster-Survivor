@@ -26,6 +26,7 @@ var _challenge_elite_mult: float = 1.0
 var _biome_spawn_mult: float = 1.0
 var _biome_elite_mult: float = 1.0
 var _biome_speed_mult: float = 1.0
+var _player_level: int = 0
 
 func _ready() -> void:
 	EventBus.game_started.connect(_on_game_started)
@@ -33,6 +34,7 @@ func _ready() -> void:
 	EventBus.game_won.connect(func(_s: int, _d: float): _active = false)
 	EventBus.enemy_split_requested.connect(_on_enemy_split_requested)
 	EventBus.boss_defeated.connect(func(_id: int): _boss_alive = false)
+	EventBus.player_level_up.connect(func(lvl: int): _player_level = lvl)
 
 func _process(delta: float) -> void:
 	if not _active:
@@ -61,6 +63,7 @@ func _on_game_started() -> void:
 	_boss_timer = Constants.BOSS_SPAWN_INTERVAL
 	_boss_alive = false
 	_boss_warning_emitted = false
+	_player_level = 0
 	_challenge_spawn_mult = WeeklyChallengeManager.get_spawn_rate_mult()
 	_challenge_elite_mult = WeeklyChallengeManager.get_elite_chance_mult()
 	var biome: int = GameManager.get_current_biome()
@@ -73,15 +76,27 @@ func _spawn_wave() -> void:
 		_instantiate_at_random_x(_pick_scene())
 
 func _pick_scene() -> PackedScene:
-	var elite_ready: bool = elite_scene != null and _elapsed >= Constants.SPAWNER_ELITE_UNLOCK_TIME
+	var elite_ready: bool = (
+		elite_scene != null
+		and _elapsed >= Constants.SPAWNER_ELITE_UNLOCK_TIME
+		and _player_level >= 2
+	)
 	var elite_chance: float = (
 		Constants.SPAWNER_ELITE_CHANCE * _challenge_elite_mult * _biome_elite_mult
 	)
 	if elite_ready and randf() < minf(1.0, elite_chance):
 		return elite_scene
-	if _elapsed >= Constants.SPAWNER_TANK_UNLOCK_TIME and randf() < Constants.SPAWNER_TANK_CHANCE:
+	if (
+		_elapsed >= Constants.SPAWNER_TANK_UNLOCK_TIME
+		and _player_level >= 2
+		and randf() < Constants.SPAWNER_TANK_CHANCE
+	):
 		return tank_scene
-	if _elapsed >= Constants.SPAWNER_ZIGZAG_UNLOCK_TIME and randf() < Constants.SPAWNER_ZIGZAG_CHANCE:
+	if (
+		_elapsed >= Constants.SPAWNER_ZIGZAG_UNLOCK_TIME
+		and _player_level >= 1
+		and randf() < Constants.SPAWNER_ZIGZAG_CHANCE
+	):
 		return zigzag_scene
 	return basic_scene
 

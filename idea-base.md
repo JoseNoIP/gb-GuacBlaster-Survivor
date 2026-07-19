@@ -509,3 +509,18 @@ python3 tools/gen_assets.py
 - **Mientras se juega**: `Game.gd._notification` detecta `state == PLAYING` → `GameManager.pause_game()`. `PauseScreen._notification` detecta `visible` → cierra confirm panel si estaba abierto, o reanuda si no.
 - **En MainMenu**: `_notification` muestra/oculta `_exit_confirm` (CanvasLayer layer=50 con overlay oscuro + card "¿Salir del juego?" + botones CANCELAR/SALIR).
 - Guards de estado evitan doble-acción cuando múltiples nodos reciben la misma notificación.
+
+## Curva de Dificultad Progresiva ✅
+- **Problema:** jugadores nuevos encontraban zigzag (30s), élites (45s) y tanks (60s) antes de tener suficientes power-ups para manejarlos.
+- **Solución:** `EnemySpawner` ahora escucha `EventBus.player_level_up` y usa `_player_level` como segunda compuerta:
+  - Zigzag: tiempo ≥ 30s **AND** nivel ≥ 1 (primera tercia de power-ups)
+  - Tank: tiempo ≥ 60s **AND** nivel ≥ 2 (segunda tercia de power-ups)
+  - Élite: tiempo ≥ 45s **AND** nivel ≥ 2
+- `_player_level` se reinicia a 0 en cada partida (en `_on_game_started`).
+- La señal `player_level_up(new_level: int)` ya existía en EventBus — solo se añadió el listener en EnemySpawner.
+
+## Fix: Contador de Corazones en Android ✅
+- **Bug:** los corazones del HUD no actualizaban su color al perder o ganar vidas en Android (GL Compatibility renderer).
+- **Causa:** `lbl.label_settings.font_color = color` modifica un `Resource`, cuya propagación de cambios no fuerza redibujado en el renderer GL de Android.
+- **Fix:** eliminado `LabelSettings` de las etiquetas de corazón. Se usa `add_theme_font_size_override` + `add_theme_color_override("font_color", color)` para tamaño y color respectivamente. `add_theme_color_override` marca el nodo directamente como sucio, garantizando redibujado en todas las plataformas.
+- **Archivos:** `HUD._make_heart_label()` y `HUD._on_player_health_changed()`.

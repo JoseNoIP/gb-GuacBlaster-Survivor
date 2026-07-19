@@ -100,10 +100,8 @@ func _build_hearts() -> void:
 func _make_heart_label(color: Color) -> Label:
 	var lbl := Label.new()
 	lbl.text = "♥"
-	var ls := LabelSettings.new()
-	ls.font_size = 28
-	ls.font_color = color
-	lbl.label_settings = ls
+	lbl.add_theme_font_size_override("font_size", 28)
+	lbl.add_theme_color_override("font_color", color)
 	_heart_labels.append(lbl)
 	return lbl
 
@@ -343,7 +341,7 @@ func _on_player_health_changed(current: int, maximum: int) -> void:
 	for i: int in _heart_labels.size():
 		var lbl: Label = _heart_labels[i]
 		lbl.visible = i < maximum
-		lbl.label_settings.font_color = HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR
+		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR)
 
 func _on_xp_collected(amount: int, total: int, required: int) -> void:
 	_displayed_score += amount

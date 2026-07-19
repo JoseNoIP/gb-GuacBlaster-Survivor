@@ -45,18 +45,20 @@ func test_rapid_fire_reduces_autofire_interval() -> void:
 func test_rapid_fire_applies_correct_multiplier() -> void:
 	var initial: float = _player._current_autofire_interval
 	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
-	assert_almost_eq(
-		_player._current_autofire_interval,
-		initial / Constants.RAPID_FIRE_MULTIPLIER,
-		0.0001
+	var expected: float = maxf(
+		Constants.PLAYER_AUTOFIRE_MIN,
+		initial / (1.0 + 1.0 * Constants.RAPID_FIRE_LINEAR_FACTOR)
 	)
+	assert_almost_eq(_player._current_autofire_interval, expected, 0.001)
 
 func test_rapid_fire_stacks_divide_further() -> void:
 	var initial: float = _player._current_autofire_interval
 	EventBus.powerup_stack_changed.emit(&"rapid_fire", 2)
-	var expected: float = initial / pow(Constants.RAPID_FIRE_MULTIPLIER, 2.0)
-	var clamped: float = maxf(Constants.PLAYER_AUTOFIRE_MIN, expected)
-	assert_almost_eq(_player._current_autofire_interval, clamped, 0.0001)
+	var expected: float = maxf(
+		Constants.PLAYER_AUTOFIRE_MIN,
+		initial / (1.0 + 2.0 * Constants.RAPID_FIRE_LINEAR_FACTOR)
+	)
+	assert_almost_eq(_player._current_autofire_interval, expected, 0.001)
 
 func test_rapid_fire_zero_stacks_restores_interval() -> void:
 	var initial: float = _player._current_autofire_interval
@@ -124,9 +126,9 @@ func test_guac_storm_zero_clears_streams() -> void:
 	EventBus.powerup_stack_changed.emit(&"guac_storm", 0)
 	assert_eq(_spawner._extra_streams, 0)
 
-func test_unrelated_powerup_does_not_set_pierce() -> void:
+func test_unrelated_powerup_does_not_set_burst() -> void:
 	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
-	assert_eq(_spawner._pierce_count, 0)
+	assert_false(_spawner._burst)
 
 # --- Projectile: setup ---
 
@@ -138,9 +140,9 @@ func test_setup_sets_bouncy_false_by_default() -> void:
 	_proj.setup(10.0, Vector2.UP)
 	assert_false(_proj._bouncy)
 
-func test_setup_sets_pierce_count() -> void:
-	_proj.setup(10.0, Vector2.UP, 3)
-	assert_eq(_proj.get_pierce_remaining(), 3)
+func test_setup_sets_burst_from_spawner_flag() -> void:
+	EventBus.powerup_stack_changed.emit(&"chipotle_burst", 1)
+	assert_true(_spawner._burst)
 
 # --- Projectile: bounce logic ---
 
