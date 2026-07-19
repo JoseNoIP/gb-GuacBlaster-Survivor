@@ -5,7 +5,7 @@ extends CanvasLayer
 
 const POWERUP_ABBREV: Dictionary = {
 	&"triple_shot": "TS",
-	&"super_guac": "SG",
+	&"chipotle_burst": "CB",
 	&"rapid_fire": "RF",
 	&"mole_grenade": "MG",
 	&"jalapeno_laser": "JL",
@@ -16,7 +16,7 @@ const POWERUP_ABBREV: Dictionary = {
 }
 const POWERUP_COLORS: Dictionary = {
 	&"triple_shot": Color(0.4, 0.8, 1.0),
-	&"super_guac": Color(0.3, 0.95, 0.3),
+	&"chipotle_burst": Color(1.0, 0.45, 0.1),
 	&"rapid_fire": Color(1.0, 0.5, 0.1),
 	&"mole_grenade": Color(1.0, 0.3, 0.3),
 	&"jalapeno_laser": Color(1.0, 0.95, 0.1),
@@ -100,10 +100,8 @@ func _build_hearts() -> void:
 func _make_heart_label(color: Color) -> Label:
 	var lbl := Label.new()
 	lbl.text = "♥"
-	var ls := LabelSettings.new()
-	ls.font_size = 28
-	ls.font_color = color
-	lbl.label_settings = ls
+	lbl.add_theme_font_size_override("font_size", 28)
+	lbl.add_theme_color_override("font_color", color)
 	_heart_labels.append(lbl)
 	return lbl
 
@@ -343,7 +341,7 @@ func _on_player_health_changed(current: int, maximum: int) -> void:
 	for i: int in _heart_labels.size():
 		var lbl: Label = _heart_labels[i]
 		lbl.visible = i < maximum
-		lbl.label_settings.font_color = HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR
+		lbl.add_theme_color_override("font_color", HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR)
 
 func _on_xp_collected(amount: int, total: int, required: int) -> void:
 	_displayed_score += amount

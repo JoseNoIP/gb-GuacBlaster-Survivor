@@ -50,6 +50,7 @@ Responder estas preguntas con el usuario ANTES de empezar a codificar:
 2. **¿Vista top-down con sensación de profundidad?** → Evaluar ilusión de perspectiva (ver agente `game-feel`, sección 6). No es automático — requiere que el diseño del juego lo soporte.
 3. **¿Publicar en Google Play?** → Usar `/android-deploy` para el pipeline completo. Requiere keystore + cuenta de servicio de Google.
 4. **¿Sesiones cortas (< 5 min)?** → El arco sesión debe ser: aprendizaje (min 0–1) → acumulación (min 1–3) → clímax (boss / objetivo final).
+5. **¿Tutorial interactivo (FTUE)?** → Recomendado siempre. Ver arquitectura en FASE 8 y anti-alucinación §FTUE. El tutorial usa los sistemas reales del juego (Player, GemSpawner, PowerUpDropper) en una escena separada `TutorialGame.tscn`.
 
 ---
 
@@ -303,6 +304,7 @@ Antes de cerrar, ofrecer estas features probadas que elevan la calidad percibida
 
 | Feature | Skill / Agente | Cuándo aplicar |
 |---|---|---|
+| Tutorial interactivo (FTUE) | Ver §FTUE en este archivo | Siempre — reduce abandono en primera sesión |
 | Multi-idioma | `/mobile-i18n` | Si el mercado objetivo incluye más de un idioma |
 | Ilusión de profundidad | agente `game-feel` §6 | Si el juego tiene vista top-down y enemigos que se acercan |
 | Animación de victoria | agente `game-feel` §7 | Siempre — el jugador debe "salir" antes de ver resultados |
@@ -336,6 +338,109 @@ Antes de cerrar, ofrecer estas features probadas que elevan la calidad percibida
 
    Assets pendientes (sin código): [lista]
    ```
+
+---
+
+## Tutorial interactivo FTUE (First-Time User Experience)
+
+Implementación probada en GuacBlaster Survivor (julio 2026).
+
+### Arquitectura
+
+```
+src/scenes/TutorialGame.gd    ← escena autónoma, construye todo programáticamente
+src/scenes/TutorialGame.tscn  ← minimal (solo root Node2D + script)
+src/scenes/MainMenu.gd        ← _on_play_pressed() enruta según SaveManager.get_tutorial_shown()
+```
+
+`SaveManager` necesita:
+```gdscript
+func get_tutorial_shown() -> bool:
+    return _data.get("tutorial_shown", false) as bool
+
+func set_tutorial_shown(value: bool) -> void:
+    _data["tutorial_shown"] = value
+    _save()
+```
+
+### Flujo de pasos
+
+```
+WELCOME (botón EMPEZAR)
+  → MOVE (arrastra >80px; flecha animada sigue al jugador)
+  → SHOOT (spawnea 1 enemigo; espera enemy_destroyed)
+  → COLLECT (GemSpawner auto-spawnea gema; espera gem_collected)
+  → LEVEL_UP (emite powerup_selection_requested con 3 opciones; espera powerup_selected)
+  → COMPLETE (botón JUGAR → set_tutorial_shown(true) → Game.tscn)
+```
+
+Si el jugador muere durante el tutorial → reinicia TutorialGame.tscn (NO marca tutorial_shown).
+
+### TutorialGame._ready() — orden obligatorio
+
+```gdscript
+func _ready() -> void:
+    _build_scene()       # 1. instancia Player, ProjectileSpawner, GemSpawner, PowerUpDropper
+    GameManager.start_game()  # 2. emite game_started → Player y ProjectileSpawner se inicializan
+    EventBus.game_over.connect(_on_game_over)
+    _advance_to(Step.WELCOME)
+```
+
+`add_child()` en `_ready()` llama `_ready()` del hijo inmediatamente (el padre ya está en el árbol).
+Por eso los hijos ya están conectados al EventBus cuando `start_game()` emite.
+
+### Routing en MainMenu
+
+```gdscript
+const GAME_SCENE: String = "res://src/scenes/Game.tscn"
+const TUTORIAL_SCENE: String = "res://src/scenes/TutorialGame.tscn"
+
+func _on_play_pressed() -> void:
+    var dest: String = GAME_SCENE if SaveManager.get_tutorial_shown() else TUTORIAL_SCENE
+    get_tree().change_scene_to_file.call_deferred(dest)
+```
+
+### Overlay — panel de instrucciones
+
+El panel usa posición y tamaño **explícitos** (NO `set_anchors_preset`):
+
+```gdscript
+var panel_h: float = 160.0
+var panel: PanelContainer = PanelContainer.new()
+panel.position = Vector2(0.0, vp.y - panel_h)
+panel.set_size(Vector2(vp.x, panel_h))
+layer.add_child(panel)
+```
+
+**Anti-alucinación FTUE:**
+
+1. **NO usar `set_anchors_preset(PRESET_BOTTOM_WIDE)` con PanelContainer creado programáticamente** — cuando `anchor_top = 1` y `anchor_bottom = 1`, el panel queda con altura 0 y no se renderiza. `custom_minimum_size` no lo rescata. Usar `position` + `set_size()` siempre que se cree UI de forma programática en un CanvasLayer.
+2. **ProjectileSpawner necesita `projectile_scene` asignado** — usar `ps.set(&"projectile_scene", ProjectileScene)` (regla CLAUDE.md #15, no usar class_name como tipo).
+3. **`set_tutorial_shown(true)` solo al COMPLETAR** — no antes. Si se llama en el primer frame como hacía el tutorial viejo de Game.gd, cualquier save existente tiene el flag en `true` y el tutorial nunca vuelve a mostrarse.
+4. **Conectar eventos con `CONNECT_ONE_SHOT`** — `enemy_destroyed`, `gem_collected`, `powerup_selected` deben conectarse justo antes de que el paso que los espera comience, con `CONNECT_ONE_SHOT`, para no acumular listeners entre reinicios.
+5. **Enum antes de const** — gdlint (class-definitions-order) exige: `enum` → `const` → `var`. Si el enum va después de los const, falla lint.
+
+### Claves de traducción recomendadas
+
+```
+TUTORIAL_WELCOME_TITLE, TUTORIAL_WELCOME_HINT, TUTORIAL_BTN_START
+TUTORIAL_MOVE_TITLE, TUTORIAL_MOVE_HINT
+TUTORIAL_SHOOT_TITLE, TUTORIAL_SHOOT_HINT
+TUTORIAL_COLLECT_TITLE, TUTORIAL_COLLECT_HINT
+TUTORIAL_LEVELUP_TITLE, TUTORIAL_LEVELUP_HINT
+TUTORIAL_DONE_TITLE, TUTORIAL_DONE_HINT
+```
+
+### Checklist
+
+- [ ] `SaveManager` tiene `get_tutorial_shown()` / `set_tutorial_shown()`
+- [ ] `MainMenu._on_play_pressed()` enruta a TutorialGame si `!tutorial_shown`
+- [ ] `TutorialGame._ready()` llama `GameManager.start_game()` DESPUÉS de `add_child` de todos los sistemas
+- [ ] Panel de overlay usa `position` + `set_size()` explícitos (no `PRESET_BOTTOM_WIDE`)
+- [ ] `set_tutorial_shown(true)` solo se llama en el paso COMPLETE, al presionar el botón final
+- [ ] Si el jugador muere → reinicia tutorial (no Game.tscn)
+- [ ] Todos los strings del tutorial usan `tr(&"KEY")`
+- [ ] `gdlint src/` pasa a 0 errores
 
 ---
 

@@ -593,7 +593,7 @@ def make_heart(size=26):
 
 _ICON_COLORS = {
     "triple_shot":    (40, 120, 255, 255),
-    "super_guac":     (40, 195, 70, 255),
+    "chipotle_burst": (235, 80, 20, 255),
     "rapid_fire":     (255, 120, 20, 255),
     "mole_grenade":   (190, 65, 40, 255),
     "jalapeno_laser": (245, 220, 30, 255),
@@ -650,21 +650,6 @@ def _make_ts_icon(size: int = 64) -> list:
     return _flat(g)
 
 
-def _make_sg_icon(size: int = 64) -> list:
-    """Super guac — bullet piercing three circles (penetration)."""
-    g = _icon_base("super_guac", size)
-    cx, cy = size // 2, size // 2
-    # Three rings
-    for i, (ry, r) in enumerate([(16, 11), (32, 11), (48, 11)]):
-        _circle(g, cx, ry, r, WHT)
-        inner = (max(0, _ICON_COLORS["super_guac"][0] - 30),
-                 max(0, _ICON_COLORS["super_guac"][1] - 30),
-                 max(0, _ICON_COLORS["super_guac"][2] - 30), 255)
-        _circle(g, cx, ry, r - 3, inner)
-    # Projectile going through
-    _rect(g, cx - 3, 4, cx + 3, size - 5, (255, 255, 150, 255))
-    _poly(g, [(cx, 3), (cx - 5, 10), (cx + 5, 10)], (255, 255, 200, 255))
-    return _flat(g)
 
 
 def _make_rf_icon(size: int = 64) -> list:
@@ -818,9 +803,40 @@ def _make_gs_icon(size: int = 64) -> list:
     return _flat(g)
 
 
+def _make_cb_icon(size: int = 64) -> list:
+    """Chipotle burst — explosion ring with 8 rays and hot core."""
+    g = _icon_base("chipotle_burst", size)
+    cx, cy = size // 2, size // 2
+    # Outer explosion ring (8 rays)
+    for angle_deg in range(0, 360, 45):
+        a = math.radians(angle_deg)
+        for r in range(14, 28):
+            px = cx + int(r * math.cos(a))
+            py = cy + int(r * math.sin(a))
+            alpha = max(0, 255 - (r - 14) * 18)
+            _set(g, px, py, (255, 200, 60, alpha))
+        # Tip spark
+        tip_r = 28
+        tx = cx + int(tip_r * math.cos(a))
+        ty = cy + int(tip_r * math.sin(a))
+        _circle(g, tx, ty, 2, (255, 240, 120, 255))
+    # Mid ring (secondary rays at 22.5° offset)
+    for angle_deg in range(22, 360, 45):
+        a = math.radians(angle_deg)
+        for r in range(10, 20):
+            px = cx + int(r * math.cos(a))
+            py = cy + int(r * math.sin(a))
+            _set(g, px, py, (255, 140, 30, 200))
+    # Hot core
+    _circle(g, cx, cy, 8, (255, 220, 80, 255))
+    _circle(g, cx, cy, 5, WHT)
+    _circle(g, cx, cy, 2, (255, 240, 200, 255))
+    return _flat(g)
+
+
 _ICON_MAKERS = {
     "triple_shot":    _make_ts_icon,
-    "super_guac":     _make_sg_icon,
+    "chipotle_burst": _make_cb_icon,
     "rapid_fire":     _make_rf_icon,
     "mole_grenade":   _make_mg_icon,
     "jalapeno_laser": _make_jl_icon,

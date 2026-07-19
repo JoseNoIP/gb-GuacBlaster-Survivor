@@ -75,11 +75,11 @@ func test_rapid_fire_applies_correct_multiplier() -> void:
 	var timer: Timer = _player.get_node("AutofireTimer")
 	var original: float = timer.wait_time
 	EventBus.powerup_stack_changed.emit(&"rapid_fire", 1)
-	assert_almost_eq(
-		timer.wait_time,
-		original / Constants.RAPID_FIRE_MULTIPLIER,
-		0.001
+	var expected: float = maxf(
+		Constants.PLAYER_AUTOFIRE_MIN,
+		original / (1.0 + 1.0 * Constants.RAPID_FIRE_LINEAR_FACTOR)
 	)
+	assert_almost_eq(timer.wait_time, expected, 0.001)
 
 # --- Damage stat ---
 

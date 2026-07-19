@@ -278,7 +278,7 @@ def main():
 | `pip install Pillow` falla (PEP 668) | macOS protege el Python del sistema | `python3 -m venv /tmp/venv && /tmp/venv/bin/pip install Pillow` |
 | PNG válido pero con fondo blanco visible en juego | `tolerance` muy bajo en chroma_key | Subir `tolerance` a 50-60 |
 | Sprite con huecos en áreas blancas del personaje | `tolerance` muy alto | Bajar a 25-30 |
-| Fondo procedural sobreescribe descarga AI | `gen_assets.py` corre `main()` accidentalmente | Ejecutar solo las funciones necesarias (no `main()`) |
+| Fondo procedural sobreescribe descarga AI | `gen_assets.py` corre `main()` accidentalmente | Ejecutar solo las funciones necesarias (no `main()`). Para generar UN solo ícono, escribir un script inline que importe solo la función: `python3 -c "import sys; sys.path.insert(0,'tools'); from gen_assets import _make_cb_icon, save_png; save_png('ruta.png', 64, 64, _make_cb_icon())"` |
 | `enemy_elite.tscn` usa sprite de otro personaje | Scene referencia UID incorrecto en `ext_resource` | Crear `.import` manual + actualizar UID en `.tscn` |
 
 ---

@@ -87,7 +87,7 @@ const SPAWNER_ZIGZAG_CHANCE: float = 0.25
 # --- Power-ups ---
 const POWERUP_POOL: Array = [
 	&"triple_shot",
-	&"super_guac",
+	&"chipotle_burst",
 	&"rapid_fire",
 	&"mole_grenade",
 	&"jalapeno_laser",
@@ -105,7 +105,8 @@ const PLAYER_AUTOFIRE_MIN: float = 0.05
 const MOLE_GRENADE_COOLDOWN: float = 5.0
 const JALAPENO_LASER_DURATION: float = 2.0
 const NACHO_WALL_HITS: int = 3
-const SUPER_GUAC_PENETRATION: int = 3
+const CHIPOTLE_BURST_RADIUS: float = 65.0
+const CHIPOTLE_BURST_DAMAGE_MULT: float = 0.5
 const MULTI_STREAM_SPACING: float = 40.0
 
 # --- Meta Upgrades ---
@@ -137,7 +138,7 @@ const PLAYER_CONTACT_INVINCIBILITY: float = 1.0
 const GRENADE_RADIUS: float = 80.0
 
 # --- Perspective / Depth illusion ---
-const PERSPECTIVE_VP_Y_RATIO: float = 0.25       # vanishing point at 25% from top
+const PERSPECTIVE_VP_Y_RATIO: float = 0.10       # vanishing point at 10% from top
 const PERSPECTIVE_FULL_SIZE_Y_RATIO: float = 0.45 # enemies reach full size by 45% from top
 const PERSPECTIVE_SCALE_MIN: float = 0.35         # enemy size at vanishing point
 const PERSPECTIVE_SCALE_MAX: float = 1.0          # enemy size at full-size threshold

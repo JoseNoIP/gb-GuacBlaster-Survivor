@@ -1,5 +1,5 @@
 extends GutTest
-## Unit tests for Projectile setup, pierce logic, and movement direction.
+## Unit tests for Projectile setup, burst flag, and movement direction.
 
 var _proj: Projectile
 
@@ -19,34 +19,17 @@ func test_setup_sets_damage() -> void:
 	_proj.setup(25.0, Vector2.UP)
 	assert_eq(_proj.get_damage(), 25.0)
 
-func test_setup_sets_pierce_zero_by_default() -> void:
+func test_setup_burst_is_false_by_default() -> void:
 	_proj.setup(10.0, Vector2.UP)
-	assert_eq(_proj.get_pierce_remaining(), 0)
+	assert_false(_proj.get_burst())
 
-func test_setup_sets_pierce_count() -> void:
-	_proj.setup(10.0, Vector2.UP, Constants.SUPER_GUAC_PENETRATION)
-	assert_eq(_proj.get_pierce_remaining(), Constants.SUPER_GUAC_PENETRATION)
+func test_setup_sets_burst_true() -> void:
+	_proj.setup(10.0, Vector2.UP, true)
+	assert_true(_proj.get_burst())
 
-# --- Pierce consumption ---
-
-func test_consume_pierce_frees_when_zero() -> void:
-	_proj.setup(10.0, Vector2.UP, 0)
-	# queue_free is called; after yield the node should be freed
-	assert_false(_proj.is_queued_for_deletion(), "not freed before consume")
-	_proj._consume_pierce()
-	assert_true(_proj.is_queued_for_deletion(), "freed after pierce=0")
-
-func test_consume_pierce_decrements_when_positive() -> void:
-	_proj.setup(10.0, Vector2.UP, 2)
-	_proj._consume_pierce()
-	assert_eq(_proj.get_pierce_remaining(), 1)
-	assert_false(_proj.is_queued_for_deletion(), "should NOT be freed yet")
-
-func test_consume_pierce_frees_after_exhaustion() -> void:
-	_proj.setup(10.0, Vector2.UP, 1)
-	_proj._consume_pierce()  # pierce goes to 0, NOT freed (0 means still alive)
-	_proj._consume_pierce()  # now pierce <= 0, freed
-	assert_true(_proj.is_queued_for_deletion())
+func test_setup_burst_false_explicit() -> void:
+	_proj.setup(10.0, Vector2.UP, false)
+	assert_false(_proj.get_burst())
 
 # --- Screen exit ---
 

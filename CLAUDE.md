@@ -174,6 +174,14 @@ func _exit_tree() -> void:
 
 25. **`bundleRelease` no firma aunque se pasen `-Pperform_signing=true`** — en Godot 4.7, `config.gradle` puede ignorar estos flags. Solución: firmar el AAB explícitamente con `jarsigner` después de construirlo, antes de subir a Play Store. JAR Signature (v1) es suficiente — Google Play reemplaza la firma al distribuir si se usa Google Play App Signing. Ejemplo: `jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore KEY.keystore -storepass PASS builds/GuacBlaster.aab ALIAS`.
 
+### Reglas de UI programática
+32. **`set_anchors_preset(PRESET_BOTTOM_WIDE)` en Control creado programáticamente** — deja el control con altura 0 si `anchor_top = anchor_bottom = 1` y no se ajustan los offsets. `custom_minimum_size` NO rescata esto. Usar siempre `position` + `set_size()` explícitos al crear UI en código: `panel.position = Vector2(0, vp.y - h); panel.set_size(Vector2(vp.x, h))`.
+
+### Reglas de Tutorial FTUE
+33. **Tutorial en escena separada** (`TutorialGame.tscn`) — nunca como overlay sobre `Game.tscn`. Usa los sistemas reales del juego (Player, GemSpawner, PowerUpDropper) instanciados programáticamente. Ver skill `/new-game` §FTUE para la arquitectura completa.
+34. **`set_tutorial_shown(true)` solo al completar** — si se llama antes (e.g. al entrar a la pantalla), el flag queda en `true` en el save y el tutorial nunca vuelve a mostrarse en futuras sesiones.
+35. **Enrutar desde MainMenu, no desde Game** — `MainMenu._on_play_pressed()` decide entre `TutorialGame.tscn` y `Game.tscn` según `SaveManager.get_tutorial_shown()`. `Game.tscn` no debe tener lógica de tutorial.
+
 ---
 
 ## Roles Internos por Iteración
@@ -303,7 +311,7 @@ e) DOC       — Actualizar idea-base.md, CLAUDE.md y memoria (project_guacblast
 | ID | Abrev | Nombre | Efecto por stack |
 |---|---|---|---|
 | `triple_shot` | TS | Disparo Triple | +2 disparos diagonales |
-| `super_guac` | SG | Súper-Guac | Proyectiles penetran 3 enemigos |
+| `chipotle_burst` | CB | Chipotle Burst | Proyectiles explotan al impactar: AoE 65px, 50% del daño base |
 | `rapid_fire` | RF | Fuego Rápido | Cadencia ×2 (apilable) |
 | `mole_grenade` | MG | Granada de Mole | AoE cada 5s automático |
 | `jalapeno_laser` | JL | Láser Jalapeño | Rayo 2s que sigue al jugador |

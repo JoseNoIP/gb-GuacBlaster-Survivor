@@ -7,7 +7,7 @@ const FALL_SPEED: float = 80.0
 
 const DROP_COLORS: Dictionary = {
 	&"triple_shot":    Color(0.2, 0.55, 1.0),
-	&"super_guac":     Color(0.2, 0.8, 0.3),
+	&"chipotle_burst": Color(0.95, 0.35, 0.1),
 	&"rapid_fire":     Color(1.0, 0.7, 0.1),
 	&"mole_grenade":   Color(0.65, 0.4, 0.2),
 	&"jalapeno_laser": Color(1.0, 0.3, 0.1),
@@ -18,7 +18,7 @@ const DROP_COLORS: Dictionary = {
 }
 const POWERUP_ABBREV: Dictionary = {
 	&"triple_shot":    "TS",
-	&"super_guac":     "SG",
+	&"chipotle_burst": "CB",
 	&"rapid_fire":     "RF",
 	&"mole_grenade":   "MG",
 	&"jalapeno_laser": "JL",
