@@ -138,7 +138,7 @@ const PLAYER_CONTACT_INVINCIBILITY: float = 1.0
 const GRENADE_RADIUS: float = 80.0
 
 # --- Perspective / Depth illusion ---
-const PERSPECTIVE_VP_Y_RATIO: float = 0.25       # vanishing point at 25% from top
+const PERSPECTIVE_VP_Y_RATIO: float = 0.10       # vanishing point at 10% from top
 const PERSPECTIVE_FULL_SIZE_Y_RATIO: float = 0.45 # enemies reach full size by 45% from top
 const PERSPECTIVE_SCALE_MIN: float = 0.35         # enemy size at vanishing point
 const PERSPECTIVE_SCALE_MAX: float = 1.0          # enemy size at full-size threshold
